@@ -1,0 +1,17 @@
+{
+    "name": "MechaSurvivor.Systems",
+    "rootNamespace": "MechaSurvivor.Systems",
+    "references": [
+        "MechaSurvivor.Core",
+        "MechaSurvivor.Utilities"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

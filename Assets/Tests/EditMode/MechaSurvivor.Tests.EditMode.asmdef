@@ -1,0 +1,28 @@
+{
+    "name": "MechaSurvivor.Tests.EditMode",
+    "rootNamespace": "MechaSurvivor.Tests.EditMode",
+    "references": [
+        "MechaSurvivor.Core",
+        "MechaSurvivor.Systems",
+        "MechaSurvivor.Gameplay",
+        "MechaSurvivor.UI",
+        "MechaSurvivor.Utilities",
+        "UnityEngine.TestRunner",
+        "UnityEditor.TestRunner"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "nunit.framework.dll"
+    ],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "UNITY_INCLUDE_TESTS"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
