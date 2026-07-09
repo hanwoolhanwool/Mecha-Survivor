@@ -1,0 +1,72 @@
+# =============================================================
+# EditorConfig — Mecha Survivor 코딩 규칙 (Rider / VS 공통)
+# =============================================================
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 4
+
+[*.{yml,yaml,json,uxml,uss}]
+indent_size = 2
+
+[*.md]
+trim_trailing_whitespace = false
+
+# -------------------------------------------------------------
+# C# 코딩 컨벤션
+# -------------------------------------------------------------
+[*.cs]
+indent_size = 4
+
+# using 정렬: System 우선, 사용 안 하는 using 제거
+dotnet_sort_system_directives_first = true
+dotnet_separate_import_directive_groups = false
+
+# this. 한정자 사용 안 함
+dotnet_style_qualification_for_field = false:suggestion
+dotnet_style_qualification_for_property = false:suggestion
+dotnet_style_qualification_for_method = false:suggestion
+dotnet_style_qualification_for_event = false:suggestion
+
+# 언어 키워드 사용 (int vs Int32)
+dotnet_style_predefined_type_for_locals_parameters_members = true:suggestion
+dotnet_style_predefined_type_for_member_access = true:suggestion
+
+# var 사용 정책 (명확한 타입일 때만)
+csharp_style_var_for_built_in_types = false:suggestion
+csharp_style_var_when_type_is_apparent = true:suggestion
+csharp_style_var_elsewhere = false:suggestion
+
+# 표현식 본문
+csharp_style_expression_bodied_methods = when_on_single_line:suggestion
+csharp_style_expression_bodied_properties = true:suggestion
+
+# 중괄호 항상 사용
+csharp_prefer_braces = true:warning
+
+# 네임스페이스: 파일 스코프
+csharp_style_namespace_declarations = file_scoped:suggestion
+
+# 네이밍 규칙 --------------------------------------------------
+# private 필드: _camelCase
+dotnet_naming_rule.private_fields_underscore.severity = suggestion
+dotnet_naming_rule.private_fields_underscore.symbols = private_fields
+dotnet_naming_rule.private_fields_underscore.style = underscore_camel
+
+dotnet_naming_symbols.private_fields.applicable_kinds = field
+dotnet_naming_symbols.private_fields.applicable_accessibilities = private
+dotnet_naming_style.underscore_camel.capitalization = camel_case
+dotnet_naming_style.underscore_camel.required_prefix = _
+
+# 상수: PascalCase
+dotnet_naming_rule.constants_pascal.severity = suggestion
+dotnet_naming_rule.constants_pascal.symbols = constants
+dotnet_naming_rule.constants_pascal.style = pascal_case
+dotnet_naming_symbols.constants.applicable_kinds = field
+dotnet_naming_symbols.constants.required_modifiers = const
+dotnet_naming_style.pascal_case.capitalization = pascal_case

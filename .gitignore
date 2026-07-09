@@ -1,0 +1,59 @@
+# =============================================================
+# Unity .gitignore (Unity 6 / URP)
+# =============================================================
+
+# Unity 생성 폴더 (절대 커밋 금지)
+/[Ll]ibrary/
+/[Tt]emp/
+/[Oo]bj/
+/[Bb]uild/
+/[Bb]uilds/
+/[Ll]ogs/
+/[Uu]ser[Ss]ettings/
+/[Mm]emoryCaptures/
+
+# 에셋 임포트 캐시
+/[Aa]ssets/AssetStoreTools*
+/[Aa]ssets/Plugins/Editor/JetBrains*
+
+# IDE / 에디터
+/.idea/
+/.vs/
+/.vscode/
+*.csproj
+*.unityproj
+*.sln
+*.suo
+*.tmp
+*.user
+*.userprefs
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.mdb
+*.opendb
+*.VC.db
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# 빌드 산출물
+ExportedObj/
+.consulo/
+*.apk
+*.aab
+*.ipa
+*.unitypackage
+*.app
+
+# Crashlytics / Analytics
+crashlytics-build.properties
+
+# Rider
+/_ReSharper.Caches/
+
+# 프로파일러
+/[Pp]rofiler*.data
