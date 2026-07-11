@@ -14,6 +14,8 @@ namespace MechaSurvivor.Systems
         private readonly Transform _parent;
         private readonly int _maxSize;
         private readonly Stack<T> _available = new();
+        // 이미 반환된(비활성) 인스턴스 집합. 동일 객체의 이중 Release를 O(1)로 차단한다.
+        private readonly HashSet<T> _inactive = new();
 
         public int CountInactive => _available.Count;
         public int CountActive { get; private set; }
@@ -29,6 +31,7 @@ namespace MechaSurvivor.Systems
                 T obj = CreateInstance();
                 obj.gameObject.SetActive(false);
                 _available.Push(obj);
+                _inactive.Add(obj);
             }
         }
 
@@ -37,6 +40,7 @@ namespace MechaSurvivor.Systems
         public T Get(Vector3 position, Quaternion rotation)
         {
             T obj = _available.Count > 0 ? _available.Pop() : CreateInstance();
+            _inactive.Remove(obj);
 
             obj.transform.SetPositionAndRotation(position, rotation);
             obj.gameObject.SetActive(true);
@@ -52,6 +56,18 @@ namespace MechaSurvivor.Systems
 
         public void Release(T obj)
         {
+            if (obj == null)
+            {
+                return;
+            }
+
+            // 이미 반환된 객체의 재반환은 CountActive를 오염시키므로 무시한다.
+            if (!_inactive.Add(obj))
+            {
+                Debug.LogWarning($"[ComponentPool] 이미 풀에 반환된 인스턴스를 다시 Release 시도: {obj.name}", obj);
+                return;
+            }
+
             if (obj is IPoolable poolable)
             {
                 poolable.OnReturnedToPool();
@@ -66,6 +82,8 @@ namespace MechaSurvivor.Systems
             }
             else
             {
+                // 풀 상한 초과분은 보관하지 않고 파괴 — 추적 집합에서도 제거.
+                _inactive.Remove(obj);
                 Object.Destroy(obj.gameObject);
             }
         }
@@ -81,6 +99,7 @@ namespace MechaSurvivor.Systems
                 }
             }
 
+            _inactive.Clear();
             CountActive = 0;
         }
     }

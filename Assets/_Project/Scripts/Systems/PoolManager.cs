@@ -15,6 +15,9 @@ namespace MechaSurvivor.Systems
         private readonly Dictionary<Component, ComponentPool<Component>> _prefabToPool = new();
         private readonly Dictionary<Component, ComponentPool<Component>> _instanceToPool = new();
 
+        // 전역 풀은 씬 전환에도 유지되어야 스폰된 오브젝트/풀 매핑이 끊기지 않는다.
+        protected override bool Persistent => true;
+
         protected override void Awake()
         {
             base.Awake();
