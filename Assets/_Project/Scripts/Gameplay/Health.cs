@@ -19,6 +19,9 @@ namespace MechaSurvivor.Gameplay
         /// <summary>사망 시 알림. 스포너/드롭 시스템이 구독해 처리.</summary>
         public event Action<Health> Died;
 
+        /// <summary>피격 성립 시 알림 (적용된 양, 피격 정보). 히트 플래시 등 피드백이 구독.</summary>
+        public event Action<float, DamageInfo> Damaged;
+
         /// <summary>데이터 기반 스폰 시 최대 체력을 주입.</summary>
         public void Init(float maxHealth)
         {
@@ -36,6 +39,7 @@ namespace MechaSurvivor.Gameplay
             }
 
             Current = Mathf.Max(0f, Current - amount);
+            Damaged?.Invoke(amount, info);
 
             if (Current <= 0f)
             {

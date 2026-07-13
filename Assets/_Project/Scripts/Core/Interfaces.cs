@@ -9,18 +9,24 @@ namespace MechaSurvivor.Core
         void TakeDamage(float amount, in DamageInfo info = default);
     }
 
-    /// <summary>피격 부가 정보(타격 지점, 넉백 방향, 크리티컬 여부).</summary>
+    /// <summary>
+    /// 피격 부가 정보(타격 지점, 넉백 방향, 크리티컬 여부, 출처 무기).
+    /// SourceId는 런 종료 통계의 "무기별 기여도" 집계에 쓰인다 (GDD 6장).
+    /// </summary>
     public readonly struct DamageInfo
     {
         public readonly Vector3 HitPoint;
         public readonly Vector3 HitDirection;
         public readonly bool IsCritical;
+        public readonly string SourceId;
 
-        public DamageInfo(Vector3 hitPoint, Vector3 hitDirection, bool isCritical = false)
+        public DamageInfo(Vector3 hitPoint, Vector3 hitDirection, bool isCritical = false,
+            string sourceId = null)
         {
             HitPoint = hitPoint;
             HitDirection = hitDirection;
             IsCritical = isCritical;
+            SourceId = sourceId;
         }
     }
 

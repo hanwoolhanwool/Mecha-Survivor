@@ -35,4 +35,58 @@ namespace MechaSurvivor.Core
 
         public PlayerLeveledUpEvent(int newLevel) => NewLevel = newLevel;
     }
+
+    /// <summary>무기 발사. 통계(발사 횟수·가동률)와 카메라 셰이크가 구독.</summary>
+    public readonly struct WeaponFiredEvent : IEvent
+    {
+        public readonly string WeaponId;
+
+        public WeaponFiredEvent(string weaponId) => WeaponId = weaponId;
+    }
+
+    /// <summary>데미지 성립. 통계(무기별 기여도)가 구독 — 전투 코드는 통계의 존재를 모른다.</summary>
+    public readonly struct DamageDealtEvent : IEvent
+    {
+        public readonly string SourceId;
+        public readonly float Amount;
+        public readonly Vector3 Position;
+        public readonly bool KilledTarget;
+
+        public DamageDealtEvent(string sourceId, float amount, Vector3 position, bool killedTarget)
+        {
+            SourceId = sourceId;
+            Amount = amount;
+            Position = position;
+            KilledTarget = killedTarget;
+        }
+    }
+
+    /// <summary>런 종료(클리어/사망). 결과 화면이 구독.</summary>
+    public readonly struct RunEndedEvent : IEvent
+    {
+        public readonly bool Victory;
+        public readonly float DurationSeconds;
+
+        public RunEndedEvent(bool victory, float durationSeconds)
+        {
+            Victory = victory;
+            DurationSeconds = durationSeconds;
+        }
+    }
+
+    /// <summary>플레이어 사망. RunTimer가 구독해 런을 종료한다.</summary>
+    public readonly struct PlayerDiedEvent : IEvent
+    {
+        public readonly Vector3 Position;
+
+        public PlayerDiedEvent(Vector3 position) => Position = position;
+    }
+
+    /// <summary>경험치 획득. 레벨 진행/HUD가 구독.</summary>
+    public readonly struct ExperienceGainedEvent : IEvent
+    {
+        public readonly int Amount;
+
+        public ExperienceGainedEvent(int amount) => Amount = amount;
+    }
 }
