@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1d09f78d631b1914abe3cc346d4b5291, type: 3}
+  m_Name: EnemyData_Elite
+  m_EditorClassIdentifier: MechaSurvivor.Gameplay::MechaSurvivor.Gameplay.EnemyData
+  DisplayName: "\uC5D8\uB9AC\uD2B8"
+  Archetype: 3
+  MaxHealth: 450
+  MoveSpeed: 5
+  ContactDamage: 22
+  ContactRadius: 2.6
+  ContactInterval: 1
+  SelfDestructOnContact: 0
+  AttackRange: 45
+  AttackInterval: 2.5
+  ProjectileSpeed: 35
+  ProjectileDamage: 6
+  ProjectilePrefab: {fileID: 0}
+  SeparationRadius: 4
+  ExpReward: 25
+  Prefab: {fileID: 566798036318868575, guid: 1fccd5d8b145e1d4c994b4d33c0bc913, type: 3}

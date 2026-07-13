@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1d09f78d631b1914abe3cc346d4b5291, type: 3}
+  m_Name: EnemyData_Turret
+  m_EditorClassIdentifier: MechaSurvivor.Gameplay::MechaSurvivor.Gameplay.EnemyData
+  DisplayName: "\uD3EC\uD0D1"
+  Archetype: 2
+  MaxHealth: 45
+  MoveSpeed: 0
+  ContactDamage: 5
+  ContactRadius: 1.5
+  ContactInterval: 1
+  SelfDestructOnContact: 0
+  AttackRange: 55
+  AttackInterval: 2.5
+  ProjectileSpeed: 38
+  ProjectileDamage: 10
+  ProjectilePrefab: {fileID: 6218458190241991508, guid: 60f70cdb53eaec94ebe28e4a022c29ad, type: 3}
+  SeparationRadius: 2
+  ExpReward: 4
+  Prefab: {fileID: 7625202895171966324, guid: 70df0af197445104da1bb8ab5ebf3979, type: 3}

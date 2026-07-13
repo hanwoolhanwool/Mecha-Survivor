@@ -1,0 +1,60 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f514b6eacc6f08548a65c8ae4ec5f31f, type: 3}
+  m_Name: WaveData_MainRun
+  m_EditorClassIdentifier: MechaSurvivor.Gameplay::MechaSurvivor.Gameplay.WaveData
+  Spawns:
+  - Enemy: {fileID: 11400000, guid: c29c94f2a8e78f6408681adb32dada86, type: 2}
+    StartTime: 0
+    EndTime: 120
+    SpawnInterval: 2.5
+    MaxAlive: 15
+  - Enemy: {fileID: 11400000, guid: c29c94f2a8e78f6408681adb32dada86, type: 2}
+    StartTime: 120
+    EndTime: 480
+    SpawnInterval: 1.2
+    MaxAlive: 40
+  - Enemy: {fileID: 11400000, guid: c29c94f2a8e78f6408681adb32dada86, type: 2}
+    StartTime: 480
+    EndTime: 0
+    SpawnInterval: 0.8
+    MaxAlive: 70
+  - Enemy: {fileID: 11400000, guid: 5f5b0ac78db3baa48a019e5c5332f2a6, type: 2}
+    StartTime: 480
+    EndTime: 0
+    SpawnInterval: 2
+    MaxAlive: 28
+  - Enemy: {fileID: 11400000, guid: 76f68b0c78855d84c9849788366e5750, type: 2}
+    StartTime: 720
+    EndTime: 0
+    SpawnInterval: 6
+    MaxAlive: 8
+  - Enemy: {fileID: 11400000, guid: e97fd7b1b73bdbc49829c5fcf4fdd419, type: 2}
+    StartTime: 300
+    EndTime: 320
+    SpawnInterval: 300
+    MaxAlive: 1
+  - Enemy: {fileID: 11400000, guid: e97fd7b1b73bdbc49829c5fcf4fdd419, type: 2}
+    StartTime: 960
+    EndTime: 0
+    SpawnInterval: 45
+    MaxAlive: 3
+  - Enemy: {fileID: 11400000, guid: 9a84026fd8eaa424e8c19a543a48a5f6, type: 2}
+    StartTime: 1140
+    EndTime: 0
+    SpawnInterval: 999
+    MaxAlive: 1
+  - Enemy: {fileID: 11400000, guid: 5f5b0ac78db3baa48a019e5c5332f2a6, type: 2}
+    StartTime: 15
+    EndTime: 480
+    SpawnInterval: 2.5
+    MaxAlive: 14
