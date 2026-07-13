@@ -16,6 +16,10 @@
 /[Aa]ssets/AssetStoreTools*
 /[Aa]ssets/Plugins/Editor/JetBrains*
 
+# 런타임 캡처 산출물 (FrameCapturer)
+/[Aa]ssets/Screenshots/
+/[Aa]ssets/Screenshots.meta
+
 # IDE / 에디터
 /.idea/
 /.vs/
