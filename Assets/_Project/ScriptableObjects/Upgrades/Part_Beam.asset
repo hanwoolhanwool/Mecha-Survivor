@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0fec32232a3c4d343a342c30faa6f9a5, type: 3}
+  m_Name: Part_Beam
+  m_EditorClassIdentifier: MechaSurvivor.Gameplay::MechaSurvivor.Gameplay.PartUpgradeData
+  Id: part_beam
+  DisplayName: "\uB300\uCD9C\uB825 \uBE54 \uCE90\uB17C"
+  Description: "\uCC28\uC9D5 \uD6C4 \uAD00\uD1B5 \uBE54. \uC77C\uC9C1\uC120\uC0C1\uC758
+    \uC801\uC744 \uD55C \uC904\uB85C \uC99D\uBC1C\uC2DC\uD0A8\uB2E4. \uAC15\uD654
+    \uC2DC \uBE54 \uAD75\uAE30 \uC99D\uAC00"
+  Icon: {fileID: 0}
+  Category: 0
+  Rarity: 0.8
+  MaxLevel: 5
+  WeaponPrefab: {fileID: 3744012904025426182, guid: d4394135a15c6574fadead91a4c5762b, type: 3}
+  Weapon: {fileID: 11400000, guid: 3f896e59e42bfbe47ab9b3308ebc4acd, type: 2}
+  UnlocksWeaponSlot: 0

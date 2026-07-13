@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 69176d13713026042aabd2d2bea373eb, type: 3}
+  m_Name: Result_OverloadShield
+  m_EditorClassIdentifier: MechaSurvivor.Gameplay::MechaSurvivor.Gameplay.ArmorUpgradeData
+  Id: result_overload_shield
+  DisplayName: "\uC624\uBC84\uB85C\uB4DC \uC2E4\uB4DC"
+  Description: "[\uC870\uD569] \uBCF5\uD569 \uC7A5\uAC11 + \uB9AC\uC561\uD130 \u2192
+    \uCD5C\uB300 HP +80"
+  Icon: {fileID: 0}
+  Category: 1
+  Rarity: 1
+  MaxLevel: 5
+  MaxHealthPerLevel: 80

@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0fec32232a3c4d343a342c30faa6f9a5, type: 3}
+  m_Name: Part_Gatling
+  m_EditorClassIdentifier: MechaSurvivor.Gameplay::MechaSurvivor.Gameplay.PartUpgradeData
+  Id: part_gatling
+  DisplayName: "\uD314 \uBC1C\uCE78 \u2014 \uAC1C\uD2C0\uB9C1"
+  Description: "\uB85C\uD14C\uC774\uC158\uC758 \uBC14\uB2E5. \uD640\uB4DC \uC5F0\uC0AC\uB85C
+    \uBE48 \uC2DC\uAC04\uC744 \uBA54\uC6B4\uB2E4. \uAC15\uD654 \uC2DC \uB370\uBBF8\uC9C0/\uC5F0\uC0AC
+    \uC0C1\uC2B9, Lv.5 \uAC00\uC18D \uD68C\uC804"
+  Icon: {fileID: 0}
+  Category: 0
+  Rarity: 1.2
+  MaxLevel: 5
+  WeaponPrefab: {fileID: 4307548678177279281, guid: 36ca0485ace71ad4c8950805e41d1524, type: 3}
+  Weapon: {fileID: 11400000, guid: a6e66cb2112622745b0148279d7a5db8, type: 2}
+  UnlocksWeaponSlot: 0

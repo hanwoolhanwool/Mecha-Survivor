@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b0f78c0cc6fa67045989851b10788464, type: 3}
+  m_Name: Recipe_HeatedGatling
+  m_EditorClassIdentifier: MechaSurvivor.Gameplay::MechaSurvivor.Gameplay.RecipeData
+  Ingredients:
+  - Item: {fileID: 11400000, guid: 098fbe7a764362d4781f3cc34b9f230b, type: 2}
+    RequiredLevel: 3
+  - Item: {fileID: 11400000, guid: b794ed5eceed7c14481e2753eb58f83f, type: 2}
+    RequiredLevel: 2
+  Result: {fileID: 11400000, guid: 029ec48d1223cb64c9afce0c39fb3b7a, type: 2}

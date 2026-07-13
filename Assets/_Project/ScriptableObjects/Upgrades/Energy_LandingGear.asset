@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 73cb68cb5eaef144e9afff0b75e3ab1e, type: 3}
+  m_Name: Energy_LandingGear
+  m_EditorClassIdentifier: MechaSurvivor.Gameplay::MechaSurvivor.Gameplay.EnergyUpgradeData
+  Id: energy_landing_gear
+  DisplayName: "\uC811\uC9C0 \uBC29\uC5F4 \uAE30\uC5B4"
+  Description: "\uCC29\uC9C0 \uC911 \uCFE8\uB2E4\uC6B4 \uAC00\uC18D \uBC30\uC728
+    +0.15 (\uC9C0\uC0C1 = \uD654\uB825, \uACF5\uC911 = \uC548\uC804)"
+  Icon: {fileID: 0}
+  Category: 2
+  Rarity: 0.8
+  MaxLevel: 5
+  GlobalCooldownReductionPerLevel: 0
+  TargetWeapon: {fileID: 0}
+  WeaponCooldownReductionPerLevel: 0
+  MoveSpeedPerLevel: 0
+  GroundedMultiplierPerLevel: 0.15

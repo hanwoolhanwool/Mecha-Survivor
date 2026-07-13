@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 73cb68cb5eaef144e9afff0b75e3ab1e, type: 3}
+  m_Name: Result_HeatedGatling
+  m_EditorClassIdentifier: MechaSurvivor.Gameplay::MechaSurvivor.Gameplay.EnergyUpgradeData
+  Id: result_heated_gatling
+  DisplayName: "\uAC00\uC5F4\uC2DD \uAC1C\uD2C0\uB9C1"
+  Description: "[\uC870\uD569] \uAC1C\uD2C0\uB9C1 + \uC2A4\uB7EC\uC2A4\uD130 \u2192
+    \uAC1C\uD2C0\uB9C1 \uC804\uC6A9 \uCFE8\uB2E4\uC6B4 \uAC10\uC18C +100%"
+  Icon: {fileID: 0}
+  Category: 2
+  Rarity: 1
+  MaxLevel: 5
+  GlobalCooldownReductionPerLevel: 0
+  TargetWeapon: {fileID: 11400000, guid: a6e66cb2112622745b0148279d7a5db8, type: 2}
+  WeaponCooldownReductionPerLevel: 1
+  MoveSpeedPerLevel: 0
+  GroundedMultiplierPerLevel: 0

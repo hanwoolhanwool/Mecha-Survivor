@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 73cb68cb5eaef144e9afff0b75e3ab1e, type: 3}
+  m_Name: Energy_Thrusters
+  m_EditorClassIdentifier: MechaSurvivor.Gameplay::MechaSurvivor.Gameplay.EnergyUpgradeData
+  Id: energy_thrusters
+  DisplayName: "\uBCA1\uD130\uB9C1 \uC2A4\uB7EC\uC2A4\uD130"
+  Description: "\uC774\uB3D9\xB7\uC0C1\uC2B9\xB7\uD558\uAC15 \uC18D\uB3C4 +12%"
+  Icon: {fileID: 0}
+  Category: 2
+  Rarity: 1
+  MaxLevel: 5
+  GlobalCooldownReductionPerLevel: 0
+  TargetWeapon: {fileID: 0}
+  WeaponCooldownReductionPerLevel: 0
+  MoveSpeedPerLevel: 0.12
+  GroundedMultiplierPerLevel: 0

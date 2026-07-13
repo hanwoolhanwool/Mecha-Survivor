@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 73cb68cb5eaef144e9afff0b75e3ab1e, type: 3}
+  m_Name: Energy_Reactor
+  m_EditorClassIdentifier: MechaSurvivor.Gameplay::MechaSurvivor.Gameplay.EnergyUpgradeData
+  Id: energy_reactor
+  DisplayName: "\uCD9C\uB825 \uC99D\uD3ED \uB9AC\uC561\uD130"
+  Description: "\uC804\uC5ED \uCFE8\uB2E4\uC6B4 \uAC10\uC18C +25% (\uB098\uB217\uC148
+    \uBAA8\uB378 \u2014 \uC313\uC744\uC218\uB85D \uC815\uC9C1\uD558\uAC8C \uBE68\uB77C\uC9C4\uB2E4)"
+  Icon: {fileID: 0}
+  Category: 2
+  Rarity: 1.2
+  MaxLevel: 5
+  GlobalCooldownReductionPerLevel: 0.25
+  TargetWeapon: {fileID: 0}
+  WeaponCooldownReductionPerLevel: 0
+  MoveSpeedPerLevel: 0
+  GroundedMultiplierPerLevel: 0

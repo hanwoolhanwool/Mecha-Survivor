@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0fec32232a3c4d343a342c30faa6f9a5, type: 3}
+  m_Name: Part_GravityWell
+  m_EditorClassIdentifier: MechaSurvivor.Gameplay::MechaSurvivor.Gameplay.PartUpgradeData
+  Id: part_gravity_well
+  DisplayName: "\uADF8\uB798\uBE44\uD2F0 \uC6F0 \uB7F0\uCC98"
+  Description: "\uC801\uC744 \uD55C \uACF3\uC73C\uB85C \uBE68\uC544\uB4E4\uC774\uB294
+    \uC911\uB825\uC7A5. \uBBF8\uC0AC\uC77C\xB7\uBE54 \uCF64\uBCF4\uC758 \uD575\uC2EC"
+  Icon: {fileID: 0}
+  Category: 0
+  Rarity: 0.8
+  MaxLevel: 5
+  WeaponPrefab: {fileID: 180758841849358318, guid: 36089f14647a52949a318a59941d98b5, type: 3}
+  Weapon: {fileID: 11400000, guid: ae3138e146d150c448aa16909a8d38da, type: 2}
+  UnlocksWeaponSlot: 0
