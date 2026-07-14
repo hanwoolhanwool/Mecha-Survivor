@@ -55,11 +55,13 @@ namespace MechaSurvivor.Gameplay
             // 역동 연출 상태 갱신.
             float pitchOffset = 0f;
             float bank = 0f;
+            float lateralOffset = 0f;
             if (_dynamics != null)
             {
                 float speed01 = 0f;
                 float lateral = 0f;
                 float verticalInput = 0f;
+                float lateralVelocity01 = 0f;
                 if (_mecha != null)
                 {
                     Vector3 v = _mecha.Velocity;
@@ -68,27 +70,37 @@ namespace MechaSurvivor.Gameplay
                         : 0f;
                     lateral = _mecha.MoveInput.x;
                     verticalInput = _mecha.VerticalInput;
+
+                    // 카메라 우측 기준 측면 속도 비율 — 대시 임펄스까지 반영된 실제 속도.
+                    if (_mecha.HorizontalSpeed > 0f)
+                    {
+                        Vector3 right = yawRotation * Vector3.right;
+                        lateralVelocity01 = (v.x * right.x + v.z * right.z) / _mecha.HorizontalSpeed;
+                    }
                 }
 
-                _dynamics.Tick(speed01, lateral, verticalInput, deltaTime);
+                _dynamics.Tick(speed01, lateral, verticalInput, deltaTime, lateralVelocity01);
                 camera.fieldOfView = _dynamics.CurrentFov;
                 pitchOffset = _dynamics.CurrentPitchOffset;
                 bank = _dynamics.CurrentBank;
+                lateralOffset = _dynamics.CurrentLateralOffset;
             }
+
+            // 고속 측면 오프셋 — 카메라가 이동 방향으로 밀려 기체가 화면 측면으로 밀려난다.
+            Vector3 offsetPivot = _smoothedPivot + yawRotation * new Vector3(lateralOffset, 0f, 0f);
 
             Quaternion rotation = Quaternion.Euler(pitch + pitchOffset, yaw, bank);
             Vector3 boomDirection = rotation * Vector3.back;
-            Vector3 desired = _smoothedPivot + boomDirection * _armLength;
 
             // 피벗 → 카메라 스피어캐스트로 지형 끼임 방지.
             float distance = _armLength;
-            if (Physics.SphereCast(_smoothedPivot, _collisionRadius, boomDirection,
+            if (Physics.SphereCast(offsetPivot, _collisionRadius, boomDirection,
                     out RaycastHit hit, _armLength, _collisionMask, QueryTriggerInteraction.Ignore))
             {
                 distance = hit.distance;
             }
 
-            Vector3 finalPosition = _smoothedPivot + boomDirection * distance;
+            Vector3 finalPosition = offsetPivot + boomDirection * distance;
             if (_dynamics != null)
             {
                 finalPosition += rotation * _dynamics.EvaluateShakeOffset();

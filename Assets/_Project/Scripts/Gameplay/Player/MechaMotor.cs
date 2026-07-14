@@ -27,6 +27,25 @@ namespace MechaSurvivor.Gameplay
         }
 
         /// <summary>
+        /// 대시 방향. 이동 입력이 있으면 그 방향(카메라 요 기준), 없으면 기체가 향한 방향.
+        /// 반환은 항상 수평 단위 벡터 — 대시는 수평 기동이다.
+        /// </summary>
+        public static Vector3 DashDirection(Vector2 move, float yawDegrees, Vector3 fallbackForward)
+        {
+            if (move.sqrMagnitude > 0.0001f)
+            {
+                Vector3 fromInput = Quaternion.Euler(0f, yawDegrees, 0f)
+                                    * new Vector3(move.x, 0f, move.y);
+                return fromInput.normalized;
+            }
+
+            fallbackForward.y = 0f;
+            return fallbackForward.sqrMagnitude > 0.0001f
+                ? fallbackForward.normalized
+                : Vector3.forward;
+        }
+
+        /// <summary>
         /// 외부 임펄스(산탄 캐논 반동 등)의 지수 감쇠. 관성 0 원칙(GDD 2.3)의 예외지만
         /// 짧게 감쇠해 "밀려남"만 남기고 조작감을 되돌려준다. 미세 잔량은 0으로 스냅.
         /// </summary>

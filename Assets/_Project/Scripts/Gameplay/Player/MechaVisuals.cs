@@ -27,11 +27,15 @@ namespace MechaSurvivor.Gameplay
         [Header("하체 요 회전 — 이동 방향을 드르륵 따라간다")]
         [SerializeField] private float _yawFollowResponse = 10f;
 
+        [Header("대시 에어 트레일 — 대시 창 동안만 방출")]
+        [SerializeField] private TrailRenderer[] _dashTrails;
+
         private Vector3 _basePosition;
         private float _visualYaw;
         private float _leanPitch;
         private float _leanRoll;
         private float _hoverPhase;
+        private bool _trailsEmitting;
 
         private void Awake()
         {
@@ -39,6 +43,8 @@ namespace MechaSurvivor.Gameplay
             {
                 _basePosition = _visualRoot.localPosition;
             }
+
+            SetTrailsEmitting(false);
         }
 
         private void LateUpdate()
@@ -86,6 +92,29 @@ namespace MechaSurvivor.Gameplay
                 : 1f - Mathf.Clamp01(planar.magnitude / speedRef);
             float bob = Mathf.Sin(_hoverPhase) * _hoverAmplitude * idleness;
             _visualRoot.localPosition = _basePosition + new Vector3(0f, bob, 0f);
+
+            // ── 대시 에어 트레일: 대시 창 동안만 방출 (상태 변화 시에만 토글).
+            if (_controller.IsDashing != _trailsEmitting)
+            {
+                SetTrailsEmitting(_controller.IsDashing);
+            }
+        }
+
+        private void SetTrailsEmitting(bool emitting)
+        {
+            _trailsEmitting = emitting;
+            if (_dashTrails == null)
+            {
+                return;
+            }
+
+            for (int i = 0; i < _dashTrails.Length; i++)
+            {
+                if (_dashTrails[i] != null)
+                {
+                    _dashTrails[i].emitting = emitting;
+                }
+            }
         }
     }
 }

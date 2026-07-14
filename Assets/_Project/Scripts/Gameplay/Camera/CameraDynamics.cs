@@ -15,6 +15,7 @@ namespace MechaSurvivor.Gameplay
         [Range(0f, 1f)] [SerializeField] private float _pitchIntensity = 1f;
         [Range(0f, 1f)] [SerializeField] private float _lagIntensity = 1f;
         [Range(0f, 1f)] [SerializeField] private float _shakeIntensity = 1f;
+        [Range(0f, 1f)] [SerializeField] private float _offsetIntensity = 1f;
 
         [Header("속도 기반 FOV")]
         [SerializeField] private float _baseFov = 60f;
@@ -37,11 +38,17 @@ namespace MechaSurvivor.Gameplay
         [SerializeField] private float _shakeFrequency = 28f;
         [SerializeField] private float _shakeDamping = 6f;
 
+        [Header("고속 측면 오프셋 — 기체가 화면 측면으로 밀려난다")]
+        [Tooltip("측면 최고 속도에서 카메라가 이동 방향으로 밀리는 거리(m). 조준은 화면 중앙 그대로")]
+        [SerializeField] private float _maxLateralOffset = 1.8f;
+        [SerializeField] private float _offsetResponse = 5f;
+
         public float BaseFov => _baseFov;
 
         private float _currentFov;
         private float _currentBank;
         private float _currentPitchOffset;
+        private float _currentLateralOffset;
         private float _shakeAmplitude;
         private float _shakeSeed;
 
@@ -57,8 +64,12 @@ namespace MechaSurvivor.Gameplay
             _shakeAmplitude = Mathf.Max(_shakeAmplitude, amplitude * _shakeIntensity);
         }
 
-        /// <summary>매 프레임 상태 보간. speed01 = 현재 수평 속도 / 최고 속도.</summary>
-        public void Tick(float speed01, float lateralInput, float verticalInput, float deltaTime)
+        /// <summary>
+        /// 매 프레임 상태 보간. speed01 = 현재 수평 속도 / 최고 속도.
+        /// lateralVelocity01 = 카메라 기준 측면 속도 / 최고 속도 (대시 중엔 1을 넘을 수 있다).
+        /// </summary>
+        public void Tick(float speed01, float lateralInput, float verticalInput, float deltaTime,
+            float lateralVelocity01 = 0f)
         {
             _currentFov = Smooth(_currentFov,
                 TargetFov(_baseFov, _maxFov, speed01, _fovIntensity), _fovResponse, deltaTime);
@@ -66,12 +77,18 @@ namespace MechaSurvivor.Gameplay
                 TargetBank(lateralInput, _maxBankAngle, _bankIntensity), _bankResponse, deltaTime);
             _currentPitchOffset = Smooth(_currentPitchOffset,
                 TargetPitchOffset(verticalInput, _maxPitchOffset, _pitchIntensity), _pitchResponse, deltaTime);
+            _currentLateralOffset = Smooth(_currentLateralOffset,
+                TargetLateralOffset(lateralVelocity01, _maxLateralOffset, _offsetIntensity),
+                _offsetResponse, deltaTime);
             _shakeAmplitude = Mathf.Max(0f, _shakeAmplitude - _shakeAmplitude * _shakeDamping * deltaTime);
         }
 
         public float CurrentFov => _currentFov;
         public float CurrentBank => _currentBank;
         public float CurrentPitchOffset => _currentPitchOffset;
+
+        /// <summary>카메라 우측(+) 기준 피벗 오프셋(m). ThirdPersonRig가 적용한다.</summary>
+        public float CurrentLateralOffset => _currentLateralOffset;
 
         /// <summary>지연 강도를 반영한 위치 추적 계수. 강도 0이면 즉시 따라붙는다(지연 없음).</summary>
         public float EffectiveLagResponse =>
@@ -110,6 +127,16 @@ namespace MechaSurvivor.Gameplay
         public static float TargetPitchOffset(float verticalInput, float maxOffset, float intensity)
         {
             return -Mathf.Clamp(verticalInput, -1f, 1f) * maxOffset * Mathf.Clamp01(intensity);
+        }
+
+        /// <summary>
+        /// 고속 측면 이동 시 카메라를 이동 방향으로 밀어 기체를 화면 반대편 측면으로 보낸다
+        /// (우측 이동 → 카메라 우측 이동 → 기체는 화면 좌측). 진행 방향의 시야가 넓어지고
+        /// 조준(화면 중앙)은 그대로다. 대시를 위해 ±1.5까지 허용해 오프셋이 더 크게 튄다.
+        /// </summary>
+        public static float TargetLateralOffset(float lateralVelocity01, float maxOffset, float intensity)
+        {
+            return Mathf.Clamp(lateralVelocity01, -1.5f, 1.5f) * maxOffset * Mathf.Clamp01(intensity);
         }
 
         /// <summary>프레임레이트 독립 지수 보간.</summary>

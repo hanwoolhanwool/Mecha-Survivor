@@ -15,11 +15,12 @@ namespace MechaSurvivor.Gameplay
         public readonly bool Fire4Held;        // E — 무기 슬롯 4
         public readonly bool CameraTogglePressed; // V — 시점 전환
         public readonly bool PausePressed;     // Esc
+        public readonly bool DashPressed;      // F — 대시 (누른 순간)
 
         public MechaInputFrame(
             Vector2 move, float vertical, Vector2 look,
             bool fire1Held, bool fire2Held, bool fire3Held, bool fire4Held,
-            bool cameraTogglePressed, bool pausePressed)
+            bool cameraTogglePressed, bool pausePressed, bool dashPressed = false)
         {
             Move = move;
             Vertical = vertical;
@@ -30,6 +31,7 @@ namespace MechaSurvivor.Gameplay
             Fire4Held = fire4Held;
             CameraTogglePressed = cameraTogglePressed;
             PausePressed = pausePressed;
+            DashPressed = dashPressed;
         }
 
         public bool IsFireHeld(int slotIndex) => slotIndex switch
@@ -107,7 +109,8 @@ namespace MechaSurvivor.Gameplay
                 fire3Held: kb.qKey.isPressed,
                 fire4Held: kb.eKey.isPressed,
                 cameraTogglePressed: kb.vKey.wasPressedThisFrame,
-                pausePressed: kb.escapeKey.wasPressedThisFrame);
+                pausePressed: kb.escapeKey.wasPressedThisFrame,
+                dashPressed: kb.fKey.wasPressedThisFrame);
         }
     }
 }

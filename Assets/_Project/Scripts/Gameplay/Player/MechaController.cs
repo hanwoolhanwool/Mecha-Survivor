@@ -49,6 +49,19 @@ namespace MechaSurvivor.Gameplay
         [Tooltip("외부 임펄스(산탄 반동 등) 감쇠 속도 — 클수록 빨리 멈춘다")]
         [SerializeField] private float _impulseDamping = 5f;
 
+        [Header("대시 (F) — 순간 가속, 에어 트레일은 MechaVisuals가 그린다")]
+        [SerializeField] private float _dashSpeed = 42f;
+        [SerializeField] private float _dashCooldown = 1.6f;
+
+        [Tooltip("대시 연출(트레일·오프셋)이 유지되는 시간(초)")]
+        [SerializeField] private float _dashDuration = 0.35f;
+
+        private float _nextDashTime;
+        private float _dashEndTime;
+
+        /// <summary>대시 연출 창 — 에어 트레일(MechaVisuals)이 읽는다.</summary>
+        public bool IsDashing => Time.time < _dashEndTime;
+
         /// <summary>에너지 계열 업그레이드(기동력)가 호출. 0.1 = +10%.</summary>
         public void AddMoveSpeedMultiplier(float amount) =>
             _speedMultiplier = Mathf.Max(0.1f, _speedMultiplier + amount);
@@ -69,6 +82,15 @@ namespace MechaSurvivor.Gameplay
         {
             MechaInputFrame frame = _input.Frame;
             float yaw = _camera != null ? _camera.Yaw : transform.eulerAngles.y;
+
+            // 대시 — 향하고 있는 방향(입력 우선)으로 순간 가속 (GDD 2.3: 반응은 즉각적으로).
+            if (frame.DashPressed && Time.time >= _nextDashTime)
+            {
+                Vector3 dashDirection = MechaMotor.DashDirection(frame.Move, yaw, transform.forward);
+                AddImpulse(dashDirection * _dashSpeed);
+                _nextDashTime = Time.time + _dashCooldown;
+                _dashEndTime = Time.time + _dashDuration;
+            }
 
             Vector3 velocity = MechaMotor.ComputeVelocity(
                 frame.Move, frame.Vertical, yaw,
