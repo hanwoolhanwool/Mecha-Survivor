@@ -183,30 +183,7 @@ namespace MechaSurvivor.Gameplay
             }
 
             float radius = _explosionRadius * Mathf.Max(transform.localScale.x, 0.1f);
-            float radiusSqr = radius * radius;
-            var enemies = EnemyBrain.ActiveEnemies;
-
-            // 역순: TakeDamage → 사망 → 리스트 제거가 일어나도 안전하게.
-            for (int i = enemies.Count - 1; i >= 0; i--)
-            {
-                EnemyBrain enemy = enemies[i];
-                if ((enemy.transform.position - position).sqrMagnitude > radiusSqr)
-                {
-                    continue;
-                }
-
-                var damageable = enemy.GetComponent<Health>();
-                if (damageable == null || !damageable.IsAlive)
-                {
-                    continue;
-                }
-
-                Vector3 direction = (enemy.transform.position - position).normalized;
-                damageable.TakeDamage(Damage,
-                    new DamageInfo(enemy.transform.position, direction, false, SourceId));
-                EventBus<DamageDealtEvent>.Raise(new DamageDealtEvent(
-                    SourceId, Damage, enemy.transform.position, !damageable.IsAlive));
-            }
+            AreaDamage.Apply(position, radius, Damage, SourceId);
         }
     }
 }

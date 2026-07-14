@@ -27,6 +27,17 @@ namespace MechaSurvivor.Gameplay
         }
 
         /// <summary>
+        /// 외부 임펄스(산탄 캐논 반동 등)의 지수 감쇠. 관성 0 원칙(GDD 2.3)의 예외지만
+        /// 짧게 감쇠해 "밀려남"만 남기고 조작감을 되돌려준다. 미세 잔량은 0으로 스냅.
+        /// </summary>
+        public static Vector3 DecayImpulse(Vector3 impulse, float dampingPerSecond, float deltaTime)
+        {
+            float k = Mathf.Exp(-Mathf.Max(0f, dampingPerSecond) * Mathf.Max(0f, deltaTime));
+            Vector3 next = impulse * k;
+            return next.sqrMagnitude < 0.01f ? Vector3.zero : next;
+        }
+
+        /// <summary>
         /// 고도 상한(Ceiling) 클램프. 이번 프레임 이동으로 천장을 넘지 않도록
         /// 상승 속도를 줄여 반환한다. 하강/정지는 그대로 통과.
         /// (GDD 2.2 — 위로 무한정 도망칠 수 없어야 근접 적이 성립한다)

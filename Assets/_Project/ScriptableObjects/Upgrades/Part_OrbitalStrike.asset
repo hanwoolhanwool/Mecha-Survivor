@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0fec32232a3c4d343a342c30faa6f9a5, type: 3}
+  m_Name: Part_OrbitalStrike
+  m_EditorClassIdentifier: MechaSurvivor.Gameplay::MechaSurvivor.Gameplay.PartUpgradeData
+  Id: part_orbital_strike
+  DisplayName: "\uADA4\uB3C4 \uD3ED\uACA9"
+  Description: "\uC9C0\uC0C1 \uB9C8\uCEE4\uC5D0 \uBE5B\uAE30\uB465 \uB099\uD558.
+    Lv.5: \uC735\uB2E8 \uD3ED\uACA9 5\uC5F0\uBC1C."
+  Icon: {fileID: 0}
+  Category: 0
+  Rarity: 1
+  MaxLevel: 5
+  WeaponPrefab: {fileID: 5654431551398502496, guid: f9ac3554b55e43f49b8ee6e21a206899, type: 3}
+  Weapon: {fileID: 11400000, guid: a071fabb6280b554fa4d39a6fbc8d7cc, type: 2}
+  UnlocksWeaponSlot: 0

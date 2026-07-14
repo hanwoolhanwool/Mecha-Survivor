@@ -133,7 +133,13 @@ namespace MechaSurvivor.Gameplay
                 Velocity, desired, _homingTurnRate * Mathf.Deg2Rad * deltaTime, 0f);
         }
 
-        protected void OnImpact(in RaycastHit hit)
+        /// <summary>
+        /// 무기 레벨 의존 파라미터 주입 훅 (클러스터 분열 수·EMP 체인 해금 등).
+        /// ProjectileWeapon이 Launch 직후 호출한다. 기본은 아무것도 하지 않는다.
+        /// </summary>
+        public virtual void ConfigureFromWeapon(WeaponData data, int level) { }
+
+        protected virtual void OnImpact(in RaycastHit hit)
         {
             var damageable = hit.collider.GetComponentInParent<IDamageable>();
             if (damageable != null && damageable.IsAlive)

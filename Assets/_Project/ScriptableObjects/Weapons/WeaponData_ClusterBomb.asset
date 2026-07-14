@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 64d5680e83cdc754992bef7a9becdd9b, type: 3}
+  m_Name: WeaponData_ClusterBomb
+  m_EditorClassIdentifier: MechaSurvivor.Gameplay::MechaSurvivor.Gameplay.WeaponData
+  Id: cluster_bomb
+  DisplayName: "\uD074\uB7EC\uC2A4\uD130 \uD3ED\uD0C4"
+  Role: 1
+  Damage: 18
+  BaseCooldown: 5.5
+  HoldToFire: 0
+  ProjectileSpeed: 30
+  ProjectilesPerShot: 5
+  SpreadAngle: 0
+  HomingTurnRate: 0
+  Range: 100
+  ChargeTime: 0
+  LaunchStyle: 0
+  StaggerInterval: 0
+  VisualScale: 1
+  BeamDuration: 1.5
+  BeamTicksPerSecond: 10
+  DamageGrowth: 0.25
+  ProjectilesPerLevel: 2
+  VisualScaleGrowth: 0.15
+  HomingUnlockLevel: 0
+  ProjectilePrefab: {fileID: 3482117972396662751, guid: 61ea3e652b6ae3644a6f1199c4e649b7, type: 3}
+  MuzzleVfxPrefab: {fileID: 4507217097157148152, guid: ff3f33b17263168449981f0ee1205685, type: 3}
+  ImpactVfxPrefab: {fileID: 1933503274234787412, guid: d9ec914c0b26b8c4fb7753e757bfb50b, type: 3}

@@ -76,6 +76,7 @@ namespace MechaSurvivor.Gameplay
             projectile.Launch(new ProjectileLaunchData(
                 direction, Data.ProjectileSpeed, Data.GetDamage(Level), Data.Id, Data.Range,
                 homingTurnRate, homingTarget, Data.ImpactVfxPrefab));
+            projectile.ConfigureFromWeapon(Data, Level);
         }
 
         protected static Vector3 ApplySpread(Vector3 direction, float spreadAngle)

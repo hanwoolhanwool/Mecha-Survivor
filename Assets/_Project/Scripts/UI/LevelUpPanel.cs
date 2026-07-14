@@ -18,8 +18,11 @@ namespace MechaSurvivor.UI
         private readonly Button[] _buttons = new Button[3];
         private readonly Text[] _buttonLabels = new Text[3];
         private Text _title;
+        private Button _rerollButton;
+        private Text _rerollLabel;
 
         private readonly List<UpgradeOffer> _offers = new(3);
+        private readonly RerollBudget _rerolls = new(1); // GDD §9-3 결정: 레벨업당 1회
         private int _pendingPicks;
         private bool _isOpen;
         private bool _runEnded;
@@ -73,6 +76,12 @@ namespace MechaSurvivor.UI
                     new Color(0.15f, 0.2f, 0.3f, 0.95f), out _buttonLabels[i]);
                 _buttons[i].onClick.AddListener(() => OnChoiceClicked(index));
             }
+
+            // 리롤 — 최악의 3택 회피용, 레벨업당 1회 (GDD §9-3).
+            _rerollButton = UiFactory.CreateButton("Reroll", _panelRoot.transform,
+                new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, -160f),
+                new Vector2(260f, 56f), new Color(0.3f, 0.22f, 0.1f, 0.95f), out _rerollLabel);
+            _rerollButton.onClick.AddListener(OnRerollClicked);
         }
 
         private void OnLeveledUp(PlayerLeveledUpEvent evt)
@@ -117,6 +126,12 @@ namespace MechaSurvivor.UI
                 _title.text = $"LEVEL UP!  Lv.{level}";
             }
 
+            _rerolls.Reset();
+            RefreshOffers();
+        }
+
+        private void RefreshOffers()
+        {
             for (int i = 0; i < 3; i++)
             {
                 bool hasOffer = i < _offers.Count;
@@ -126,6 +141,21 @@ namespace MechaSurvivor.UI
                     _buttonLabels[i].text = DescribeOffer(_offers[i]);
                 }
             }
+
+            bool canReroll = _rerolls.Remaining > 0;
+            _rerollButton.interactable = canReroll;
+            _rerollLabel.text = canReroll ? $"다시 뽑기 ({_rerolls.Remaining}회)" : "다시 뽑기 소진";
+        }
+
+        private void OnRerollClicked()
+        {
+            if (!_isOpen || !_rerolls.TryConsume())
+            {
+                return;
+            }
+
+            _upgradeService.RollThree(_offers);
+            RefreshOffers();
         }
 
         private string DescribeOffer(in UpgradeOffer offer)

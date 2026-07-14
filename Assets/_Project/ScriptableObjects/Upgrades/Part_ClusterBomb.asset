@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0fec32232a3c4d343a342c30faa6f9a5, type: 3}
+  m_Name: Part_ClusterBomb
+  m_EditorClassIdentifier: MechaSurvivor.Gameplay::MechaSurvivor.Gameplay.PartUpgradeData
+  Id: part_cluster_bomb
+  DisplayName: "\uD074\uB7EC\uC2A4\uD130 \uD3ED\uD0C4"
+  Description: "\uACF5\uC911 \uBD84\uC5F4 \uC735\uB2E8\uD3ED\uACA9. Lv.5: \uC0C8\uB07C\uAC00
+    \uB610 \uD130\uC9C4\uB2E4."
+  Icon: {fileID: 0}
+  Category: 0
+  Rarity: 1
+  MaxLevel: 5
+  WeaponPrefab: {fileID: 4063370666723933310, guid: fff2259d21e31374581573a46c2a4214, type: 3}
+  Weapon: {fileID: 11400000, guid: 258067d78ba9d1342841cee437638f7f, type: 2}
+  UnlocksWeaponSlot: 0

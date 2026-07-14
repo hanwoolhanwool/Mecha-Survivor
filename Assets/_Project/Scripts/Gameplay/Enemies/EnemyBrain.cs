@@ -40,6 +40,18 @@ namespace MechaSurvivor.Gameplay
         private Vector3 _lastPlayerPosition;
         private Vector3 _playerVelocity;
         private bool _released;
+        private float _empSlowFactor = 1f;
+        private float _empEndTime;
+
+        /// <summary>EMP 감전 중 — 이동 슬로우 + 사격 봉쇄 (GDD 3.4-10). 피격 연출도 읽는다.</summary>
+        public bool IsEmpAffected => Time.time < _empEndTime;
+
+        /// <summary>EMP 상태 부여. 필드가 틱마다 갱신 호출한다 — 만료는 시간이 처리.</summary>
+        public void ApplyEmp(float slowFactor, float duration)
+        {
+            _empSlowFactor = Mathf.Clamp(slowFactor, 0.05f, 1f);
+            _empEndTime = Mathf.Max(_empEndTime, Time.time + duration);
+        }
 
         /// <summary>스폰 직후 스포너가 호출. 데이터·타깃 주입 + 상태 리셋.</summary>
         public void Init(EnemyData data, Transform player, IDamageable playerDamageable,
@@ -55,6 +67,8 @@ namespace MechaSurvivor.Gameplay
             _steerPhase = Random.Range(0, SteeringSliceFrames);
             _separation = Vector3.zero;
             _released = false;
+            _empSlowFactor = 1f;
+            _empEndTime = 0f;
 
             if (_health != null)
             {
@@ -161,7 +175,8 @@ namespace MechaSurvivor.Gameplay
             Vector3 direction = Steering.CombineChaseAndSeparation(chase, _separation, SeparationWeight);
             direction = AvoidObstacles(direction, flattenSeparation);
 
-            transform.position += direction * (Data.MoveSpeed * dt);
+            float speedFactor = IsEmpAffected ? _empSlowFactor : 1f;
+            transform.position += direction * (Data.MoveSpeed * speedFactor * dt);
 
             if (direction.sqrMagnitude > 1e-4f)
             {
@@ -276,7 +291,8 @@ namespace MechaSurvivor.Gameplay
                 }
             }
 
-            if (Time.time < _nextAttackTime || Data.ProjectilePrefab == null)
+            // EMP 감전 — 사격 봉쇄 (GDD 3.4-10).
+            if (Time.time < _nextAttackTime || Data.ProjectilePrefab == null || IsEmpAffected)
             {
                 return;
             }
@@ -335,6 +351,8 @@ namespace MechaSurvivor.Gameplay
             _director = null;
             _directorEntryIndex = -1;
             _released = true;
+            _empSlowFactor = 1f;
+            _empEndTime = 0f;
         }
     }
 }

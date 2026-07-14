@@ -43,10 +43,18 @@ namespace MechaSurvivor.Gameplay
         public float CeilingHeight => _ceilingHeight;
 
         private float _speedMultiplier = 1f;
+        private Vector3 _impulse;
+
+        [Header("반동 임펄스")]
+        [Tooltip("외부 임펄스(산탄 반동 등) 감쇠 속도 — 클수록 빨리 멈춘다")]
+        [SerializeField] private float _impulseDamping = 5f;
 
         /// <summary>에너지 계열 업그레이드(기동력)가 호출. 0.1 = +10%.</summary>
         public void AddMoveSpeedMultiplier(float amount) =>
             _speedMultiplier = Mathf.Max(0.1f, _speedMultiplier + amount);
+
+        /// <summary>순간 임펄스(m/s) — 산탄 캐논 반동이 기체를 뒤로 민다 (GDD 3.4-4).</summary>
+        public void AddImpulse(Vector3 impulse) => _impulse += impulse;
 
         private CharacterController _cc;
         private MechaInput _input;
@@ -68,11 +76,15 @@ namespace MechaSurvivor.Gameplay
                 _ascendSpeed * _speedMultiplier,
                 _descendSpeed * _speedMultiplier);
 
+            // 반동 임펄스 — 속도에 얹은 뒤 지수 감쇠 (짧게 밀리고 즉시 조작감 복귀).
+            velocity += _impulse;
+            _impulse = MechaMotor.DecayImpulse(_impulse, _impulseDamping, Time.deltaTime);
+
             velocity.y = MechaMotor.ClampAscent(
                 transform.position.y, velocity.y, Time.deltaTime, _ceilingHeight);
 
             // 보행 중 수직 입력이 없으면 살짝 눌러 접지를 유지한다 (비행 복귀는 Space 한 번).
-            if (IsGrounded && Mathf.Approximately(frame.Vertical, 0f))
+            if (IsGrounded && Mathf.Approximately(frame.Vertical, 0f) && _impulse == Vector3.zero)
             {
                 velocity.y = -_groundStick;
             }

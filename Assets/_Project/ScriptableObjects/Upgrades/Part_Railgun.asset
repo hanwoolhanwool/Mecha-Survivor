@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0fec32232a3c4d343a342c30faa6f9a5, type: 3}
+  m_Name: Part_Railgun
+  m_EditorClassIdentifier: MechaSurvivor.Gameplay::MechaSurvivor.Gameplay.PartUpgradeData
+  Id: part_railgun
+  DisplayName: "\uB808\uC77C\uAC74"
+  Description: "\uC608\uC5F4 \uD6C4 \uAD00\uD1B5 \uC800\uACA9. Lv.5: \uBA85\uC911
+    \uC9C0\uC810 2\uCC28 \uD3ED\uBC1C."
+  Icon: {fileID: 0}
+  Category: 0
+  Rarity: 1
+  MaxLevel: 5
+  WeaponPrefab: {fileID: 1631851935693259625, guid: f7bb7ad737b9f2c4280aed7551324a11, type: 3}
+  Weapon: {fileID: 11400000, guid: 5422c6754a12c064fb6facce43dc00bf, type: 2}
+  UnlocksWeaponSlot: 0
