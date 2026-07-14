@@ -93,6 +93,19 @@ namespace MechaSurvivor.Gameplay
             return true;
         }
 
+        /// <summary>슬롯의 무기를 직접 교체하고 이전 무기를 반환 (무기 실험실·교체 기능용).</summary>
+        public Weapon ReplaceSlot(int index, Weapon weapon)
+        {
+            if (index < 0 || index >= MaxSlots)
+            {
+                return null;
+            }
+
+            Weapon old = _slots[index];
+            _slots[index] = weapon;
+            return old;
+        }
+
         /// <summary>빈 해금 슬롯에 무기를 장착하고 슬롯 번호를 반환. 자리가 없으면 -1.</summary>
         public int Equip(Weapon weapon)
         {
