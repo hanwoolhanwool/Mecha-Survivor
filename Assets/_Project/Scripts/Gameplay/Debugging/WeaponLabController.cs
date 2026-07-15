@@ -12,7 +12,7 @@ namespace MechaSurvivor.Gameplay
     /// HUD 쿨다운 게이지·홀드 연사 규칙이 본편과 동일하게 동작한다.
     ///
     /// 조작: ←/→ 무기 전환 · 숫자 1~9,0 무기 직접 선택 · ↑/↓ 강화 레벨 · R 표적 재배치.
-    /// (WASD/Space/Shift 이동, 좌클릭 발사, V 시점 전환은 본편 조작 그대로)
+    /// (WASD/Space/Ctrl 이동, Shift 대시, 좌클릭 발사, V 시점 전환은 본편 조작 그대로)
     /// </summary>
     public sealed class WeaponLabController : MonoBehaviour
     {
@@ -209,7 +209,7 @@ namespace MechaSurvivor.Gameplay
             _hudText =
                 $"[무기 실험실]  {_index + 1}/{_weaponPrefabs.Length}  {weaponName}  Lv.{_level}\n" +
                 "←/→ 무기 전환   숫자 1~0 직접 선택   ↑/↓ 레벨   R 표적 재배치\n" +
-                "좌클릭 발사 · WASD/Space/Shift 이동 · V 시점 전환";
+                "좌클릭 발사 · WASD/Space/Ctrl 이동 · Shift 대시 · V 시점 전환";
         }
 
         private void OnGUI()

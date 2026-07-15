@@ -7,7 +7,7 @@ namespace MechaSurvivor.Gameplay
     public readonly struct MechaInputFrame
     {
         public readonly Vector2 Move;          // WASD (카메라 기준 수평)
-        public readonly float Vertical;        // Space(+1) / Shift(-1)
+        public readonly float Vertical;        // Space(+1) / Ctrl(-1)
         public readonly Vector2 Look;          // 마우스 델타
         public readonly bool Fire1Held;        // 좌클릭 — 무기 슬롯 1
         public readonly bool Fire2Held;        // 우클릭 — 무기 슬롯 2
@@ -15,7 +15,7 @@ namespace MechaSurvivor.Gameplay
         public readonly bool Fire4Held;        // E — 무기 슬롯 4
         public readonly bool CameraTogglePressed; // V — 시점 전환
         public readonly bool PausePressed;     // Esc
-        public readonly bool DashPressed;      // F — 대시 (누른 순간)
+        public readonly bool DashPressed;      // Shift — 대시 (누른 순간)
 
         public MechaInputFrame(
             Vector2 move, float vertical, Vector2 look,
@@ -96,7 +96,7 @@ namespace MechaSurvivor.Gameplay
 
             float vertical = 0f;
             if (kb.spaceKey.isPressed) vertical += 1f;
-            if (kb.leftShiftKey.isPressed) vertical -= 1f;
+            if (kb.leftCtrlKey.isPressed) vertical -= 1f;
 
             Vector2 look = mouse != null ? mouse.delta.ReadValue() : Vector2.zero;
 
@@ -110,7 +110,7 @@ namespace MechaSurvivor.Gameplay
                 fire4Held: kb.eKey.isPressed,
                 cameraTogglePressed: kb.vKey.wasPressedThisFrame,
                 pausePressed: kb.escapeKey.wasPressedThisFrame,
-                dashPressed: kb.fKey.wasPressedThisFrame);
+                dashPressed: kb.leftShiftKey.wasPressedThisFrame);
         }
     }
 }

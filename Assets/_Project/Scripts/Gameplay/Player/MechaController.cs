@@ -49,7 +49,7 @@ namespace MechaSurvivor.Gameplay
         [Tooltip("외부 임펄스(산탄 반동 등) 감쇠 속도 — 클수록 빨리 멈춘다")]
         [SerializeField] private float _impulseDamping = 5f;
 
-        [Header("대시 (F) — 순간 가속, 에어 트레일은 MechaVisuals가 그린다")]
+        [Header("대시 (Shift) — 순간 가속, 에어 트레일은 MechaVisuals가 그린다")]
         [SerializeField] private float _dashSpeed = 42f;
         [SerializeField] private float _dashCooldown = 1.6f;
 
