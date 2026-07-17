@@ -1,0 +1,141 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e5186e8134911924bb2bc3b1efa4ca98, type: 3}
+  m_Name: SfxLibrary
+  m_EditorClassIdentifier: MechaSurvivor.Systems::MechaSurvivor.Systems.SfxLibrary
+  _entries:
+  - Id: gatling
+    Clip: {fileID: 8300000, guid: 3bc7674b8655aff4a9562e8721af42c8, type: 3}
+    Volume: 0.5
+    PitchMin: 0.92
+    PitchMax: 1.08
+    MinInterval: 0.04
+    Spatial: 0
+  - Id: laser_cannon
+    Clip: {fileID: 8300000, guid: 476dd1f9147a85a419c8e275b1182522, type: 3}
+    Volume: 0.5
+    PitchMin: 0.95
+    PitchMax: 1.1
+    MinInterval: 0.05
+    Spatial: 0
+  - Id: missile_pod
+    Clip: {fileID: 8300000, guid: e2baef2e17c34f243bd042e2bfab74a4, type: 3}
+    Volume: 0.7
+    PitchMin: 0.95
+    PitchMax: 1.05
+    MinInterval: 0.08
+    Spatial: 0
+  - Id: shotgun_cannon
+    Clip: {fileID: 8300000, guid: 796b6fa5000fb8c4c89b991992319caa, type: 3}
+    Volume: 0.8
+    PitchMin: 0.95
+    PitchMax: 1.05
+    MinInterval: 0.1
+    Spatial: 0
+  - Id: cluster_bomb
+    Clip: {fileID: 8300000, guid: 4a4013b6b37f29c4ea79318ec9695ba9, type: 3}
+    Volume: 0.7
+    PitchMin: 0.95
+    PitchMax: 1.05
+    MinInterval: 0.1
+    Spatial: 0
+  - Id: beam
+    Clip: {fileID: 8300000, guid: 333137affcc7ebd40972ec8f87d96254, type: 3}
+    Volume: 0.8
+    PitchMin: 0.98
+    PitchMax: 1.02
+    MinInterval: 0.2
+    Spatial: 0
+  - Id: railgun
+    Clip: {fileID: 8300000, guid: 56707de57f919da41990f0a934724e66, type: 3}
+    Volume: 0.85
+    PitchMin: 0.97
+    PitchMax: 1.03
+    MinInterval: 0.15
+    Spatial: 0
+  - Id: orbital_strike
+    Clip: {fileID: 8300000, guid: e9f48afff22eef843bcca65bc7f9974d, type: 3}
+    Volume: 0.9
+    PitchMin: 0.95
+    PitchMax: 1.05
+    MinInterval: 0.25
+    Spatial: 0
+  - Id: gravity_well
+    Clip: {fileID: 8300000, guid: c4df2d4bf51f35b44a1f36158298342c, type: 3}
+    Volume: 0.7
+    PitchMin: 0.95
+    PitchMax: 1.05
+    MinInterval: 0.15
+    Spatial: 0
+  - Id: emp_field
+    Clip: {fileID: 8300000, guid: 7e7e2fbda8ae537498449a994a93730c, type: 3}
+    Volume: 0.7
+    PitchMin: 0.95
+    PitchMax: 1.05
+    MinInterval: 0.15
+    Spatial: 0
+  - Id: support_drone
+    Clip: {fileID: 8300000, guid: 9fb31999df7008847881a96273dce581, type: 3}
+    Volume: 0.35
+    PitchMin: 0.9
+    PitchMax: 1.1
+    MinInterval: 0.12
+    Spatial: 1
+  - Id: enemy_death
+    Clip: {fileID: 8300000, guid: 938b95171b933e746aeb3424494b477d, type: 3}
+    Volume: 0.55
+    PitchMin: 0.85
+    PitchMax: 1.15
+    MinInterval: 0.06
+    Spatial: 1
+  - Id: player_hit
+    Clip: {fileID: 8300000, guid: 75958099b60722f44b7ecffddcb356fa, type: 3}
+    Volume: 0.8
+    PitchMin: 0.95
+    PitchMax: 1.05
+    MinInterval: 0.15
+    Spatial: 0
+  - Id: player_death
+    Clip: {fileID: 8300000, guid: 5f9a2cdb4143dec48b88e4fedde611ba, type: 3}
+    Volume: 1
+    PitchMin: 1
+    PitchMax: 1
+    MinInterval: 0.5
+    Spatial: 1
+  - Id: xp_pickup
+    Clip: {fileID: 8300000, guid: 514185007cf98254d8854ece0f5d6b3a, type: 3}
+    Volume: 0.35
+    PitchMin: 0.95
+    PitchMax: 1.2
+    MinInterval: 0.09
+    Spatial: 0
+  - Id: level_up
+    Clip: {fileID: 8300000, guid: 309a703225c39734382be44b694c40f2, type: 3}
+    Volume: 0.8
+    PitchMin: 1
+    PitchMax: 1
+    MinInterval: 0.3
+    Spatial: 0
+  - Id: run_clear
+    Clip: {fileID: 8300000, guid: 527afc7d254c0aa458942c5340f0ec2d, type: 3}
+    Volume: 0.9
+    PitchMin: 1
+    PitchMax: 1
+    MinInterval: 1
+    Spatial: 0
+  - Id: run_fail
+    Clip: {fileID: 8300000, guid: 341fe64fa38c0744784d88c7330d451c, type: 3}
+    Volume: 0.9
+    PitchMin: 1
+    PitchMax: 1
+    MinInterval: 1
+    Spatial: 0

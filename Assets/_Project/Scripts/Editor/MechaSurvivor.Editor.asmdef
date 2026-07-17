@@ -1,7 +1,9 @@
 {
     "name": "MechaSurvivor.Editor",
     "rootNamespace": "MechaSurvivor.Editor",
-    "references": [],
+    "references": [
+        "MechaSurvivor.Utilities"
+    ],
     "includePlatforms": [
         "Editor"
     ],
