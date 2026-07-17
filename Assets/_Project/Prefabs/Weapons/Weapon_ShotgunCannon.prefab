@@ -48,6 +48,13 @@ MonoBehaviour:
   _data: {fileID: 11400000, guid: a560f01afe34bb44299e0a3fed19ad51, type: 2}
   _muzzle: {fileID: 4273545898539158789}
   _recoilImpulse: 16
+  _flameUnlockLevel: 5
+  _flameWaves: 4
+  _flameWaveInterval: 0.06
+  _flamePuffPrefab: {fileID: 6313182794753863429, guid: e7f8c3d40f3867145a3468c20ace4476, type: 3}
+  _puffsPerWave: 2
+  _puffForwardSpacing: 2.2
+  _puffScatter: 0.7
 --- !u!1 &7017715896097299036
 GameObject:
   m_ObjectHideFlags: 0

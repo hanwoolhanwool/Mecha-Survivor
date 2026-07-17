@@ -89,4 +89,35 @@ namespace MechaSurvivor.Core
 
         public ExperienceGainedEvent(int amount) => Amount = amount;
     }
+
+    /// <summary>
+    /// 차징 무기의 실제 발사 순간(레일건 등). WeaponFired(방아쇠·쿨다운 시작)와 구별된다.
+    /// 카메라 킥처럼 "탄이 나가는 순간"에 맞춰야 하는 연출이 구독한다.
+    /// </summary>
+    public readonly struct WeaponDischargedEvent : IEvent
+    {
+        public readonly string WeaponId;
+        public readonly Vector3 Position;
+
+        public WeaponDischargedEvent(string weaponId, Vector3 position)
+        {
+            WeaponId = weaponId;
+            Position = position;
+        }
+    }
+
+    /// <summary>대형 착탄(궤도 폭격 등). 화면 플래시·카메라 셰이크가 구독.</summary>
+    public readonly struct HeavyImpactEvent : IEvent
+    {
+        public readonly Vector3 Position;
+
+        /// <summary>연출 강도 0~1. 플래시 알파·셰이크 진폭에 곱해진다.</summary>
+        public readonly float Magnitude;
+
+        public HeavyImpactEvent(Vector3 position, float magnitude)
+        {
+            Position = position;
+            Magnitude = magnitude;
+        }
+    }
 }

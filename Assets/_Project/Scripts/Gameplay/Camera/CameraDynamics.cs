@@ -16,6 +16,7 @@ namespace MechaSurvivor.Gameplay
         [Range(0f, 1f)] [SerializeField] private float _lagIntensity = 1f;
         [Range(0f, 1f)] [SerializeField] private float _shakeIntensity = 1f;
         [Range(0f, 1f)] [SerializeField] private float _offsetIntensity = 1f;
+        [Range(0f, 1f)] [SerializeField] private float _kickIntensity = 1f;
 
         [Header("속도 기반 FOV")]
         [SerializeField] private float _baseFov = 60f;
@@ -38,6 +39,10 @@ namespace MechaSurvivor.Gameplay
         [SerializeField] private float _shakeFrequency = 28f;
         [SerializeField] private float _shakeDamping = 6f;
 
+        [Header("킥 — 레일건 등 발사 순간 카메라가 위로 튄다")]
+        [Tooltip("클수록 빨리 복귀한다")]
+        [SerializeField] private float _kickRecovery = 9f;
+
         [Header("고속 측면 오프셋 — 기체가 화면 측면으로 밀려난다")]
         [Tooltip("측면 최고 속도에서 카메라가 이동 방향으로 밀리는 거리(m). 조준은 화면 중앙 그대로")]
         [SerializeField] private float _maxLateralOffset = 1.8f;
@@ -51,6 +56,7 @@ namespace MechaSurvivor.Gameplay
         private float _currentLateralOffset;
         private float _shakeAmplitude;
         private float _shakeSeed;
+        private float _kickPitch;
 
         private void Awake()
         {
@@ -62,6 +68,16 @@ namespace MechaSurvivor.Gameplay
         public void AddShake(float amplitude)
         {
             _shakeAmplitude = Mathf.Max(_shakeAmplitude, amplitude * _shakeIntensity);
+        }
+
+        /// <summary>
+        /// 순간 반동 킥(도). 카메라가 위로 튀었다가 지수 감쇠로 복귀한다 — 레일건의 "한 방, 순간".
+        /// 셰이크(노이즈)와 달리 방향이 있는 단발 임펄스다.
+        /// </summary>
+        public void AddKick(float pitchDegrees)
+        {
+            // 음의 피치 오프셋 = 올려다봄 (TargetPitchOffset과 같은 부호 규약).
+            _kickPitch -= pitchDegrees * Mathf.Clamp01(_kickIntensity);
         }
 
         /// <summary>
@@ -81,11 +97,12 @@ namespace MechaSurvivor.Gameplay
                 TargetLateralOffset(lateralVelocity01, _maxLateralOffset, _offsetIntensity),
                 _offsetResponse, deltaTime);
             _shakeAmplitude = Mathf.Max(0f, _shakeAmplitude - _shakeAmplitude * _shakeDamping * deltaTime);
+            _kickPitch = Smooth(_kickPitch, 0f, _kickRecovery, deltaTime);
         }
 
         public float CurrentFov => _currentFov;
         public float CurrentBank => _currentBank;
-        public float CurrentPitchOffset => _currentPitchOffset;
+        public float CurrentPitchOffset => _currentPitchOffset + _kickPitch;
 
         /// <summary>카메라 우측(+) 기준 피벗 오프셋(m). ThirdPersonRig가 적용한다.</summary>
         public float CurrentLateralOffset => _currentLateralOffset;

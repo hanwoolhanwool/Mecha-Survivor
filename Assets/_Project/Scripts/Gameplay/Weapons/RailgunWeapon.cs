@@ -63,6 +63,10 @@ namespace MechaSurvivor.Gameplay
 
         private void FireRail(Vector3 origin, Vector3 direction)
         {
+            // 실제 발사 순간 — 카메라 킥 등 "탄이 나가는 순간" 연출이 여기 반응한다
+            // (WeaponFired는 차징 시작 시점이라 킥이 0.6초 빗나간다).
+            EventBus<WeaponDischargedEvent>.Raise(new WeaponDischargedEvent(Data.Id, origin));
+
             if (Data.MuzzleVfxPrefab != null &&
                 Data.MuzzleVfxPrefab.TryGetComponent(out PooledVfx muzzleVfx))
             {

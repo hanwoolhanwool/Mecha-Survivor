@@ -15,6 +15,13 @@ namespace MechaSurvivor.Gameplay
         [Tooltip("낙하 순간 스폰할 빛기둥 VFX (풀링)")]
         [SerializeField] private PooledVfx _pillarVfxPrefab;
 
+        [Tooltip("착탄 후 피어오르는 버섯구름 VFX (풀링)")]
+        [SerializeField] private MushroomCloudVfx _cloudVfxPrefab;
+
+        [Tooltip("HeavyImpact 연출 강도(0~1) — 화면 플래시·셰이크에 곱해진다")]
+        [Range(0f, 1f)]
+        [SerializeField] private float _impactMagnitude = 1f;
+
         [Tooltip("마커 링 시각 — 자식 트랜스폼. 딜레이 동안 반경 크기 → 0.3배로 수축")]
         [SerializeField] private Transform _ring;
 
@@ -63,6 +70,14 @@ namespace MechaSurvivor.Gameplay
             {
                 PoolManager.Instance.Spawn(_pillarVfxPrefab, transform.position, Quaternion.identity);
             }
+
+            if (_cloudVfxPrefab != null)
+            {
+                PoolManager.Instance.Spawn(_cloudVfxPrefab, transform.position, Quaternion.identity);
+            }
+
+            // 화면 플래시·카메라 셰이크는 이 이벤트를 구독한다 — 마커는 그들의 존재를 모른다.
+            EventBus<HeavyImpactEvent>.Raise(new HeavyImpactEvent(transform.position, _impactMagnitude));
 
             AreaDamage.Apply(transform.position, _radius, _damage, _sourceId);
             PoolManager.Instance.Despawn(this);
