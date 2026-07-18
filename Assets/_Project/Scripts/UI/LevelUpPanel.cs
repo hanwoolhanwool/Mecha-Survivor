@@ -14,9 +14,13 @@ namespace MechaSurvivor.UI
     {
         [SerializeField] private UpgradeService _upgradeService;
 
+        [Tooltip("창이 열린 직후 오클릭 방지를 위해 선택을 잠그는 시간(비스케일 초)")]
+        [SerializeField] private float _selectLockSeconds = 0.45f;
+
         private GameObject _panelRoot;
         private readonly Button[] _buttons = new Button[3];
         private readonly Text[] _buttonLabels = new Text[3];
+        private readonly Image[] _choiceIcons = new Image[3];
         private Text _title;
         private Button _rerollButton;
         private Text _rerollLabel;
@@ -26,6 +30,8 @@ namespace MechaSurvivor.UI
         private int _pendingPicks;
         private bool _isOpen;
         private bool _runEnded;
+        private bool _selectionLocked;
+        private float _selectableAtUnscaled;
 
         private void Awake()
         {
@@ -61,7 +67,7 @@ namespace MechaSurvivor.UI
                 new Color(1f, 0.9f, 0.4f));
 
             const float buttonWidth = 380f;
-            const float buttonHeight = 180f;
+            const float buttonHeight = 232f;
             const float gap = 40f;
             float totalWidth = 3 * buttonWidth + 2 * gap;
 
@@ -75,11 +81,19 @@ namespace MechaSurvivor.UI
                     new Vector2(buttonWidth, buttonHeight),
                     new Color(0.15f, 0.2f, 0.3f, 0.95f), out _buttonLabels[i]);
                 _buttons[i].onClick.AddListener(() => OnChoiceClicked(index));
+
+                // 중상단 아이콘 — 텍스트를 읽기 전에 무엇인지 한눈에 보이게.
+                _choiceIcons[i] = UiFactory.CreatePanel("Icon", _buttons[i].transform,
+                    new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -52f),
+                    new Vector2(76f, 76f), Color.white);
+
+                // 텍스트 영역은 아이콘 아래부터 시작한다.
+                _buttonLabels[i].rectTransform.offsetMax = new Vector2(0f, -96f);
             }
 
             // 리롤 — 최악의 3택 회피용, 레벨업당 1회 (GDD §9-3).
             _rerollButton = UiFactory.CreateButton("Reroll", _panelRoot.transform,
-                new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, -160f),
+                new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, -190f),
                 new Vector2(260f, 56f), new Color(0.3f, 0.22f, 0.1f, 0.95f), out _rerollLabel);
             _rerollButton.onClick.AddListener(OnRerollClicked);
         }
@@ -128,6 +142,38 @@ namespace MechaSurvivor.UI
 
             _rerolls.Reset();
             RefreshOffers();
+            LockSelection();
+        }
+
+        /// <summary>
+        /// 전투 중 좌클릭 연타가 갓 열린 창의 선택지를 바로 눌러버리는 것을 막는다.
+        /// timeScale이 0이므로 비스케일 시간으로 해제한다. 연속 레벨업 재오픈 시에도 매번 잠근다.
+        /// </summary>
+        private void LockSelection()
+        {
+            _selectionLocked = _selectLockSeconds > 0f;
+            _selectableAtUnscaled = Time.unscaledTime + _selectLockSeconds;
+            ApplyInteractable();
+        }
+
+        private void Update()
+        {
+            if (_isOpen && _selectionLocked && Time.unscaledTime >= _selectableAtUnscaled)
+            {
+                _selectionLocked = false;
+                ApplyInteractable();
+            }
+        }
+
+        private void ApplyInteractable()
+        {
+            bool unlocked = !_selectionLocked;
+            for (int i = 0; i < 3; i++)
+            {
+                _buttons[i].interactable = unlocked;
+            }
+
+            _rerollButton.interactable = unlocked && _rerolls.Remaining > 0;
         }
 
         private void RefreshOffers()
@@ -139,17 +185,18 @@ namespace MechaSurvivor.UI
                 if (hasOffer)
                 {
                     _buttonLabels[i].text = DescribeOffer(_offers[i]);
+                    _choiceIcons[i].sprite = UpgradeIconFactory.GetIcon(_offers[i].Upgrade);
                 }
             }
 
             bool canReroll = _rerolls.Remaining > 0;
-            _rerollButton.interactable = canReroll;
             _rerollLabel.text = canReroll ? $"다시 뽑기 ({_rerolls.Remaining}회)" : "다시 뽑기 소진";
+            ApplyInteractable();
         }
 
         private void OnRerollClicked()
         {
-            if (!_isOpen || !_rerolls.TryConsume())
+            if (!_isOpen || _selectionLocked || !_rerolls.TryConsume())
             {
                 return;
             }
@@ -180,7 +227,7 @@ namespace MechaSurvivor.UI
 
         private void OnChoiceClicked(int index)
         {
-            if (!_isOpen || index >= _offers.Count)
+            if (!_isOpen || _selectionLocked || index >= _offers.Count)
             {
                 return;
             }
