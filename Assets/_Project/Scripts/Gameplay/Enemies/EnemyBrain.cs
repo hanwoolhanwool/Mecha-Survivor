@@ -53,9 +53,9 @@ namespace MechaSurvivor.Gameplay
             _empEndTime = Mathf.Max(_empEndTime, Time.time + duration);
         }
 
-        /// <summary>스폰 직후 스포너가 호출. 데이터·타깃 주입 + 상태 리셋.</summary>
+        /// <summary>스폰 직후 스포너가 호출. 데이터·타깃 주입 + 상태 리셋. healthMultiplier = 난이도 HP 배율.</summary>
         public void Init(EnemyData data, Transform player, IDamageable playerDamageable,
-            SpawnDirector director = null, int directorEntryIndex = -1)
+            SpawnDirector director = null, int directorEntryIndex = -1, float healthMultiplier = 1f)
         {
             Data = data;
             _player = player;
@@ -72,7 +72,7 @@ namespace MechaSurvivor.Gameplay
 
             if (_health != null)
             {
-                _health.Init(data.MaxHealth);
+                _health.Init(data.MaxHealth * healthMultiplier);
             }
 
             if (player != null)
@@ -322,6 +322,9 @@ namespace MechaSurvivor.Gameplay
                 new EnemyKilledEvent(transform.position, Data.ExpReward));
             Release();
         }
+
+        /// <summary>QA/실험실: 처치 이벤트 없이 즉시 회수. 스포너 생존 카운트는 정상 반환된다.</summary>
+        public void ForceRelease() => Release();
 
         /// <summary>스포너 카운트 반환 + 풀 회수. 사망/자폭 공통 경로.</summary>
         private void Release()

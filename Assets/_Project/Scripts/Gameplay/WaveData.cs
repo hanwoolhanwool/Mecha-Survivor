@@ -24,6 +24,9 @@ namespace MechaSurvivor.Gameplay
 
             [Tooltip("이 규칙으로 동시에 생존 가능한 최대 수")]
             public int MaxAlive;
+
+            [Tooltip("한 번 스폰할 때 무리로 함께 나오는 수 (0/1 = 단일)")]
+            public int BurstCount;
         }
 
         public List<Spawn> Spawns = new();

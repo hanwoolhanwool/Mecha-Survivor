@@ -55,6 +55,12 @@ namespace MechaSurvivor.Systems
             }
         }
 
+        /// <summary>QA: 경과 시간 점프 (음수 = 되감기). 종료 판정은 다음 Update가 처리한다.</summary>
+        public void Skip(float deltaSeconds)
+        {
+            Elapsed = Mathf.Clamp(Elapsed + deltaSeconds, 0f, _runDuration);
+        }
+
         private void OnPlayerDied(PlayerDiedEvent _)
         {
             EndRun(victory: false);

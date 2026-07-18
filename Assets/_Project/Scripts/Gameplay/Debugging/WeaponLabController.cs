@@ -160,10 +160,11 @@ namespace MechaSurvivor.Gameplay
         {
             _pendingRespawns.Clear();
 
+            // ForceRelease — 스포너가 스폰한 적도 생존 카운트가 정상 반환되도록.
             IReadOnlyList<EnemyBrain> active = EnemyBrain.ActiveEnemies;
             for (int i = active.Count - 1; i >= 0; i--)
             {
-                PoolManager.Instance.Despawn(active[i]);
+                active[i].ForceRelease();
             }
 
             for (int i = 0; i < _dummyCount; i++)

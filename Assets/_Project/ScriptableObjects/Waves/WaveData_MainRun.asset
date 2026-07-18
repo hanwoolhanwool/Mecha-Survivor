@@ -16,45 +16,54 @@ MonoBehaviour:
   - Enemy: {fileID: 11400000, guid: c29c94f2a8e78f6408681adb32dada86, type: 2}
     StartTime: 0
     EndTime: 120
-    SpawnInterval: 2.5
-    MaxAlive: 15
+    SpawnInterval: 1.5
+    MaxAlive: 25
+    BurstCount: 3
   - Enemy: {fileID: 11400000, guid: c29c94f2a8e78f6408681adb32dada86, type: 2}
     StartTime: 120
     EndTime: 480
-    SpawnInterval: 1.2
-    MaxAlive: 40
+    SpawnInterval: 0.9
+    MaxAlive: 45
+    BurstCount: 4
   - Enemy: {fileID: 11400000, guid: c29c94f2a8e78f6408681adb32dada86, type: 2}
     StartTime: 480
     EndTime: 0
-    SpawnInterval: 0.8
-    MaxAlive: 70
+    SpawnInterval: 0.6
+    MaxAlive: 80
+    BurstCount: 5
   - Enemy: {fileID: 11400000, guid: 5f5b0ac78db3baa48a019e5c5332f2a6, type: 2}
     StartTime: 480
     EndTime: 0
-    SpawnInterval: 2
-    MaxAlive: 28
+    SpawnInterval: 1.4
+    MaxAlive: 36
+    BurstCount: 4
   - Enemy: {fileID: 11400000, guid: 76f68b0c78855d84c9849788366e5750, type: 2}
     StartTime: 720
     EndTime: 0
-    SpawnInterval: 6
-    MaxAlive: 8
+    SpawnInterval: 5
+    MaxAlive: 10
+    BurstCount: 2
   - Enemy: {fileID: 11400000, guid: e97fd7b1b73bdbc49829c5fcf4fdd419, type: 2}
     StartTime: 300
     EndTime: 320
     SpawnInterval: 300
     MaxAlive: 1
+    BurstCount: 1
   - Enemy: {fileID: 11400000, guid: e97fd7b1b73bdbc49829c5fcf4fdd419, type: 2}
     StartTime: 960
     EndTime: 0
     SpawnInterval: 45
     MaxAlive: 3
+    BurstCount: 1
   - Enemy: {fileID: 11400000, guid: 9a84026fd8eaa424e8c19a543a48a5f6, type: 2}
     StartTime: 1140
     EndTime: 0
     SpawnInterval: 999
     MaxAlive: 1
+    BurstCount: 1
   - Enemy: {fileID: 11400000, guid: 5f5b0ac78db3baa48a019e5c5332f2a6, type: 2}
     StartTime: 15
     EndTime: 480
-    SpawnInterval: 2.5
-    MaxAlive: 14
+    SpawnInterval: 1.6
+    MaxAlive: 20
+    BurstCount: 3

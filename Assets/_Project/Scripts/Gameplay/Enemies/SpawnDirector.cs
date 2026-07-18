@@ -13,6 +13,9 @@ namespace MechaSurvivor.Gameplay
         [Header("데이터")]
         [SerializeField] private WaveData _waveData;
 
+        [Tooltip("시간 기반 전역 난이도 곡선. 비워두면 배율 1로 동작")]
+        [SerializeField] private DifficultyData _difficulty;
+
         [Header("참조")]
         [SerializeField] private Transform _player;
         [SerializeField] private PlayerHealth _playerHealth;
@@ -41,6 +44,12 @@ namespace MechaSurvivor.Gameplay
         private int[] _aliveCounts;
         private float _fallbackElapsed;
 
+        /// <summary>QA: 켜면 스폰만 멈춘다 (생존 적 행동은 유지).</summary>
+        public bool SpawningPaused { get; set; }
+
+        /// <summary>QA/HUD: 현재 적용 중인 난이도 곡선.</summary>
+        public DifficultyData Difficulty => _difficulty;
+
         private void Awake()
         {
             int count = _waveData != null ? _waveData.Spawns.Count : 0;
@@ -50,12 +59,15 @@ namespace MechaSurvivor.Gameplay
 
         private void Update()
         {
-            if (_waveData == null || _player == null)
+            if (_waveData == null || _player == null || SpawningPaused)
             {
                 return;
             }
 
             float elapsed = GetElapsed();
+            float rateMul = _difficulty != null ? _difficulty.SpawnRateAt(elapsed) : 1f;
+            float aliveMul = _difficulty != null ? _difficulty.MaxAliveMultiplierAt(elapsed) : 1f;
+            float healthMul = _difficulty != null ? _difficulty.HealthMultiplierAt(elapsed) : 1f;
 
             for (int i = 0; i < _waveData.Spawns.Count; i++)
             {
@@ -65,18 +77,22 @@ namespace MechaSurvivor.Gameplay
                     continue;
                 }
 
-                if (!WaveData.IsActiveAt(entry, elapsed))
+                if (!WaveData.IsActiveAt(entry, elapsed) || elapsed < _nextSpawnTimes[i])
                 {
                     continue;
                 }
 
-                if (elapsed < _nextSpawnTimes[i] || _aliveCounts[i] >= entry.MaxAlive)
+                int maxAlive = DifficultyMath.EffectiveMaxAlive(entry.MaxAlive, aliveMul);
+                int burst = DifficultyMath.BurstToSpawn(entry.BurstCount, _aliveCounts[i], maxAlive);
+                if (burst <= 0)
                 {
+                    // 상한 가득 — 간격을 미루지 않아 슬롯이 비면 즉시 재개된다.
                     continue;
                 }
 
-                SpawnOne(entry.Enemy, i);
-                _nextSpawnTimes[i] = elapsed + Mathf.Max(0.05f, entry.SpawnInterval);
+                SpawnBurst(entry.Enemy, i, burst, healthMul);
+                _nextSpawnTimes[i] = elapsed + DifficultyMath.EffectiveInterval(
+                    Mathf.Max(0.05f, entry.SpawnInterval), rateMul);
             }
         }
 
@@ -91,14 +107,42 @@ namespace MechaSurvivor.Gameplay
             return _fallbackElapsed;
         }
 
-        private void SpawnOne(EnemyData data, int entryIndex)
+        /// <summary>무리 단위 스폰 — 기준점 하나를 잡고 주변에 흩뿌려 떼로 몰려오게 한다.</summary>
+        private void SpawnBurst(EnemyData data, int entryIndex, int count, float healthMultiplier)
         {
-            Vector3 position = PickSpawnPosition(data);
+            float spread = _difficulty != null ? _difficulty.BurstSpreadRadius : 5f;
+            Vector3 anchor = PickSpawnPosition(data);
 
-            var brain = (EnemyBrain)PoolManager.Instance.Spawn(
-                data.Prefab, position, Quaternion.identity);
-            brain.Init(data, _player, _playerHealth, this, entryIndex);
-            _aliveCounts[entryIndex]++;
+            for (int n = 0; n < count; n++)
+            {
+                Vector3 position = n == 0 ? anchor : ScatterAround(anchor, spread, data);
+                var brain = (EnemyBrain)PoolManager.Instance.Spawn(
+                    data.Prefab, position, Quaternion.identity);
+                brain.Init(data, _player, _playerHealth, this, entryIndex, healthMultiplier);
+                _aliveCounts[entryIndex]++;
+            }
+        }
+
+        /// <summary>무리 기준점 주변으로 흩뿌린 지점. 지상형은 그 지점의 지면 높이로 재스냅한다.</summary>
+        private Vector3 ScatterAround(Vector3 anchor, float spread, EnemyData data)
+        {
+            Vector2 offset = Random.insideUnitCircle * spread;
+            Vector3 position = new(anchor.x + offset.x, anchor.y, anchor.z + offset.y);
+
+            if (IsAirborne(data))
+            {
+                position.y = Mathf.Max(_flyerMinAltitude, position.y + Random.Range(-2f, 2f));
+                return position;
+            }
+
+            Vector3 rayOrigin = position + Vector3.up * 200f;
+            if (Physics.Raycast(rayOrigin, Vector3.down, out RaycastHit hit, 400f,
+                    _groundMask, QueryTriggerInteraction.Ignore))
+            {
+                position.y = hit.point.y;
+            }
+
+            return position;
         }
 
         private Vector3 PickSpawnPosition(EnemyData data)
@@ -129,11 +173,7 @@ namespace MechaSurvivor.Gameplay
                 0f,
                 playerPosition.z + Mathf.Sin(angle) * radius);
 
-            bool airborne = data.Archetype == EnemyArchetype.Flyer
-                            || data.Archetype == EnemyArchetype.Elite
-                            || data.Archetype == EnemyArchetype.Boss;
-
-            if (airborne)
+            if (IsAirborne(data))
             {
                 flat.y = Mathf.Max(
                     _flyerMinAltitude,
@@ -150,6 +190,35 @@ namespace MechaSurvivor.Gameplay
             }
 
             return flat;
+        }
+
+        private static bool IsAirborne(EnemyData data) =>
+            data.Archetype == EnemyArchetype.Flyer
+            || data.Archetype == EnemyArchetype.Elite
+            || data.Archetype == EnemyArchetype.Boss;
+
+        /// <summary>QA: 시간 점프 뒤 호출 — 스폰 예약을 즉시로 되돌려 새 시각 기준으로 재개한다.</summary>
+        public void ResetSchedule()
+        {
+            if (_nextSpawnTimes == null)
+            {
+                return;
+            }
+
+            for (int i = 0; i < _nextSpawnTimes.Length; i++)
+            {
+                _nextSpawnTimes[i] = 0f;
+            }
+        }
+
+        /// <summary>QA: 생존 적 전원 회수. 처치 이벤트가 없어 경험치는 지급되지 않는다.</summary>
+        public void DespawnAllAlive()
+        {
+            System.Collections.Generic.IReadOnlyList<EnemyBrain> active = EnemyBrain.ActiveEnemies;
+            for (int i = active.Count - 1; i >= 0; i--)
+            {
+                active[i].ForceRelease();
+            }
         }
 
         /// <summary>적 사망/자폭 시 EnemyBrain이 호출 — 해당 규칙의 생존 수 반환.</summary>
