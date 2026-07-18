@@ -53,11 +53,18 @@ namespace MechaSurvivor.UI
                 new Vector2(900f, 600f), string.Empty, 24, TextAnchor.UpperCenter, Color.white);
 
             Button restart = UiFactory.CreateButton("Restart", _panelRoot.transform,
-                new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 90f),
+                new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(-180f, 90f),
                 new Vector2(320f, 70f), new Color(0.2f, 0.35f, 0.2f, 0.95f), out Text label);
             label.text = "다시 출격";
             label.fontSize = 28;
             restart.onClick.AddListener(Restart);
+
+            Button lobby = UiFactory.CreateButton("Lobby", _panelRoot.transform,
+                new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(180f, 90f),
+                new Vector2(320f, 70f), new Color(0.22f, 0.26f, 0.32f, 0.95f), out Text lobbyLabel);
+            lobbyLabel.text = "로비로";
+            lobbyLabel.fontSize = 28;
+            lobby.onClick.AddListener(GoToLobby);
         }
 
         private void OnRunEnded(RunEndedEvent evt)
@@ -118,10 +125,18 @@ namespace MechaSurvivor.UI
             return _sb.ToString();
         }
 
+        // Boot 재경유가 필요 없다 — 전역 서비스는 lazy Resolve/자체 등록이고,
+        // PoolManager는 씬 언로드 시 활성 인스턴스를 전량 회수한다.
         private void Restart()
         {
             Time.timeScale = 1f;
-            SceneManager.LoadScene("Boot");
+            SceneManager.LoadScene("Game");
+        }
+
+        private void GoToLobby()
+        {
+            Time.timeScale = 1f;
+            SceneManager.LoadScene("Lobby");
         }
     }
 }

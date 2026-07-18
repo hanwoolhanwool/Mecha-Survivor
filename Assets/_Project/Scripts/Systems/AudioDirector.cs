@@ -22,9 +22,6 @@ namespace MechaSurvivor.Systems
 
         [SerializeField] private SfxLibrary _library;
 
-        [Range(0f, 1f)]
-        [SerializeField] private float _masterVolume = 0.8f;
-
         [Tooltip("동시 재생 보이스 수. 모두 사용 중이면 가장 오래된 것을 뺏는다")]
         [SerializeField] private int _voiceCount = 20;
 
@@ -43,9 +40,12 @@ namespace MechaSurvivor.Systems
         private int _nextVoice;
         private SfxThrottle _throttle;
         private HashSet<string> _damageDealtSet;
+        private GameSettings _settings;
 
         private void Awake()
         {
+            // 볼륨은 사용자 설정이 단일 출처다 — 환경설정 패널에서 바꾸면 즉시 반영된다.
+            _settings = GameSettings.Resolve();
             _throttle = new SfxThrottle(_throttleWindow, _throttleBudget);
             _damageDealtSet = new HashSet<string>(_damageDealtSfxIds);
             CreateVoices();
@@ -132,7 +132,7 @@ namespace MechaSurvivor.Systems
             voice.transform.position = hasPosition ? position : transform.position;
             voice.spatialBlend = spatial ? 1f : 0f;
             voice.clip = entry.Clip;
-            voice.volume = entry.Volume * _masterVolume;
+            voice.volume = entry.Volume * _settings.MasterVolume;
             voice.pitch = Random.Range(entry.PitchMin, entry.PitchMax);
             voice.Play();
         }

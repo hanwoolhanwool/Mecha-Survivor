@@ -148,7 +148,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f60d8959e4348554b9522cb6429428f8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: MechaSurvivor.Core::MechaSurvivor.Core.GameBootstrap
-  _gameSceneName: Game
+  _gameSceneName: Lobby
   _loadGameSceneOnStart: 1
 --- !u!4 &465678133
 Transform:

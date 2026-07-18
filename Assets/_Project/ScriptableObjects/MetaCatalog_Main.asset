@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e2381b66ea1ef674390192278bdb7f9e, type: 3}
+  m_Name: MetaCatalog_Main
+  m_EditorClassIdentifier: MechaSurvivor.Gameplay::MechaSurvivor.Gameplay.MetaCatalog
+  Enemies:
+  - {fileID: 11400000, guid: c29c94f2a8e78f6408681adb32dada86, type: 2}
+  - {fileID: 11400000, guid: 5f5b0ac78db3baa48a019e5c5332f2a6, type: 2}
+  - {fileID: 11400000, guid: 76f68b0c78855d84c9849788366e5750, type: 2}
+  - {fileID: 11400000, guid: e97fd7b1b73bdbc49829c5fcf4fdd419, type: 2}
+  - {fileID: 11400000, guid: 9a84026fd8eaa424e8c19a543a48a5f6, type: 2}
+  Weapons:
+  - {fileID: 11400000, guid: 3f896e59e42bfbe47ab9b3308ebc4acd, type: 2}
+  - {fileID: 11400000, guid: 258067d78ba9d1342841cee437638f7f, type: 2}
+  - {fileID: 11400000, guid: f91958f74ecf300479d0ee6e09b5ee09, type: 2}
+  - {fileID: 11400000, guid: a6e66cb2112622745b0148279d7a5db8, type: 2}
+  - {fileID: 11400000, guid: ae3138e146d150c448aa16909a8d38da, type: 2}
+  - {fileID: 11400000, guid: 5d79123fa41107f47bb487ff40d41b1e, type: 2}
+  - {fileID: 11400000, guid: e7bd2d32e3731304aa481f3d2ee8f57b, type: 2}
+  - {fileID: 11400000, guid: a071fabb6280b554fa4d39a6fbc8d7cc, type: 2}
+  - {fileID: 11400000, guid: 5422c6754a12c064fb6facce43dc00bf, type: 2}
+  - {fileID: 11400000, guid: a560f01afe34bb44299e0a3fed19ad51, type: 2}

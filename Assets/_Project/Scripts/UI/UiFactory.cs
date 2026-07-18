@@ -104,6 +104,82 @@ namespace MechaSurvivor.UI
             return text;
         }
 
+        /// <summary>
+        /// 모달 공통 골격: 전체 딤 + 중앙 박스 + 제목. panelRoot(딤)를 SetActive로 여닫는다.
+        /// 반환값은 박스 트랜스폼 — 내용물은 여기에 붙인다.
+        /// </summary>
+        public static Transform CreateModal(GameObject host, int sortingOrder, string title,
+            Vector2 boxSize, out GameObject panelRoot)
+        {
+            CreateCanvas(host, sortingOrder);
+
+            Image dim = CreatePanel("Dim", host.transform,
+                Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero,
+                new Color(0f, 0f, 0f, 0.6f));
+            dim.raycastTarget = true;
+            panelRoot = dim.gameObject;
+
+            Image box = CreatePanel("Box", panelRoot.transform,
+                new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero,
+                boxSize, new Color(0.08f, 0.09f, 0.11f, 0.98f));
+            box.raycastTarget = true;
+
+            CreateText("Title", box.transform,
+                new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -50f),
+                new Vector2(boxSize.x - 80f, 60f), title, 36, TextAnchor.MiddleCenter, Color.white);
+
+            return box.transform;
+        }
+
+        /// <summary>모달 하단 닫기 버튼.</summary>
+        public static Button CreateCloseButton(Transform box, UnityEngine.Events.UnityAction onClose)
+        {
+            Button close = CreateButton("CloseButton", box,
+                new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 50f),
+                new Vector2(240f, 52f), new Color(0.32f, 0.2f, 0.2f, 1f), out Text label);
+            label.text = "닫기";
+            label.fontSize = 24;
+            close.onClick.AddListener(onClose);
+            return close;
+        }
+
+        /// <summary>수평 슬라이더 (트랙/채움/핸들 전부 단색 Image — 스프라이트 불필요).</summary>
+        public static Slider CreateSlider(string name, Transform parent,
+            Vector2 anchorMin, Vector2 anchorMax, Vector2 anchoredPosition, Vector2 size,
+            Color trackColor, Color fillColor)
+        {
+            RectTransform root = CreateRect(name, parent, anchorMin, anchorMax, anchoredPosition, size);
+
+            RectTransform track = CreateRect("Track", root,
+                new Vector2(0f, 0.5f), new Vector2(1f, 0.5f), Vector2.zero, new Vector2(0f, 8f));
+            var trackImage = track.gameObject.AddComponent<Image>();
+            trackImage.color = trackColor;
+            trackImage.raycastTarget = true;
+
+            RectTransform fillArea = CreateRect("FillArea", root,
+                new Vector2(0f, 0.5f), new Vector2(1f, 0.5f), Vector2.zero, new Vector2(-20f, 8f));
+            RectTransform fill = CreateRect("Fill", fillArea,
+                Vector2.zero, new Vector2(0f, 1f), Vector2.zero, new Vector2(10f, 0f));
+            var fillImage = fill.gameObject.AddComponent<Image>();
+            fillImage.color = fillColor;
+            fillImage.raycastTarget = false;
+
+            RectTransform handleArea = CreateRect("HandleArea", root,
+                Vector2.zero, Vector2.one, Vector2.zero, new Vector2(-20f, 0f));
+            RectTransform handle = CreateRect("Handle", handleArea,
+                Vector2.zero, new Vector2(0f, 1f), Vector2.zero, new Vector2(20f, 0f));
+            var handleImage = handle.gameObject.AddComponent<Image>();
+            handleImage.color = Color.white;
+            handleImage.raycastTarget = true;
+
+            var slider = root.gameObject.AddComponent<Slider>();
+            slider.fillRect = fill;
+            slider.handleRect = handle;
+            slider.targetGraphic = handleImage;
+            slider.direction = Slider.Direction.LeftToRight;
+            return slider;
+        }
+
         public static Button CreateButton(string name, Transform parent,
             Vector2 anchorMin, Vector2 anchorMax, Vector2 anchoredPosition, Vector2 size,
             Color background, out Text label)

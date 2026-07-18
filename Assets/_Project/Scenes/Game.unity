@@ -149,6 +149,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: MechaSurvivor.UI::MechaSurvivor.UI.PauseController
   _input: {fileID: 175836622}
+  _settingsPanel: {fileID: 606022748}
 --- !u!4 &37980820
 Transform:
   m_ObjectHideFlags: 0
@@ -1284,6 +1285,7 @@ GameObject:
   - component: {fileID: 175836635}
   - component: {fileID: 175836636}
   - component: {fileID: 175836637}
+  - component: {fileID: 175836638}
   m_Layer: 8
   m_Name: Player
   m_TagString: Player
@@ -1599,6 +1601,20 @@ MonoBehaviour:
   _groundedVolumeScale: 0.15
   _followResponse: 6
   _dashVolume: 0.7
+--- !u!114 &175836638
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 175836621}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d1708e0c9c899aa4b9ce73a6f024deeb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: MechaSurvivor.Gameplay::MechaSurvivor.Gameplay.StartLoadoutApplier
+  _loadouts: {fileID: 11400000, guid: 97d7827e9e4d4a446a0db2d6fd555a43, type: 2}
+  _inventory: {fileID: 175836624}
 --- !u!1 &206184670
 GameObject:
   m_ObjectHideFlags: 0
@@ -4249,6 +4265,50 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 561115969}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!1 &606022747
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 606022749}
+  - component: {fileID: 606022748}
+  m_Layer: 0
+  m_Name: SettingsPanel
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &606022748
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 606022747}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1c47557a22a12fc468a29acd54574d94, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: MechaSurvivor.UI::MechaSurvivor.UI.SettingsPanel
+--- !u!4 &606022749
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 606022747}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &613736852
 GameObject:
   m_ObjectHideFlags: 0
@@ -9322,7 +9382,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: MechaSurvivor.Systems::MechaSurvivor.Systems.AudioDirector
   _library: {fileID: 11400000, guid: ea275d8782a13be41a39364f8e4fbb3b, type: 2}
-  _masterVolume: 0.8
   _voiceCount: 20
   _throttleWindow: 0.05
   _throttleBudget: 8
@@ -10031,6 +10090,7 @@ GameObject:
   - component: {fileID: 1557257189}
   - component: {fileID: 1557257188}
   - component: {fileID: 1557257193}
+  - component: {fileID: 1557257194}
   m_Layer: 0
   m_Name: Systems
   m_TagString: Untagged
@@ -10066,6 +10126,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: MechaSurvivor.Gameplay::MechaSurvivor.Gameplay.SpawnDirector
   _waveData: {fileID: 11400000, guid: 1bbac542241061a4bb4df9d4c87e6eb9, type: 2}
+  _difficulty: {fileID: 11400000, guid: 67237d33e07db4d4cb49642e8604c840, type: 2}
   _player: {fileID: 175836626}
   _playerHealth: {fileID: 175836630}
   _spawnRadiusMin: 35
@@ -10132,6 +10193,27 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: MechaSurvivor.Gameplay::MechaSurvivor.Gameplay.DeathVfxSpawner
   _explosionPrefab: {fileID: 1402695177833100785, guid: d9ec914c0b26b8c4fb7753e757bfb50b, type: 3}
+--- !u!114 &1557257194
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1557257187}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0ba99e66957c95043a36058c15b0f888, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: MechaSurvivor.Systems::MechaSurvivor.Systems.RecordKeeper
+  _achievements:
+  - {fileID: 11400000, guid: e9b8a2de476c3824abc51fe00d757fbc, type: 2}
+  - {fileID: 11400000, guid: 2d0f89b78ffe8e94392a2779f4c63548, type: 2}
+  - {fileID: 11400000, guid: 616fa23f55f40e84293f7b9acb88a379, type: 2}
+  - {fileID: 11400000, guid: e77d6fcc36101294cbbfa01f6dac3646, type: 2}
+  - {fileID: 11400000, guid: 44718ae550dee2a478d42aca370a34e7, type: 2}
+  - {fileID: 11400000, guid: bbcdab1cecc9dd04c8580dbba1de4406, type: 2}
+  - {fileID: 11400000, guid: 5f9be40cbae340e4ba2d9d4a2aec0409, type: 2}
+  - {fileID: 11400000, guid: 9aedf763bb3bf24439a44b446eb6f90b, type: 2}
 --- !u!1 &1568009622
 GameObject:
   m_ObjectHideFlags: 0
@@ -13250,3 +13332,4 @@ SceneRoots:
   - {fileID: 64888053}
   - {fileID: 1452642951}
   - {fileID: 1065265034}
+  - {fileID: 606022749}

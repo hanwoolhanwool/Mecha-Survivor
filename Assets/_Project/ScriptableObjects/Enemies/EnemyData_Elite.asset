@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1d09f78d631b1914abe3cc346d4b5291, type: 3}
   m_Name: EnemyData_Elite
   m_EditorClassIdentifier: MechaSurvivor.Gameplay::MechaSurvivor.Gameplay.EnemyData
+  Id: elite
   DisplayName: "\uC5D8\uB9AC\uD2B8"
   Archetype: 3
   MaxHealth: 450

@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1b326fed8e7019a45bf1b91ca714f30e, type: 3}
+  m_Name: Achievement_kills_500_run
+  m_EditorClassIdentifier: MechaSurvivor.Systems::MechaSurvivor.Systems.AchievementData
+  Id: kills_500_run
+  Title: "\uD559\uC0B4\uC790"
+  Description: "\uD55C \uBC88\uC758 \uCD9C\uACA9\uC5D0\uC11C 500\uAE30 \uC774\uC0C1
+    \uACA9\uD30C\uD55C\uB2E4"
+  Metric: 1
+  Threshold: 500
+  WeaponId: 

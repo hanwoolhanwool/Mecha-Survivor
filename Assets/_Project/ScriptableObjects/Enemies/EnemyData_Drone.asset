@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1d09f78d631b1914abe3cc346d4b5291, type: 3}
   m_Name: EnemyData_Drone
   m_EditorClassIdentifier: MechaSurvivor.Gameplay::MechaSurvivor.Gameplay.EnemyData
+  Id: drone
   DisplayName: "\uC790\uD3ED \uB4DC\uB860"
   Archetype: 1
   MaxHealth: 12

@@ -1,16 +1,26 @@
 using UnityEngine;
 using MechaSurvivor.Core;
+using MechaSurvivor.Systems;
 
 namespace MechaSurvivor.Gameplay
 {
     /// <summary>
     /// 이벤트 → 카메라 셰이크 연동 (GDD 2.4 — 피격/대형 무기 발사 시 짧은 흔들림).
     /// 전투 코드는 카메라의 존재를 모른다 — 이벤트만 구독한다.
-    /// 강도는 CameraDynamics의 셰이크 강도 슬라이더(0~1)를 그대로 존중한다.
+    /// 강도는 CameraDynamics의 셰이크 강도 슬라이더(0~1)와 사용자 설정(화면 흔들림)을 곱해 존중한다.
+    /// 배율을 CameraDynamics가 아니라 여기서 곱는 이유: 순수 계산부(EditMode 테스트 대상)를
+    /// 사용자 저장 데이터로부터 격리하기 위해서다.
     /// </summary>
     public sealed class CameraShakeReactor : MonoBehaviour
     {
         [SerializeField] private CameraDynamics _dynamics;
+
+        private GameSettings _settings;
+
+        private void Awake()
+        {
+            _settings = GameSettings.Resolve();
+        }
 
         [Header("피격")]
         [SerializeField] private float _damagedShake = 0.35f;
@@ -44,11 +54,13 @@ namespace MechaSurvivor.Gameplay
             EventBus<HeavyImpactEvent>.Unsubscribe(OnHeavyImpact);
         }
 
+        private float UserScale => _settings.ScreenShake;
+
         private void OnPlayerDamaged(PlayerDamagedEvent evt)
         {
             if (_dynamics != null)
             {
-                _dynamics.AddShake(_damagedShake);
+                _dynamics.AddShake(_damagedShake * UserScale);
             }
         }
 
@@ -63,7 +75,7 @@ namespace MechaSurvivor.Gameplay
             {
                 if (_heavyWeaponIds[i] == evt.WeaponId)
                 {
-                    _dynamics.AddShake(_heavyFireShake);
+                    _dynamics.AddShake(_heavyFireShake * UserScale);
                     return;
                 }
             }
@@ -80,8 +92,8 @@ namespace MechaSurvivor.Gameplay
             {
                 if (_kickWeaponIds[i] == evt.WeaponId)
                 {
-                    _dynamics.AddKick(_kickPitchDegrees);
-                    _dynamics.AddShake(_kickShake);
+                    _dynamics.AddKick(_kickPitchDegrees * UserScale);
+                    _dynamics.AddShake(_kickShake * UserScale);
                     return;
                 }
             }
@@ -91,7 +103,7 @@ namespace MechaSurvivor.Gameplay
         {
             if (_dynamics != null)
             {
-                _dynamics.AddShake(_heavyImpactShake * Mathf.Clamp01(evt.Magnitude));
+                _dynamics.AddShake(_heavyImpactShake * Mathf.Clamp01(evt.Magnitude) * UserScale);
             }
         }
     }

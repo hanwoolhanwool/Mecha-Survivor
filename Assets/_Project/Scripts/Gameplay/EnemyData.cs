@@ -20,6 +20,9 @@ namespace MechaSurvivor.Gameplay
     public sealed class EnemyData : ScriptableObject
     {
         [Header("식별")]
+        [Tooltip("도감·통계 집계용 고유 ID (예: walker). 출시 후 변경 금지")]
+        public string Id = "enemy";
+
         public string DisplayName = "Enemy";
         public EnemyArchetype Archetype = EnemyArchetype.Ground;
 

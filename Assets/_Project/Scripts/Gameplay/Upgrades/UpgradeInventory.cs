@@ -16,6 +16,41 @@ namespace MechaSurvivor.Gameplay
 
         private readonly Dictionary<UpgradeData, int> _levels = new();
 
+        /// <summary>
+        /// 초기 지급 목록의 무기 파츠 전부를 주어진 세트로 교체한다
+        /// (로비 기체 선택 — StartLoadoutApplier가 Awake에서 호출).
+        /// 무기 외 초기 업그레이드(방어구·슬롯 확장 등)는 유지되고, Start의 정상 지급 경로를
+        /// 그대로 타므로 강화안·조합 판정 연동이 깨지지 않는다. Start 이후 호출은 효과가 없다.
+        /// </summary>
+        public void OverrideInitialWeapons(PartUpgradeData[] weaponParts)
+        {
+            if (weaponParts == null || weaponParts.Length == 0 || _initialUpgrades == null)
+            {
+                return;
+            }
+
+            var kept = new List<UpgradeData>(_initialUpgrades.Length + weaponParts.Length);
+            for (int i = 0; i < _initialUpgrades.Length; i++)
+            {
+                bool isWeaponPart = _initialUpgrades[i] is PartUpgradeData part
+                    && part.Weapon != null && !part.UnlocksWeaponSlot;
+                if (!isWeaponPart)
+                {
+                    kept.Add(_initialUpgrades[i]);
+                }
+            }
+
+            for (int i = 0; i < weaponParts.Length; i++)
+            {
+                if (weaponParts[i] != null)
+                {
+                    kept.Add(weaponParts[i]);
+                }
+            }
+
+            _initialUpgrades = kept.ToArray();
+        }
+
         private void Start()
         {
             if (_initialUpgrades == null)

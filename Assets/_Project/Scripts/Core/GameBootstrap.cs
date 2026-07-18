@@ -4,13 +4,13 @@ using UnityEngine.SceneManagement;
 namespace MechaSurvivor.Core
 {
     /// <summary>
-    /// 부트스트랩: Boot 씬에 배치하는 진입점. 전역 서비스를 초기화한 뒤 게임 씬을 로드한다.
-    /// Boot → (서비스 초기화) → Game 흐름을 강제해, 게임 씬을 직접 열어도
-    /// 초기화가 누락되지 않게 한다.
+    /// 부트스트랩: Boot 씬에 배치하는 진입점. 전역 서비스를 초기화한 뒤 다음 씬을 로드한다.
+    /// Boot → (서비스 초기화) → Lobby → Game 흐름. 씬을 직접 열어도 안전하도록
+    /// 전역 서비스는 lazy Resolve/자체 등록 구조를 유지한다.
     /// </summary>
     public sealed class GameBootstrap : MonoBehaviour
     {
-        [SerializeField] private string _gameSceneName = "Game";
+        [SerializeField] private string _gameSceneName = "Lobby";
         [SerializeField] private bool _loadGameSceneOnStart = true;
 
         private void Start()

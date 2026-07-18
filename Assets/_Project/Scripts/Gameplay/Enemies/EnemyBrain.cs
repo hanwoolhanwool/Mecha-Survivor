@@ -319,7 +319,7 @@ namespace MechaSurvivor.Gameplay
             }
 
             EventBus<EnemyKilledEvent>.Raise(
-                new EnemyKilledEvent(transform.position, Data.ExpReward));
+                new EnemyKilledEvent(transform.position, Data.ExpReward, Data.Id));
             Release();
         }
 

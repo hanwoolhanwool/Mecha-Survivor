@@ -2,16 +2,20 @@ using UnityEngine;
 
 namespace MechaSurvivor.Core
 {
-    /// <summary>적 사망. 픽업 스폰/경험치/스코어 시스템이 구독.</summary>
+    /// <summary>적 사망. 픽업 스폰/경험치/스코어/도감 시스템이 구독.</summary>
     public readonly struct EnemyKilledEvent : IEvent
     {
         public readonly Vector3 Position;
         public readonly int ExpReward;
 
-        public EnemyKilledEvent(Vector3 position, int expReward)
+        /// <summary>적 정의 ID (EnemyData.Id) — 도감 집계용. 출처 불명이면 빈 문자열.</summary>
+        public readonly string EnemyId;
+
+        public EnemyKilledEvent(Vector3 position, int expReward, string enemyId = "")
         {
             Position = position;
             ExpReward = expReward;
+            EnemyId = enemyId;
         }
     }
 
