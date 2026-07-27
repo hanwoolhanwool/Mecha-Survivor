@@ -7469,6 +7469,7 @@ GameObject:
   - component: {fileID: 175836636}
   - component: {fileID: 175836637}
   - component: {fileID: 175836638}
+  - component: {fileID: 175836639}
   m_Layer: 8
   m_Name: Player
   m_TagString: Player
@@ -7798,6 +7799,21 @@ MonoBehaviour:
   m_EditorClassIdentifier: MechaSurvivor.Gameplay::MechaSurvivor.Gameplay.StartLoadoutApplier
   _loadouts: {fileID: 11400000, guid: 97d7827e9e4d4a446a0db2d6fd555a43, type: 2}
   _inventory: {fileID: 175836624}
+--- !u!114 &175836639
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 175836621}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f0d0b8f8602f39541afd59f89fd30ff8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: MechaSurvivor.Gameplay::MechaSurvivor.Gameplay.MechaAnimationDriver
+  _animator: {fileID: 775639468}
+  _visualRoot: {fileID: 435096578}
+  _dampTime: 0.08
 --- !u!1 &177175641
 GameObject:
   m_ObjectHideFlags: 0
@@ -28546,6 +28562,11 @@ PrefabInstance:
 --- !u!4 &775639467 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 45ae8ac7900c57740bf4171debcf0222, type: 3}
+  m_PrefabInstance: {fileID: 775639466}
+  m_PrefabAsset: {fileID: 0}
+--- !u!95 &775639468 stripped
+Animator:
+  m_CorrespondingSourceObject: {fileID: 5866666021909216657, guid: 45ae8ac7900c57740bf4171debcf0222, type: 3}
   m_PrefabInstance: {fileID: 775639466}
   m_PrefabAsset: {fileID: 0}
 --- !u!1 &791044313

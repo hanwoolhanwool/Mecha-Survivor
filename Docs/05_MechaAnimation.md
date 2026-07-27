@@ -2,7 +2,7 @@
 
 작성일: 2026-07-28
 대상 에셋: `Assets/_Project/Art/Models/Mecha/Mecha.fbx`
-상태: **P0 완료 (2026-07-28)** — 파이프라인 관통 확인, F1 호버 클립 Game 씬 배선 완료. 이 문서가 제작·임포트·배선·검증의 단일 기준이다.
+상태: **P1 완료 (2026-07-28)** — 비행 코어(F1~F5 Flight BT + MechaAnimationDriver) Game 씬 배선 완료. 이 문서가 제작·임포트·배선·검증의 단일 기준이다.
 
 ---
 
@@ -222,7 +222,7 @@ importer.clipAnimations = new[]{ clip };  importer.SaveAndReimport();
 - **완료 기준**: Play 시 기체가 호버 애니메이션으로 떠 있음. 리타게팅 왜곡·스케일·
   발 미끄러짐 없음. 여기서 발견된 임포트 설정값을 §4에 확정 기록.
 
-### P1 — 비행 코어 (기본 상태부터)
+### P1 — 비행 코어 (기본 상태부터) ✅ 완료 (2026-07-28)
 - 제작: F2~F5 (축 4방향 비행).
 - `AC_Mecha.controller` 정식 생성 — Base 레이어 + **Flight BT** (중앙 F1, 축 4방).
 - `MechaAnimationDriver` + `MechaAnimParams` 신규 작성(§6) — 이 단계에선

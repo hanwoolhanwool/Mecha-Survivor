@@ -1,0 +1,103 @@
+using NUnit.Framework;
+using UnityEngine;
+using MechaSurvivor.Gameplay;
+
+namespace MechaSurvivor.Tests.EditMode
+{
+    /// <summary>
+    /// 애니메이터 파라미터 좌표 변환 검증 — 월드 속도 + 시각 yaw → MoveX/MoveZ (Docs/05 §6).
+    /// </summary>
+    public sealed class MechaAnimParamsTests
+    {
+        private const float ReferenceSpeed = 14f;
+
+        [Test]
+        public void ComputeMove_ForwardFlight_MapsToMoveZ1()
+        {
+            Vector2 move = MechaAnimParams.ComputeMove(
+                new Vector3(0f, 0f, ReferenceSpeed), Vector3.forward, ReferenceSpeed);
+
+            Assert.AreEqual(0f, move.x, 1e-4f);
+            Assert.AreEqual(1f, move.y, 1e-4f, "시각 전방과 같은 방향 이동은 MoveZ=1이어야 한다.");
+        }
+
+        [Test]
+        public void ComputeMove_VisualYaw90_TransformsToLocalSpace()
+        {
+            // 기체가 +X(요 90도)를 보며 +X로 이동 → 로컬 기준 전진.
+            Vector2 move = MechaAnimParams.ComputeMove(
+                new Vector3(ReferenceSpeed, 0f, 0f), Vector3.right, ReferenceSpeed);
+
+            Assert.AreEqual(0f, move.x, 1e-4f);
+            Assert.AreEqual(1f, move.y, 1e-4f, "요 90도 상태의 +X 이동은 로컬 전진이어야 한다.");
+        }
+
+        [Test]
+        public void ComputeMove_MovingLeftOfFacing_MapsToNegativeMoveX()
+        {
+            // 기체가 +X를 보는데 +Z로 이동 → 기체 기준 좌측 스트레이프.
+            Vector2 move = MechaAnimParams.ComputeMove(
+                new Vector3(0f, 0f, ReferenceSpeed), Vector3.right, ReferenceSpeed);
+
+            Assert.AreEqual(-1f, move.x, 1e-4f, "시각 전방의 좌측 이동은 MoveX=-1이어야 한다.");
+            Assert.AreEqual(0f, move.y, 1e-4f);
+        }
+
+        [Test]
+        public void ComputeMove_ZeroVelocity_ReturnsZero()
+        {
+            Vector2 move = MechaAnimParams.ComputeMove(Vector3.zero, Vector3.forward, ReferenceSpeed);
+
+            Assert.AreEqual(0f, move.magnitude, 1e-5f, "정지 시 (0,0)에 수렴해야 한다.");
+        }
+
+        [Test]
+        public void ComputeMove_OverSpeed_ClampedToUnitCircle()
+        {
+            // 대시(42m/s)나 대각 임펄스 초과분은 단위원 안으로 클램프.
+            Vector2 move = MechaAnimParams.ComputeMove(
+                new Vector3(ReferenceSpeed, 0f, ReferenceSpeed), Vector3.forward, ReferenceSpeed);
+
+            Assert.AreEqual(1f, move.magnitude, 1e-4f, "정규화 결과가 단위원을 넘으면 안 된다.");
+        }
+
+        [Test]
+        public void ComputeMove_TiltedForward_UsesPlanarProjection()
+        {
+            // 시각 루트가 앞으로 숙여져도(lean) 수평 투영 요 기준으로 계산해야 한다.
+            Vector3 tiltedForward = (Vector3.forward + Vector3.down * 0.5f).normalized;
+            Vector2 move = MechaAnimParams.ComputeMove(
+                new Vector3(0f, 0f, ReferenceSpeed), tiltedForward, ReferenceSpeed);
+
+            Assert.AreEqual(0f, move.x, 1e-4f);
+            Assert.AreEqual(1f, move.y, 1e-4f, "기울어진 forward의 수평 성분만 사용해야 한다.");
+        }
+
+        [Test]
+        public void ComputeMove_DegenerateInputs_ReturnZeroSafely()
+        {
+            Assert.AreEqual(Vector2.zero, MechaAnimParams.ComputeMove(
+                new Vector3(1f, 0f, 1f), Vector3.up, ReferenceSpeed), "수직 forward(수평 성분 0)는 0을 반환해야 한다.");
+            Assert.AreEqual(Vector2.zero, MechaAnimParams.ComputeMove(
+                new Vector3(1f, 0f, 1f), Vector3.forward, 0f), "기준속도 0은 0을 반환해야 한다.");
+        }
+
+        [Test]
+        public void ComputeSpeed_HorizontalOnly_IgnoresVertical()
+        {
+            float speed = MechaAnimParams.ComputeSpeed(
+                new Vector3(0f, 9f, ReferenceSpeed), ReferenceSpeed);
+
+            Assert.AreEqual(1f, speed, 1e-4f, "수직 속도는 Speed에 포함되면 안 된다.");
+        }
+
+        [Test]
+        public void ComputeSpeed_Dash_ExceedsOne()
+        {
+            float speed = MechaAnimParams.ComputeSpeed(
+                new Vector3(0f, 0f, 42f), ReferenceSpeed);
+
+            Assert.AreEqual(3f, speed, 1e-4f, "대시 속도는 재생속도 보정을 위해 1을 넘겨 전달한다.");
+        }
+    }
+}
