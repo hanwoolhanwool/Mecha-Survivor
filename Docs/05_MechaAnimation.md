@@ -2,7 +2,7 @@
 
 작성일: 2026-07-28
 대상 에셋: `Assets/_Project/Art/Models/Mecha/Mecha.fbx`
-상태: **P4 완료 (2026-07-28)** — 이동 20클립 + 사격/피격 레이어 3장 배선. 이 문서가 제작·임포트·배선·검증의 단일 기준이다.
+상태: **P5 완료 (2026-07-28)** — 30클립 전량 제작·배선 (이동 20 + 사격/피격 2 + 대쉬 8). 남은 것은 P6 폴리시·CityMap 동기화·QA. 이 문서가 제작·임포트·배선·검증의 단일 기준이다.
 
 ---
 
@@ -259,7 +259,12 @@ importer.clipAnimations = new[]{ clip };  importer.SaveAndReimport();
   (OnEnable/OnDisable 짝 엄수) + Fire 유지창 로직 EditMode 테스트.
 - **완료 기준**: 보행/비행 이동 중 사격이 하체를 끊지 않음. 피격이 이동을 멈추지 않음.
 
-### P5 — 대쉬
+### P5 — 대쉬 ✅ 완료 (2026-07-28)
+- **전환 우선순위 함정 (실제 발생):** 지상 대쉬 첫 프레임에 CharacterController 접지가 끊겨
+  `IsGrounded=false`와 `DashTrigger`가 같은 프레임에 들어온다. Ground 상태의 전환 순서가
+  `→Flight`가 먼저면 GroundDash 대신 Flight로 새므로 **DashTrigger 전환을 우선순위 맨 앞에** 둔다.
+- 대쉬 종료 후 접지가 회복되지 않아 지상에서도 Flight로 복귀하는 것은 컨트롤러의 기존 동작
+  (대쉬 = 순간 부양 기동, 재착지는 하강 입력) — 연출상 의도와 일치.
 - 제작: G12~G15, F12~F15 (대쉬 8클립).
 - **Dash BT** + `DashTrigger/DashX/DashZ` 배선 — `IsDashing` 상승 엣지 검출,
   0.4s 후 이전 상태 자동 복귀. 대각 입력 처리는 §8-5 결정대로.

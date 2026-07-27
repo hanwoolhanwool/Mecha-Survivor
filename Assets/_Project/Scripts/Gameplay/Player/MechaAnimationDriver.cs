@@ -5,8 +5,9 @@ namespace MechaSurvivor.Gameplay
 {
     /// <summary>
     /// MechaController 상태를 폴링해 Animator 파라미터로 공급한다 (Docs/05 §6).
-    /// 폴링: MoveX/MoveZ/Speed/IsGrounded. 이벤트: Fire(WeaponFired 유지창)/HitTrigger(PlayerDamaged).
-    /// 좌표 변환·유지창 판정은 MechaAnimParams(순수 로직)가 전담한다. 대시(P5)는 추후 확장.
+    /// 폴링: MoveX/MoveZ/Speed/IsGrounded + IsDashing 상승 엣지(DashTrigger/DashX/DashZ).
+    /// 이벤트: Fire(WeaponFired 유지창)/HitTrigger(PlayerDamaged).
+    /// 좌표 변환·유지창 판정은 MechaAnimParams(순수 로직)가 전담한다.
     /// </summary>
     [RequireComponent(typeof(MechaController))]
     public sealed class MechaAnimationDriver : MonoBehaviour
@@ -32,10 +33,14 @@ namespace MechaSurvivor.Gameplay
         private static readonly int IsGroundedHash = Animator.StringToHash("IsGrounded");
         private static readonly int FireHash = Animator.StringToHash("Fire");
         private static readonly int HitTriggerHash = Animator.StringToHash("HitTrigger");
+        private static readonly int DashTriggerHash = Animator.StringToHash("DashTrigger");
+        private static readonly int DashXHash = Animator.StringToHash("DashX");
+        private static readonly int DashZHash = Animator.StringToHash("DashZ");
 
         private MechaController _controller;
         private float _fireUntil;
         private bool _hitPending;
+        private bool _wasDashing;
 
         private void Awake()
         {
@@ -99,6 +104,18 @@ namespace MechaSurvivor.Gameplay
                 _hitPending = false;
                 _animator.SetTrigger(HitTriggerHash);
             }
+
+            // 대쉬 상승 엣지 — 방향은 스냅 공급 (댐핑 없음: 0.35초 순간 연출)
+            bool dashing = _controller.IsDashing;
+            if (dashing && !_wasDashing)
+            {
+                Vector2 dashDir = MechaAnimParams.ComputeDashDirection(_controller.Velocity, forward);
+                _animator.SetFloat(DashXHash, dashDir.x);
+                _animator.SetFloat(DashZHash, dashDir.y);
+                _animator.SetTrigger(DashTriggerHash);
+            }
+
+            _wasDashing = dashing;
         }
     }
 }

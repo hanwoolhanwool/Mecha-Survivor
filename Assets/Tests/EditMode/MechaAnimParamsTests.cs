@@ -110,6 +110,38 @@ namespace MechaSurvivor.Tests.EditMode
         }
 
         [Test]
+        public void ComputeDashDirection_QuadrantMapping()
+        {
+            // +Z를 보며 +X 대쉬 → 로컬 우측 (1,0)
+            Vector2 right = MechaAnimParams.ComputeDashDirection(
+                new Vector3(42f, 0f, 0f), Vector3.forward);
+            Assert.AreEqual(1f, right.x, 1e-4f);
+            Assert.AreEqual(0f, right.y, 1e-4f);
+
+            // +X를 보며 +X 대쉬 → 로컬 전방 (0,1)
+            Vector2 fwd = MechaAnimParams.ComputeDashDirection(
+                new Vector3(42f, 0f, 0f), Vector3.right);
+            Assert.AreEqual(0f, fwd.x, 1e-4f);
+            Assert.AreEqual(1f, fwd.y, 1e-4f);
+
+            // +Z를 보며 대각(-X,-Z) 대쉬 → 로컬 후좌 단위 벡터
+            Vector2 diag = MechaAnimParams.ComputeDashDirection(
+                new Vector3(-30f, 0f, -30f), Vector3.forward);
+            Assert.AreEqual(-0.7071f, diag.x, 1e-3f);
+            Assert.AreEqual(-0.7071f, diag.y, 1e-3f);
+            Assert.AreEqual(1f, diag.magnitude, 1e-4f, "대쉬 방향은 단위 벡터여야 한다.");
+        }
+
+        [Test]
+        public void ComputeDashDirection_NoHorizontalVelocity_FallsBackForward()
+        {
+            Vector2 dir = MechaAnimParams.ComputeDashDirection(
+                new Vector3(0f, -9f, 0f), Vector3.forward);
+
+            Assert.AreEqual(Vector2.up, dir, "수평 성분이 없으면 전방 폴백이어야 한다.");
+        }
+
+        [Test]
         public void FireWindow_WithinWindow_Active()
         {
             float fireUntil = MechaAnimParams.ExtendFireWindow(10f, 0.3f);

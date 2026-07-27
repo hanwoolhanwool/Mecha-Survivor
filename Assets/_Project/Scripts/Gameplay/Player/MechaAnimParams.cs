@@ -31,6 +31,24 @@ namespace MechaSurvivor.Gameplay
             return Vector2.ClampMagnitude(move, 1f);
         }
 
+        /// <summary>
+        /// 대쉬 순간의 월드 속도를 시각 전방 기준 로컬 단위 방향(DashX, DashZ)으로 변환한다.
+        /// 방향을 알 수 없으면(수평 성분 0) 전방 (0,1) 폴백 — BT가 항상 유효 지점을 가리키게.
+        /// </summary>
+        public static Vector2 ComputeDashDirection(Vector3 worldVelocity, Vector3 visualForward)
+        {
+            Vector2 forward = new(visualForward.x, visualForward.z);
+            Vector2 planar = new(worldVelocity.x, worldVelocity.z);
+            if (forward.sqrMagnitude < 1e-6f || planar.sqrMagnitude < 1e-4f)
+            {
+                return Vector2.up;
+            }
+
+            forward.Normalize();
+            Vector2 right = new(forward.y, -forward.x);
+            return new Vector2(Vector2.Dot(planar, right), Vector2.Dot(planar, forward)).normalized;
+        }
+
         /// <summary>사격 이벤트 수신 시각으로부터 유지창 종료 시각을 계산한다.</summary>
         public static float ExtendFireWindow(float now, float window)
         {
