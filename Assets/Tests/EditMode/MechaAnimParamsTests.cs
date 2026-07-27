@@ -110,6 +110,31 @@ namespace MechaSurvivor.Tests.EditMode
         }
 
         [Test]
+        public void FireWindow_WithinWindow_Active()
+        {
+            float fireUntil = MechaAnimParams.ExtendFireWindow(10f, 0.3f);
+
+            Assert.IsTrue(MechaAnimParams.IsFireActive(10.29f, fireUntil), "이벤트 후 0.3초 내에는 Fire가 유지돼야 한다.");
+        }
+
+        [Test]
+        public void FireWindow_AfterWindow_Inactive()
+        {
+            float fireUntil = MechaAnimParams.ExtendFireWindow(10f, 0.3f);
+
+            Assert.IsFalse(MechaAnimParams.IsFireActive(10.31f, fireUntil), "유지창 경과 후 Fire는 꺼져야 한다.");
+        }
+
+        [Test]
+        public void FireWindow_RepeatedFire_ExtendsWindow()
+        {
+            float fireUntil = MechaAnimParams.ExtendFireWindow(10f, 0.3f);
+            fireUntil = MechaAnimParams.ExtendFireWindow(10.2f, 0.3f);
+
+            Assert.IsTrue(MechaAnimParams.IsFireActive(10.45f, fireUntil), "연사 중 재발사는 유지창을 갱신해야 한다.");
+        }
+
+        [Test]
         public void ComputeSpeed_SlowDrift_DoesNotSlowPlayback()
         {
             float speed = MechaAnimParams.ComputeSpeed(

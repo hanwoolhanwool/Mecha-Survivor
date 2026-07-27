@@ -31,6 +31,18 @@ namespace MechaSurvivor.Gameplay
             return Vector2.ClampMagnitude(move, 1f);
         }
 
+        /// <summary>사격 이벤트 수신 시각으로부터 유지창 종료 시각을 계산한다.</summary>
+        public static float ExtendFireWindow(float now, float window)
+        {
+            return now + window;
+        }
+
+        /// <summary>Fire 파라미터 값 — 유지창이 아직 열려 있는가.</summary>
+        public static bool IsFireActive(float now, float fireUntil)
+        {
+            return now < fireUntil;
+        }
+
         /// <summary>
         /// 수평 속력 / 기준속도 — Ground 상태의 재생속도 배율(speedParameter)로 쓰인다.
         /// 하한 1: 정지 시에도 Idle이 정상 재생돼야 하므로 1 밑으로 내리지 않는다

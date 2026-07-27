@@ -2,7 +2,7 @@
 
 작성일: 2026-07-28
 대상 에셋: `Assets/_Project/Art/Models/Mecha/Mecha.fbx`
-상태: **P3 완료 (2026-07-28)** — 이동 20클립 전부 배선 (두 BT 8방 완성, 대각 우측은 미러). 이 문서가 제작·임포트·배선·검증의 단일 기준이다.
+상태: **P4 완료 (2026-07-28)** — 이동 20클립 + 사격/피격 레이어 3장 배선. 이 문서가 제작·임포트·배선·검증의 단일 기준이다.
 
 ---
 
@@ -249,7 +249,10 @@ importer.clipAnimations = new[]{ clip };  importer.SaveAndReimport();
 - 두 BT를 8방 배치로 개편 (대각 지점 ±0.71).
 - **완료 기준**: 대각 이동 시 합성 블렌드가 아닌 전용 클립 재생, 축↔대각 경계에서 떨림 없음.
 
-### P4 — 전투 반응 (사격·피격)
+### P4 — 전투 반응 (사격·피격) ✅ 완료 (2026-07-28)
+- 사격은 지상/비행 공용 1클립(`Mecha_Shoot`)으로 시작 (§8-3 취지 연장 — 상체 마스크라 구분 체감 없음).
+  피격도 공용 1클립(`Mecha_Hit`, Additive 기준 포즈=프레임 0). G10/F10·G11/F11 분리는 후순위.
+- UpperBody 레이어는 weight 고정 1 + `Fire` Bool로 Empty↔Shoot 전환 방식 (스크립트 weight 제어 없음).
 - 제작: G10/F10 사격, G11/F11 피격.
 - 상체 아바타 마스크 생성 → **UpperBody 레이어**(사격), **Additive Hit 레이어**(피격) 구성.
 - 드라이버에 `EventBus<WeaponFiredEvent>`/`<PlayerDamagedEvent>` 구독 추가
