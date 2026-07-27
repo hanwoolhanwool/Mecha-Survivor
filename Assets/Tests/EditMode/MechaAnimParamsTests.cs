@@ -99,5 +99,23 @@ namespace MechaSurvivor.Tests.EditMode
 
             Assert.AreEqual(3f, speed, 1e-4f, "대시 속도는 재생속도 보정을 위해 1을 넘겨 전달한다.");
         }
+
+        [Test]
+        public void ComputeSpeed_Stationary_ClampsToOne()
+        {
+            // Ground 상태의 speedParameter로 쓰이므로 정지 시에도 1 — Idle이 멈추면 안 된다.
+            float speed = MechaAnimParams.ComputeSpeed(Vector3.zero, ReferenceSpeed);
+
+            Assert.AreEqual(1f, speed, 1e-4f, "정지 시 재생속도 배율은 1이어야 한다 (Idle 정지 방지).");
+        }
+
+        [Test]
+        public void ComputeSpeed_SlowDrift_DoesNotSlowPlayback()
+        {
+            float speed = MechaAnimParams.ComputeSpeed(
+                new Vector3(0f, 0f, ReferenceSpeed * 0.4f), ReferenceSpeed);
+
+            Assert.AreEqual(1f, speed, 1e-4f, "저속에서도 재생속도는 1 밑으로 내려가지 않는다.");
+        }
     }
 }

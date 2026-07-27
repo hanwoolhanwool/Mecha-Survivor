@@ -2,7 +2,7 @@
 
 작성일: 2026-07-28
 대상 에셋: `Assets/_Project/Art/Models/Mecha/Mecha.fbx`
-상태: **P1 완료 (2026-07-28)** — 비행 코어(F1~F5 Flight BT + MechaAnimationDriver) Game 씬 배선 완료. 이 문서가 제작·임포트·배선·검증의 단일 기준이다.
+상태: **P2 완료 (2026-07-28)** — 비행+지상 코어(Flight/Ground BT + IsGrounded 전환) Game 씬 배선 완료. 이 문서가 제작·임포트·배선·검증의 단일 기준이다.
 
 ---
 
@@ -175,7 +175,7 @@ importer.clipAnimations = new[]{ clip };  importer.SaveAndReimport();
 |---|---|---|
 | `IsGrounded` | Bool | `MechaController.IsGrounded` |
 | `MoveX`, `MoveZ` | Float | 월드 속도를 시각 요(yaw) 로컬로 변환·정규화 |
-| `Speed` | Float | 수평 속력 / 기준속도 — 보행 재생속도 보정용 |
+| `Speed` | Float | 수평 속력 / 기준속도, **하한 1** — Ground 상태 speedParameter로 배선. 하한이 없으면 정지 시 Idle이 멈춘다 (P2 확정) |
 | `DashTrigger` | Trigger | `MechaController.IsDashing` 상승 엣지 |
 | `DashX`, `DashZ` | Float | 대쉬 방향의 로컬 성분 |
 | `Fire` | Bool | `WeaponFiredEvent` 수신 후 짧은 유지창(0.3s) |
@@ -237,7 +237,7 @@ importer.clipAnimations = new[]{ clip };  importer.SaveAndReimport();
   `MoveX/MoveZ/Speed`만 공급. **EditMode 테스트 동시 작성** (좌표 변환·정규화).
 - **완료 기준**: 비행 8방향 입력(대각은 블렌드 합성으로 임시 커버)이 자연스럽게 재생.
 
-### P2 — 지상 코어 + 상태 전환
+### P2 — 지상 코어 + 상태 전환 ✅ 완료 (2026-07-28)
 - 제작: G1~G5 (지상 Idle + 축 4방 보행).
 - **Ground BT** 추가, `IsGrounded`로 Flight↔Ground 전환 배선 (전환 0.15s).
 - 보행 발 미끄러짐은 `Speed` 파라미터로 재생속도 보정.

@@ -31,16 +31,20 @@ namespace MechaSurvivor.Gameplay
             return Vector2.ClampMagnitude(move, 1f);
         }
 
-        /// <summary>수평 속력 / 기준속도 — 보행 재생속도 보정용. 대시 중엔 1을 넘는다.</summary>
+        /// <summary>
+        /// 수평 속력 / 기준속도 — Ground 상태의 재생속도 배율(speedParameter)로 쓰인다.
+        /// 하한 1: 정지 시에도 Idle이 정상 재생돼야 하므로 1 밑으로 내리지 않는다
+        /// (저속 이동의 발 미끄러짐은 QA 허용 범위). 대시 중엔 1을 넘는다.
+        /// </summary>
         public static float ComputeSpeed(Vector3 worldVelocity, float referenceSpeed)
         {
             if (referenceSpeed <= 0f)
             {
-                return 0f;
+                return 1f;
             }
 
             Vector2 planar = new(worldVelocity.x, worldVelocity.z);
-            return planar.magnitude / referenceSpeed;
+            return Mathf.Max(1f, planar.magnitude / referenceSpeed);
         }
     }
 }
