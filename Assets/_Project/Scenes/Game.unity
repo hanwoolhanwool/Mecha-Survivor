@@ -7595,7 +7595,7 @@ MonoBehaviour:
   _maxAimDistance: 500
   _aimMask:
     serializedVersion: 2
-    m_Bits: 4294959871
+    m_Bits: 25143
 --- !u!114 &175836628
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7722,7 +7722,7 @@ MonoBehaviour:
   _controller: {fileID: 175836631}
   _camera: {fileID: 1035946877}
   _visualRoot: {fileID: 435096578}
-  _hoverAmplitude: 0.12
+  _hoverAmplitude: 0
   _hoverFrequency: 1.6
   _maxLeanAngle: 12
   _leanResponse: 8

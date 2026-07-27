@@ -83,6 +83,11 @@ Humanoid 리그이므로 Blender 직접 키프레임 제작과 Mixamo 리타게�
 상승/하강 전용 클립은 만들지 않는다 — `VerticalInput` 기반 피치 연출은
 기존 `MechaVisuals`(뱅킹/피치 절차 연출)가 이미 담당하므로 중복 제작하지 않는다.
 
+**진폭 기준 (2026-07-28 확정):** 서바이버 시점 카메라(원경)에서 체감되도록 클립 진폭은
+근경 기준보다 크게 잡는다 — Idle 부유 ±10cm, 이동 자세 각도(트레일/뱅킹) 15~35° 급.
+절차 부유(`MechaVisuals._hoverAmplitude`)는 **0으로 끄고 부유는 애니메이션이 전담**한다
+(이중 부유 제거). 이동 기울임(lean)은 절차 연출을 유지하고 클립 자세와 합산된다.
+
 ## 4. 제작 파이프라인 (Blender → Unity)
 
 1. **Blender에서 클립별 Action으로 제작.** 30fps 기준.
@@ -112,6 +117,9 @@ axis_forward='-Z', axis_up='Y',
   내보내면 fileScale=0.01이 되는데, `Mecha.fbx`는 fileScale=1이다. 이 불일치 상태로 Humanoid
   리타게팅하면 **Hips 이동값이 ×100으로 튀어 기체가 5m 위로 떠오른다.**
   반드시 `FBX_SCALE_ALL`로 내보내 fileScale=1을 맞춘다.
+- **★ 프레임 범위 함정 (P1 후 실제 발생):** 내보내기는 액션 범위가 아니라 **씬 프레임 범위로
+  베이크**한다. 씬 범위(0~120)가 액션(0~60)보다 길면 "2초 동작 + 2초 정지 홀드"인 4초짜리
+  클립이 나온다. **내보내기 직전 `scene.frame_start/end`를 액션 `frame_range`에 맞출 것.**
 - Blender 5.1은 레이어드 액션이라 `action.fcurves`가 없다 —
   `action.layers[*].strips[*].channelbags[*].fcurves`로 접근.
 - 소스 액션은 `Mecha Ver 2.blend`에 `use_fake_user=True`로 보존 (`Mecha_Fly_Idle` 등).
