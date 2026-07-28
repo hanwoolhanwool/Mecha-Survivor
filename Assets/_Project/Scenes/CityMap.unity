@@ -52821,6 +52821,81 @@ CapsuleCollider:
   m_Height: 3.2
   m_Direction: 1
   m_Center: {x: 0, y: 1.6, z: 0}
+--- !u!1001 &406749460
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 1946927605}
+    m_Modifications:
+    - target: {fileID: -8679921383154817045, guid: 45ae8ac7900c57740bf4171debcf0222, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 45ae8ac7900c57740bf4171debcf0222, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 45ae8ac7900c57740bf4171debcf0222, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 45ae8ac7900c57740bf4171debcf0222, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 45ae8ac7900c57740bf4171debcf0222, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 45ae8ac7900c57740bf4171debcf0222, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 45ae8ac7900c57740bf4171debcf0222, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 45ae8ac7900c57740bf4171debcf0222, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 45ae8ac7900c57740bf4171debcf0222, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 45ae8ac7900c57740bf4171debcf0222, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 45ae8ac7900c57740bf4171debcf0222, type: 3}
+      propertyPath: m_Name
+      value: MechaModel
+      objectReference: {fileID: 0}
+    - target: {fileID: 5866666021909216657, guid: 45ae8ac7900c57740bf4171debcf0222, type: 3}
+      propertyPath: m_Controller
+      value: 
+      objectReference: {fileID: 9100000, guid: 16cfbd2b1834d8641a1e11b005451429, type: 2}
+    - target: {fileID: 5866666021909216657, guid: 45ae8ac7900c57740bf4171debcf0222, type: 3}
+      propertyPath: m_ApplyRootMotion
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 45ae8ac7900c57740bf4171debcf0222, type: 3}
+--- !u!4 &406749461 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 45ae8ac7900c57740bf4171debcf0222, type: 3}
+  m_PrefabInstance: {fileID: 406749460}
+  m_PrefabAsset: {fileID: 0}
+--- !u!95 &406749462 stripped
+Animator:
+  m_CorrespondingSourceObject: {fileID: 5866666021909216657, guid: 45ae8ac7900c57740bf4171debcf0222, type: 3}
+  m_PrefabInstance: {fileID: 406749460}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &406830977
 GameObject:
   m_ObjectHideFlags: 0
@@ -249874,6 +249949,7 @@ GameObject:
   - component: {fileID: 1910716004}
   - component: {fileID: 1910716014}
   - component: {fileID: 1910716013}
+  - component: {fileID: 1910716018}
   m_Layer: 8
   m_Name: Player
   m_TagString: Player
@@ -250170,7 +250246,7 @@ MonoBehaviour:
   _controller: {fileID: 1910716009}
   _camera: {fileID: 1002897306}
   _visualRoot: {fileID: 1946927605}
-  _hoverAmplitude: 0.12
+  _hoverAmplitude: 0
   _hoverFrequency: 1.6
   _maxLeanAngle: 12
   _leanResponse: 8
@@ -250203,6 +250279,22 @@ CharacterController:
   m_SkinWidth: 0.08
   m_MinMoveDistance: 0.001
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &1910716018
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1910715999}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f0d0b8f8602f39541afd59f89fd30ff8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: MechaSurvivor.Gameplay::MechaSurvivor.Gameplay.MechaAnimationDriver
+  _animator: {fileID: 406749462}
+  _visualRoot: {fileID: 1946927605}
+  _dampTime: 0.08
+  _fireWindow: 0.3
 --- !u!1001 &1911047321
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -254402,6 +254494,7 @@ Transform:
   m_Children:
   - {fileID: 847740356}
   - {fileID: 1004435387}
+  - {fileID: 406749461}
   m_Father: {fileID: 1910716003}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!23 &1946927606
@@ -254411,7 +254504,7 @@ MeshRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1946927604}
-  m_Enabled: 1
+  m_Enabled: 0
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
