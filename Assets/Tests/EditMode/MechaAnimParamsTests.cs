@@ -142,6 +142,21 @@ namespace MechaSurvivor.Tests.EditMode
         }
 
         [Test]
+        public void ComputeVerticalLean_Grounded_AlwaysZero()
+        {
+            Assert.AreEqual(0f, MechaAnimParams.ComputeVerticalLean(-1f, true), "접지 중 하강 입력은 자세에 반영되면 안 된다.");
+            Assert.AreEqual(0f, MechaAnimParams.ComputeVerticalLean(1f, true));
+        }
+
+        [Test]
+        public void ComputeVerticalLean_Airborne_ClampsToUnit()
+        {
+            Assert.AreEqual(1f, MechaAnimParams.ComputeVerticalLean(2.5f, false), 1e-5f);
+            Assert.AreEqual(-1f, MechaAnimParams.ComputeVerticalLean(-3f, false), 1e-5f);
+            Assert.AreEqual(0.5f, MechaAnimParams.ComputeVerticalLean(0.5f, false), 1e-5f);
+        }
+
+        [Test]
         public void IsHeavyHit_ThresholdBoundary()
         {
             // 최대체력 100, 임계 15% — 15 정확히면 강피격 (이상 판정)

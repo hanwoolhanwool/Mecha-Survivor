@@ -87,6 +87,15 @@ namespace MechaSurvivor.Gameplay
         }
 
         /// <summary>
+        /// 상승/하강 자세 파라미터 (Docs/05 §10-B5) — 접지 중엔 0 (보행에 수직 자세 금지),
+        /// 비행 중엔 수직 입력을 -1~1로 클램프해 그대로 쓴다.
+        /// </summary>
+        public static float ComputeVerticalLean(float verticalInput, bool isGrounded)
+        {
+            return isGrounded ? 0f : Mathf.Clamp(verticalInput, -1f, 1f);
+        }
+
+        /// <summary>
         /// 강피격 판정 — 대미지가 최대체력의 threshold 비율 이상이면 강피격 (Docs/05 §10-B2).
         /// Damage 0 이하(체력 갱신 알림)는 호출 전에 걸러야 한다.
         /// </summary>

@@ -372,10 +372,18 @@ Avatar, Bake Into Pose 3종). 소스 액션은 `Mecha Ver 2.blend`에 fake user�
 - **경량 대안**: 마스크 유지 + UpperBody 레이어 Shoot를 `IsGrounded`로 2상태 분기
   (지상 견착만 살짝 낮고 단단하게). 클립 1종 추가로 끝나며 B1과 병행 가능.
 
-### B5. 상승/하강 전용 자세 클립
+### B5. 상승/하강 전용 자세 클립 ✅ 완료 (2026-07-29)
 
-- **현재 상태**: `VerticalInput` 기반 피치는 MechaVisuals 절차 연출이 담당 (§8-4 확정 유지).
-- **착수 기준**: 상승/하강 시 몸 기울임을 넘어 다리·팔 자세 변화까지 원할 때.
+- 구현 결과: 아래 사양대로 — `VerticalLean` Additive 레이어(4번째) + Simple1D BT
+  (`VerticalY`: Descend −1 / 중립 0 / Ascend +1). 중립 지점은 **무모션이 아니라
+  전 프레임 중립 포즈의 3번째 클립**(`Mecha_Fly_VNeutral`) — 1D BT 중앙에서 양쪽이
+  50/50 섞이는 것을 막는다.
+- **Additive 포즈 클립 제작 요령 (확정)**: 테이크 프레임 0 = 중립(기준 포즈)로 만들고
+  임포터에서 `firstFrame`을 루프 시작(6)으로 잘라 기준 프레임을 루프 밖에 둔다
+  (`additiveReferencePoseFrame=0`, 클립 6~66). 기준을 루프 안에 두면 루프 경계에서
+  중립으로 꺼지는 딥이 생긴다.
+- 드라이버: `ComputeVerticalLean` — **접지 중엔 0 고정**(보행에 수직 자세 금지),
+  비행 중 ±1 클램프. 댐핑 0.08s.
 - **방법**: Flight BT를 3D로 바꾸지 말 것 (2D Freeform 8방 구조 유지가 우선).
   대신 **별도 Additive 레이어**에 1D BT(`VerticalY` 파라미터, -1~1)를 얹는다:
   `Mecha_Fly_Descend`(-1) / 중립(0, 모션 없음) / `Mecha_Fly_Ascend`(+1).

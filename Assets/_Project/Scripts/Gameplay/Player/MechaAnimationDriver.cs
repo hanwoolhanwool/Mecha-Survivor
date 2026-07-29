@@ -42,6 +42,7 @@ namespace MechaSurvivor.Gameplay
         private static readonly int DashZHash = Animator.StringToHash("DashZ");
         private static readonly int FireTypeHash = Animator.StringToHash("FireType");
         private static readonly int HitHeavyTriggerHash = Animator.StringToHash("HitHeavyTrigger");
+        private static readonly int VerticalYHash = Animator.StringToHash("VerticalY");
 
         private MechaController _controller;
         private float _fireUntil;
@@ -122,6 +123,9 @@ namespace MechaSurvivor.Gameplay
             _animator.SetFloat(MoveZHash, move.y, _dampTime, dt);
             _animator.SetFloat(SpeedHash, speed, _dampTime, dt);
             _animator.SetBool(IsGroundedHash, _controller.IsGrounded);
+            _animator.SetFloat(VerticalYHash,
+                MechaAnimParams.ComputeVerticalLean(_controller.VerticalInput, _controller.IsGrounded),
+                _dampTime, dt);
             _animator.SetBool(FireHash, MechaAnimParams.IsFireActive(Time.time, _fireUntil));
             _animator.SetInteger(FireTypeHash, _fireGroup);
 
