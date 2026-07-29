@@ -307,11 +307,13 @@ P0~P6 완료 시점(2026-07-28)에 의도적으로 미뤄둔 확장들. 공통 �
 Avatar, Bake Into Pose 3종). 소스 액션은 `Mecha Ver 2.blend`에 fake user로 보존되어 있고,
 보행/대쉬 포즈는 방향 벡터 파라미터의 절차 생성 함수로 만들어져 재활용 가능하다.
 
-### B1. 무기별 사격 반동 변형
+### B1. 무기별 사격 반동 변형 ✅ 완료 (2026-07-29)
 
-- **현재 상태**: 공용 `Mecha_Shoot` 1종. `WeaponFiredEvent.WeaponId`는 수신하지만 무시한다.
-- **착수 기준**: 무기 시각 개성 강화가 필요할 때. 서바이버 특성상 다무기 동시 발사라
-  개별 무기 1:1 클립은 과잉 — **반동 그룹 3종**으로 묶는 것을 권장.
+- 구현 결과: 아래 사양대로 구현. `FireType` Int(0=Light/1=Launcher/2=Heavy, 값=우선순위),
+  UpperBody 레이어 3상태(ShootLight/ShootLauncher/ShootHeavy) + 승격 전환 3개,
+  Heavy는 비루프 + Exit Time으로 Empty 왕복 → 연사 유지 중 킥 반복 재생.
+  매핑·경합은 `MechaAnimParams.GetFireGroup/ResolveFireGroup` (테스트 4개).
+  구 `Mecha_Anim_Shoot.fbx`(공용 클립)는 미사용으로 남김 — 필요 시 삭제 가능.
 
 | 그룹 | 무기 (WeaponData.Id) | 클립 | 사양 |
 |---|---|---|---|

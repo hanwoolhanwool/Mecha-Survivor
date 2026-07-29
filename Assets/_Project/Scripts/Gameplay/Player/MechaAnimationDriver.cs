@@ -36,9 +36,11 @@ namespace MechaSurvivor.Gameplay
         private static readonly int DashTriggerHash = Animator.StringToHash("DashTrigger");
         private static readonly int DashXHash = Animator.StringToHash("DashX");
         private static readonly int DashZHash = Animator.StringToHash("DashZ");
+        private static readonly int FireTypeHash = Animator.StringToHash("FireType");
 
         private MechaController _controller;
         private float _fireUntil;
+        private int _fireGroup;
         private bool _hitPending;
         private bool _wasDashing;
 
@@ -71,7 +73,11 @@ namespace MechaSurvivor.Gameplay
 
         private void OnWeaponFired(WeaponFiredEvent evt)
         {
-            _fireUntil = MechaAnimParams.ExtendFireWindow(Time.time, _fireWindow);
+            float now = Time.time;
+            int incoming = MechaAnimParams.GetFireGroup(evt.WeaponId);
+            bool windowActive = MechaAnimParams.IsFireActive(now, _fireUntil);
+            _fireGroup = MechaAnimParams.ResolveFireGroup(_fireGroup, incoming, windowActive);
+            _fireUntil = MechaAnimParams.ExtendFireWindow(now, _fireWindow);
         }
 
         private void OnPlayerDamaged(PlayerDamagedEvent evt)
@@ -98,6 +104,7 @@ namespace MechaSurvivor.Gameplay
             _animator.SetFloat(SpeedHash, speed, _dampTime, dt);
             _animator.SetBool(IsGroundedHash, _controller.IsGrounded);
             _animator.SetBool(FireHash, MechaAnimParams.IsFireActive(Time.time, _fireUntil));
+            _animator.SetInteger(FireTypeHash, _fireGroup);
 
             if (_hitPending)
             {

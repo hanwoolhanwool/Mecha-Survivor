@@ -142,6 +142,42 @@ namespace MechaSurvivor.Tests.EditMode
         }
 
         [Test]
+        public void GetFireGroup_MapsWeaponsToRecoilGroups()
+        {
+            Assert.AreEqual(MechaAnimParams.FireGroupLight, MechaAnimParams.GetFireGroup("gatling"));
+            Assert.AreEqual(MechaAnimParams.FireGroupLight, MechaAnimParams.GetFireGroup("gravity_well"));
+            Assert.AreEqual(MechaAnimParams.FireGroupLauncher, MechaAnimParams.GetFireGroup("missile_pod"));
+            Assert.AreEqual(MechaAnimParams.FireGroupLauncher, MechaAnimParams.GetFireGroup("orbital_strike"));
+            Assert.AreEqual(MechaAnimParams.FireGroupHeavy, MechaAnimParams.GetFireGroup("railgun"));
+            Assert.AreEqual(MechaAnimParams.FireGroupHeavy, MechaAnimParams.GetFireGroup("shotgun_cannon"));
+        }
+
+        [Test]
+        public void GetFireGroup_UnknownOrNull_FallsBackToLight()
+        {
+            Assert.AreEqual(MechaAnimParams.FireGroupLight, MechaAnimParams.GetFireGroup("new_weapon_9000"));
+            Assert.AreEqual(MechaAnimParams.FireGroupLight, MechaAnimParams.GetFireGroup(null));
+        }
+
+        [Test]
+        public void ResolveFireGroup_WithinWindow_EscalatesOnly()
+        {
+            // 유지창 내 상위 그룹은 승격
+            Assert.AreEqual(MechaAnimParams.FireGroupHeavy, MechaAnimParams.ResolveFireGroup(
+                MechaAnimParams.FireGroupLight, MechaAnimParams.FireGroupHeavy, true));
+            // 유지창 내 하위 그룹은 강등되지 않는다 (연사 무기가 Heavy 반동을 덮으면 안 됨)
+            Assert.AreEqual(MechaAnimParams.FireGroupHeavy, MechaAnimParams.ResolveFireGroup(
+                MechaAnimParams.FireGroupHeavy, MechaAnimParams.FireGroupLight, true));
+        }
+
+        [Test]
+        public void ResolveFireGroup_WindowClosed_ResetsToIncoming()
+        {
+            Assert.AreEqual(MechaAnimParams.FireGroupLight, MechaAnimParams.ResolveFireGroup(
+                MechaAnimParams.FireGroupHeavy, MechaAnimParams.FireGroupLight, false));
+        }
+
+        [Test]
         public void FireWindow_WithinWindow_Active()
         {
             float fireUntil = MechaAnimParams.ExtendFireWindow(10f, 0.3f);

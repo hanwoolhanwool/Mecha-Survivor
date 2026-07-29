@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace MechaSurvivor.Gameplay
@@ -47,6 +48,42 @@ namespace MechaSurvivor.Gameplay
             forward.Normalize();
             Vector2 right = new(forward.y, -forward.x);
             return new Vector2(Vector2.Dot(planar, right), Vector2.Dot(planar, forward)).normalized;
+        }
+
+        // ── 사격 반동 그룹 (Docs/05 §10-B1) — 값 = 우선순위 (클수록 우선) ──
+        public const int FireGroupLight = 0;
+        public const int FireGroupLauncher = 1;
+        public const int FireGroupHeavy = 2;
+
+        private static readonly Dictionary<string, int> FireGroups = new()
+        {
+            { "gatling", FireGroupLight },
+            { "beam", FireGroupLight },
+            { "laser_cannon", FireGroupLight },
+            { "emp_field", FireGroupLight },
+            { "gravity_well", FireGroupLight },
+            { "missile_pod", FireGroupLauncher },
+            { "cluster_bomb", FireGroupLauncher },
+            { "orbital_strike", FireGroupLauncher },
+            { "railgun", FireGroupHeavy },
+            { "shotgun_cannon", FireGroupHeavy },
+        };
+
+        /// <summary>WeaponId → 반동 그룹. 미지 무기는 Light 폴백 (신무기 추가 시 안전).</summary>
+        public static int GetFireGroup(string weaponId)
+        {
+            return weaponId != null && FireGroups.TryGetValue(weaponId, out int group)
+                ? group
+                : FireGroupLight;
+        }
+
+        /// <summary>
+        /// 유지창 내 동시 발사 경합 규칙 — 상위 그룹만 승격, 강등은 창이 닫힌 뒤에만.
+        /// (Heavy 단발 반동이 연사 무기에 곧바로 덮이는 것을 막는다.)
+        /// </summary>
+        public static int ResolveFireGroup(int currentGroup, int incomingGroup, bool windowActive)
+        {
+            return windowActive ? Mathf.Max(currentGroup, incomingGroup) : incomingGroup;
         }
 
         /// <summary>사격 이벤트 수신 시각으로부터 유지창 종료 시각을 계산한다.</summary>
