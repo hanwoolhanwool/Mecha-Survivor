@@ -19,16 +19,22 @@ namespace MechaSurvivor.Core
         }
     }
 
-    /// <summary>플레이어 피격. HUD 체력바가 구독.</summary>
+    /// <summary>
+    /// 플레이어 체력 변동. HUD 체력바·피격 연출(애니/SFX/셰이크)이 구독.
+    /// Damage=0은 피격이 아닌 체력 갱신 알림(최대체력 업그레이드 등) —
+    /// 피격 연출 구독자는 반드시 Damage > 0을 확인할 것.
+    /// </summary>
     public readonly struct PlayerDamagedEvent : IEvent
     {
         public readonly float RemainingHealth;
         public readonly float MaxHealth;
+        public readonly float Damage;
 
-        public PlayerDamagedEvent(float remainingHealth, float maxHealth)
+        public PlayerDamagedEvent(float remainingHealth, float maxHealth, float damage = 0f)
         {
             RemainingHealth = remainingHealth;
             MaxHealth = maxHealth;
+            Damage = damage;
         }
     }
 

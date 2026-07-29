@@ -329,14 +329,17 @@ Avatar, Bake Into Pose 3종). 소스 액션은 `Mecha Ver 2.blend`에 fake user�
 - **테스트**: 그룹 매핑, 우선순위 경합(유지창 내 Light→Heavy 승격, 역방향 비강등), 미지 ID 폴백(Light).
 - **규모**: 클립 2종 신규 + 컨트롤러/드라이버 소폭. 약 반나절.
 
-### B2. 강피격 (대미지 크기별 변형)
+### B2. 강피격 (대미지 크기별 변형) ✅ 완료 (2026-07-29)
 
-- **현재 상태**: `Mecha_Hit` 1종. 대미지 크기 무관 동일 재생.
-- **선결 과제 (주의)**: `PlayerDamagedEvent(RemainingHealth, MaxHealth)`에는 **대미지량이 없다.**
-  - 옵션 A (권장): 이벤트에 `Damage` 필드 추가 — Raise 지점(`PlayerHealth`)과 기존 구독자
-    영향 범위 확인 필요. readonly struct라 생성자 시그니처 변경임.
-  - 옵션 B (무침습): 드라이버가 직전 `RemainingHealth`를 기억해 delta 계산.
-    회복(체력 증가)과 구분할 것 — delta>0일 때만 피격 처리.
+- 구현 결과: **옵션 A 채택** — `PlayerDamagedEvent`에 `Damage` 필드 추가 (기본값 0).
+  `Mecha_Hit_Heavy`(0.5s Additive) + `HitHeavyTrigger`, Empty 전환 우선순위 강피격 먼저.
+  판정은 `MechaAnimParams.IsHeavyHit` (기본 15%, 드라이버 인스펙터 튜닝 가능,
+  부동소수점 경계 보정 -1e-3 포함).
+- **부수 버그 수정**: 이벤트가 `AddMaxHealth`(최대체력 업그레이드)에서도 발생하고 있어서,
+  기존에는 **체력 업그레이드를 받을 때마다 피격 애니·피격음·카메라 셰이크가 재생**되고
+  있었다. `Damage=0`을 체력 갱신 알림으로 규정하고 드라이버·AudioDirector·
+  CameraShakeReactor에 `Damage > 0` 가드를 넣어 함께 해결 (GameHud는 갱신 알림도
+  받아야 하므로 가드 없음).
 - **판정 기준**: 대미지 ≥ 최대체력의 15% → 강피격 (수치는 튜닝 대상, 순수 함수로 분리).
 - **클립**: `Mecha_Hit_Heavy` — 0.5s 비루프 Additive (기준 포즈=프레임 0, §4-확정의 Hit와
   동일 임포트: `hasAdditiveReferencePose=true`). 몸통 -14° 젖힘 + 머리 -18° + 팔 크게 벌어짐.

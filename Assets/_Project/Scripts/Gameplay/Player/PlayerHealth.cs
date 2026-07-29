@@ -46,7 +46,7 @@ namespace MechaSurvivor.Gameplay
             Current = Mathf.Max(0f, Current - amount);
             _invulnerableUntil = Time.time + _invulnerabilityDuration;
 
-            EventBus<PlayerDamagedEvent>.Raise(new PlayerDamagedEvent(Current, _maxHealth));
+            EventBus<PlayerDamagedEvent>.Raise(new PlayerDamagedEvent(Current, _maxHealth, amount));
 
             if (Current <= 0f)
             {

@@ -27,6 +27,10 @@ namespace MechaSurvivor.Gameplay
         [Tooltip("WeaponFiredEvent 후 Fire 파라미터를 유지하는 시간(초) — 자동 연사 사이 끊김 방지")]
         [SerializeField] private float _fireWindow = 0.3f;
 
+        [Header("피격")]
+        [Tooltip("강피격 판정 임계값 — 대미지가 최대체력의 이 비율 이상이면 강피격")]
+        [SerializeField] private float _heavyHitFraction = 0.15f;
+
         private static readonly int MoveXHash = Animator.StringToHash("MoveX");
         private static readonly int MoveZHash = Animator.StringToHash("MoveZ");
         private static readonly int SpeedHash = Animator.StringToHash("Speed");
@@ -37,11 +41,13 @@ namespace MechaSurvivor.Gameplay
         private static readonly int DashXHash = Animator.StringToHash("DashX");
         private static readonly int DashZHash = Animator.StringToHash("DashZ");
         private static readonly int FireTypeHash = Animator.StringToHash("FireType");
+        private static readonly int HitHeavyTriggerHash = Animator.StringToHash("HitHeavyTrigger");
 
         private MechaController _controller;
         private float _fireUntil;
         private int _fireGroup;
         private bool _hitPending;
+        private bool _heavyHitPending;
         private bool _wasDashing;
 
         private void Awake()
@@ -82,7 +88,20 @@ namespace MechaSurvivor.Gameplay
 
         private void OnPlayerDamaged(PlayerDamagedEvent evt)
         {
-            _hitPending = true;
+            // Damage=0은 체력 갱신 알림(업그레이드 등) — 피격 연출 대상 아님
+            if (evt.Damage <= 0f)
+            {
+                return;
+            }
+
+            if (MechaAnimParams.IsHeavyHit(evt.Damage, evt.MaxHealth, _heavyHitFraction))
+            {
+                _heavyHitPending = true;
+            }
+            else
+            {
+                _hitPending = true;
+            }
         }
 
         private void LateUpdate()
@@ -106,7 +125,13 @@ namespace MechaSurvivor.Gameplay
             _animator.SetBool(FireHash, MechaAnimParams.IsFireActive(Time.time, _fireUntil));
             _animator.SetInteger(FireTypeHash, _fireGroup);
 
-            if (_hitPending)
+            if (_heavyHitPending)
+            {
+                _heavyHitPending = false;
+                _hitPending = false;   // 같은 프레임 경합 시 강피격 우선
+                _animator.SetTrigger(HitHeavyTriggerHash);
+            }
+            else if (_hitPending)
             {
                 _hitPending = false;
                 _animator.SetTrigger(HitTriggerHash);

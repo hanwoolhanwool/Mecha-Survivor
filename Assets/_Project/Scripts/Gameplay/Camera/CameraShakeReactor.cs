@@ -58,7 +58,8 @@ namespace MechaSurvivor.Gameplay
 
         private void OnPlayerDamaged(PlayerDamagedEvent evt)
         {
-            if (_dynamics != null)
+            // Damage=0은 체력 갱신 알림(업그레이드 회복 등) — 피격 셰이크 대상 아님
+            if (_dynamics != null && evt.Damage > 0f)
             {
                 _dynamics.AddShake(_damagedShake * UserScale);
             }

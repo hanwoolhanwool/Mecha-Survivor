@@ -142,6 +142,21 @@ namespace MechaSurvivor.Tests.EditMode
         }
 
         [Test]
+        public void IsHeavyHit_ThresholdBoundary()
+        {
+            // 최대체력 100, 임계 15% — 15 정확히면 강피격 (이상 판정)
+            Assert.IsTrue(MechaAnimParams.IsHeavyHit(15f, 100f, 0.15f));
+            Assert.IsTrue(MechaAnimParams.IsHeavyHit(40f, 100f, 0.15f));
+            Assert.IsFalse(MechaAnimParams.IsHeavyHit(14.99f, 100f, 0.15f));
+        }
+
+        [Test]
+        public void IsHeavyHit_DegenerateMaxHealth_ReturnsFalse()
+        {
+            Assert.IsFalse(MechaAnimParams.IsHeavyHit(10f, 0f, 0.15f), "최대체력 0은 판정 불능 — 일반 피격 처리.");
+        }
+
+        [Test]
         public void GetFireGroup_MapsWeaponsToRecoilGroups()
         {
             Assert.AreEqual(MechaAnimParams.FireGroupLight, MechaAnimParams.GetFireGroup("gatling"));

@@ -96,7 +96,14 @@ namespace MechaSurvivor.Systems
 
         private void OnWeaponFired(WeaponFiredEvent evt) => Play(evt.WeaponId);
         private void OnEnemyKilled(EnemyKilledEvent evt) => PlayAt(EnemyDeathSfx, evt.Position);
-        private void OnPlayerDamaged(PlayerDamagedEvent evt) => Play(PlayerHitSfx);
+        private void OnPlayerDamaged(PlayerDamagedEvent evt)
+        {
+            // Damage=0은 체력 갱신 알림 — 피격음 대상 아님
+            if (evt.Damage > 0f)
+            {
+                Play(PlayerHitSfx);
+            }
+        }
         private void OnPlayerDied(PlayerDiedEvent evt) => PlayAt(PlayerDeathSfx, evt.Position);
         private void OnPlayerLeveledUp(PlayerLeveledUpEvent evt) => Play(LevelUpSfx);
         private void OnExperienceGained(ExperienceGainedEvent evt) => Play(XpPickupSfx);

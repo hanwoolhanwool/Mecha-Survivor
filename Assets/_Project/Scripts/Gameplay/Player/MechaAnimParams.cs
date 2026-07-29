@@ -86,6 +86,16 @@ namespace MechaSurvivor.Gameplay
             return windowActive ? Mathf.Max(currentGroup, incomingGroup) : incomingGroup;
         }
 
+        /// <summary>
+        /// 강피격 판정 — 대미지가 최대체력의 threshold 비율 이상이면 강피격 (Docs/05 §10-B2).
+        /// Damage 0 이하(체력 갱신 알림)는 호출 전에 걸러야 한다.
+        /// </summary>
+        public static bool IsHeavyHit(float damage, float maxHealth, float thresholdFraction)
+        {
+            // 부동소수점 경계 보정 — 정확히 임계값인 대미지(예: 100의 15% = 15)도 강피격
+            return maxHealth > 0f && damage >= maxHealth * thresholdFraction - 1e-3f;
+        }
+
         /// <summary>사격 이벤트 수신 시각으로부터 유지창 종료 시각을 계산한다.</summary>
         public static float ExtendFireWindow(float now, float window)
         {
