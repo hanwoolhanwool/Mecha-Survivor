@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e197413b9a8bdbc49938c3df3a2ba965, type: 3}
+  m_Name: RigProfile_Mecha
+  m_EditorClassIdentifier: MechaSurvivor.Gameplay::MechaSurvivor.Gameplay.RigProfileData
+  ModelPrefab: {fileID: 919132149155446097, guid: 45ae8ac7900c57740bf4171debcf0222, type: 3}
+  AnimatorController: {fileID: 9100000, guid: 16cfbd2b1834d8641a1e11b005451429, type: 2}
+  Mounts:
+  - Id: BackWeapon
+    Bone: 54
+    BonePath: Hips/Spine02/Spine01/Spine
+    LocalPosition: {x: -0.008828137, y: -0.049728326, z: -0.3999365}
+    LocalEulerAngles: {x: 0.03876383, y: 1.271581, z: 0.056387767}
+    LocalScale: {x: 0.45, y: 0.45, z: 0.45}
+    VisualPrefab: {fileID: 919132149155446097, guid: bf497a068da248d4391924413c2113f2, type: 3}
+    ShowForWeapon: {fileID: 11400000, guid: e7bd2d32e3731304aa481f3d2ee8f57b, type: 2}
+  - Id: RightHandWeapon
+    Bone: 18
+    BonePath: Hips/Spine02/Spine01/Spine/RightShoulder/RightArm/RightForeArm/RightHand
+    LocalPosition: {x: 0, y: 0, z: 0}
+    LocalEulerAngles: {x: 359.55673, y: 275.31668, z: 168.47905}
+    LocalScale: {x: 0.6, y: 0.6, z: 0.6}
+    VisualPrefab: {fileID: 919132149155446097, guid: 7be56e6fb1cc2f14aad182b8e883f6c4, type: 3}
+    ShowForWeapon: {fileID: 11400000, guid: 5d79123fa41107f47bb487ff40d41b1e, type: 2}
+  Muzzles: []

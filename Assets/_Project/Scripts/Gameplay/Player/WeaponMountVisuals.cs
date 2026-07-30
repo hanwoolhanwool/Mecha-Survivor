@@ -23,6 +23,13 @@ namespace MechaSurvivor.Gameplay
         [SerializeField] private WeaponSlots _slots;
         [SerializeField] private MountBinding[] _bindings;
 
+        /// <summary>RigBuilder가 프로필로 구성한 바인딩을 주입한다 (Docs/06). 인스펙터 배열을 대체.</summary>
+        public void SetBindings(MountBinding[] bindings)
+        {
+            _bindings = bindings;
+            Apply(_slots, _bindings);
+        }
+
         private void OnEnable() => Apply(_slots, _bindings);
 
         private void Update() => Apply(_slots, _bindings);
