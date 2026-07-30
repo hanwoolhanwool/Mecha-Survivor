@@ -25,6 +25,10 @@ namespace MechaSurvivor.Gameplay
         [SerializeField] private RigProfileData[] _characterProfiles;
         [SerializeField] private RigProfileData[] _enemyProfiles;
 
+        [Header("배치")]
+        [Tooltip("비행 상태에서 바닥 위로 띄우는 높이. 지상 상태는 최저점이 바닥에 닿게 자동 보정")]
+        [SerializeField] private float _flyHoverHeight = 1.2f;
+
         [Header("넛지 스텝")]
         [SerializeField] private float _moveStep = 0.05f;
         [SerializeField] private float _moveStepFine = 0.005f;
@@ -62,6 +66,8 @@ namespace MechaSurvivor.Gameplay
 
         private int _adjustIndex = -1;          // -1=조정 안 함, 0..M-1=마운트, M..=총구
         private bool _dirty;
+        private bool _grounded;                 // 현재 이동 상태 (루트 높이 결정)
+        private float _groundOffset;            // 모델 최저점→바닥 보정 (대상 선택 시 자동 측정)
 
         private Weapon _testWeapon;             // 시험 발사용 실제 무기 인스턴스
         private string _testWeaponId;
@@ -197,8 +203,51 @@ namespace MechaSurvivor.Gameplay
             _fireGroup = -1;
             _stateLabel = "FlyIdle";
             _dirty = false;
+            _grounded = _animator == null;   // AC 없는 적은 바닥에 세워 둔다
+            MeasureGroundOffset();
             ApplyPlaybackSpeed();
             ApplyLocomotion(grounded: false, move: Vector2.zero);
+            ApplyRootHeight();               // ApplyLocomotion이 스킵되는 적도 높이는 적용
+        }
+
+        /// <summary>
+        /// 모델 최저점(렌더러 바운즈)이 바닥(y=0)에 닿는 루트 높이를 잰다.
+        /// 클립 루트가 골반 기준이라 모델이 루트 아래로 뻗는다 — y=0 스폰이면 다리가 파묻힌다.
+        /// </summary>
+        private void MeasureGroundOffset()
+        {
+            _groundOffset = 0f;
+            if (_builder.ModelRoot == null)
+            {
+                return;
+            }
+
+            // 스폰 직후엔 본 포즈가 아직 안 써졌다 — 강제 갱신 (바인드 포즈 오측 방지).
+            if (_animator != null)
+            {
+                _animator.Update(0f);
+                _animator.Update(0f);
+            }
+
+            float minY = float.MaxValue;
+            Renderer[] renderers = _builder.ModelRoot.GetComponentsInChildren<Renderer>();
+            for (int i = 0; i < renderers.Length; i++)
+            {
+                minY = Mathf.Min(minY, renderers[i].bounds.min.y);
+            }
+
+            if (minY < float.MaxValue)
+            {
+                _groundOffset = _builder.transform.position.y - minY;
+            }
+        }
+
+        /// <summary>지상 = 최저점이 바닥, 비행 = 바닥에서 호버 높이만큼 위.</summary>
+        private void ApplyRootHeight()
+        {
+            Vector3 position = _builder.transform.position;
+            position.y = _groundOffset + (_grounded ? 0f : _flyHoverHeight);
+            _builder.transform.position = position;
         }
 
         private void CycleTarget(int delta)
@@ -700,6 +749,8 @@ namespace MechaSurvivor.Gameplay
                 return;
             }
 
+            _grounded = grounded;
+            ApplyRootHeight();
             _animator.SetBool(IsGroundedHash, grounded);
             _animator.SetFloat(MoveXHash, move.x);
             _animator.SetFloat(MoveZHash, move.y);
