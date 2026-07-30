@@ -76,6 +76,21 @@ namespace MechaSurvivor.Tests.EditMode
         }
 
         [Test]
+        public void SetBindings_InjectedBindings_ApplyImmediately()
+        {
+            var visuals = _root.AddComponent<WeaponMountVisuals>();
+            var so = new UnityEditor.SerializedObject(visuals);
+            so.FindProperty("_slots").objectReferenceValue = _slots;
+            so.ApplyModifiedPropertiesWithoutUndo();
+            _slots.Equip(AddWeapon(_missileData));
+
+            visuals.SetBindings(_bindings);
+
+            Assert.IsTrue(_model.activeSelf,
+                "RigBuilder가 주입한 바인딩은 다음 프레임을 기다리지 않고 즉시 반영돼야 한다.");
+        }
+
+        [Test]
         public void Apply_WeaponRemoved_ModelHidesAgain()
         {
             Weapon weapon = AddWeapon(_missileData);

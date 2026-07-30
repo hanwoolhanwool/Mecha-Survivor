@@ -299,7 +299,8 @@ namespace MechaSurvivor.Gameplay
 
             _nextAttackTime = Time.time + Data.AttackInterval;
 
-            Vector3 muzzle = transform.position + Vector3.up * 1.5f;
+            // 총구 오프셋은 데이터화 (Docs/06 §3.3) — 회전만 적용, 스케일은 무시 (종전 동작 보존).
+            Vector3 muzzle = transform.position + transform.rotation * Data.MuzzleOffset;
             Ballistics.TryPredictInterceptDirection(
                 muzzle, _player.position, _playerVelocity, Data.ProjectileSpeed,
                 out Vector3 direction);

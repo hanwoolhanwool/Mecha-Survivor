@@ -284,6 +284,15 @@ namespace MechaSurvivor.Tests.EditMode
         }
 
         [Test]
+        public void EnemyDataMuzzleOffset_Default_KeepsLegacyHardcodedValue()
+        {
+            // EnemyBrain의 종전 하드코딩(up * 1.5f) 치환 가드 — 기본값이 바뀌면 전 적의 발사 위치가 변한다.
+            var data = ScriptableObject.CreateInstance<EnemyData>();
+            Assert.AreEqual(new Vector3(0f, 1.5f, 0f), data.MuzzleOffset);
+            Object.DestroyImmediate(data);
+        }
+
+        [Test]
         public void BuildInto_MuzzleWithMissingMount_SkipsWithoutThrow()
         {
             _profile.Muzzles = new[]

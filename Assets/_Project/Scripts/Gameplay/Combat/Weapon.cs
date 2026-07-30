@@ -31,6 +31,12 @@ namespace MechaSurvivor.Gameplay
 
         protected Transform Muzzle => _muzzle != null ? _muzzle : transform;
 
+        /// <summary>
+        /// 총구 주입 (Docs/06 §3.3) — 리그 프로필의 포신 앵커가 프리팹 내부 _muzzle을 대체한다.
+        /// 프로필에 매칭 총구가 없으면 호출되지 않아 현행 동작이 유지된다.
+        /// </summary>
+        public void SetMuzzle(Transform muzzle) => _muzzle = muzzle;
+
         /// <summary>런타임 장착(업그레이드로 무기를 얻을 때) 지원.</summary>
         public void SetData(WeaponData data) => _data = data;
 

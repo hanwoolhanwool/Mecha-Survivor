@@ -48,6 +48,13 @@ namespace MechaSurvivor.Gameplay
         public float ProjectileDamage = 6f;
         public Projectile ProjectilePrefab;
 
+        [Tooltip("총구 로컬 오프셋 — 투사체 생성 위치 (Docs/06). 기본값은 종전 하드코딩과 동일")]
+        public Vector3 MuzzleOffset = new(0f, 1.5f, 0f);
+
+        [Header("리그 (Docs/06 — 적 로봇 모델 도입 대비 자리)")]
+        [Tooltip("있으면 모델·총구를 RigBuilder가 구성. 비우면 기존 프리미티브 유지")]
+        public RigProfileData RigProfile;
+
         [Header("스티어링 — 적끼리 물리 충돌 대신 분리 벡터 (SETUP 5장)")]
         public float SeparationRadius = 2f;
 

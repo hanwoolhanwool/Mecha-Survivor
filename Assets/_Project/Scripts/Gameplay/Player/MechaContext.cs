@@ -19,6 +19,9 @@ namespace MechaSurvivor.Gameplay
         [Tooltip("장착 무기가 붙는 마운트 (비우면 자기 트랜스폼)")]
         [SerializeField] private Transform _weaponMount;
 
+        [Tooltip("리그 빌더 — 프로필에 무기 Id의 총구가 있으면 발사 위치를 포신 앵커로 주입 (Docs/06)")]
+        [SerializeField] private RigBuilder _rigBuilder;
+
         public MechaController Controller => _controller;
         public PlayerHealth Health => _health;
         public WeaponSlots WeaponSlots => _weaponSlots;
@@ -63,6 +66,13 @@ namespace MechaSurvivor.Gameplay
             }
 
             weapon.SetLevel(1);
+
+            // 포신 추종 (Docs/06 §8-1): 프로필에 이 무기의 총구가 정의돼 있으면 거기서 발사한다.
+            if (weapon.Data != null && _rigBuilder != null
+                && _rigBuilder.TryGetMuzzle(weapon.Data.Id, out Transform muzzle))
+            {
+                weapon.SetMuzzle(muzzle);
+            }
 
             if (_weaponSlots.Equip(weapon) < 0)
             {
