@@ -199,10 +199,12 @@ namespace MechaSurvivor.Gameplay
         {
             Transform instance = SpawnUnparented(prefab);
             instance.SetParent(parent, worldPositionStays: false);
-            Transform prefabRoot = prefab.transform;
-            instance.localPosition = prefabRoot.localPosition;
-            instance.localRotation = prefabRoot.localRotation;
-            instance.localScale = prefabRoot.localScale;
+
+            // 모델 루트는 로컬 identity — 씬 배선과 동일하게 FBX 루트 회전(-90° 눕는 포즈)을
+            // 무시한다 (Game 씬 MechaModel = 0,0,0 확인). 스케일만 프리팹 값을 유지한다.
+            instance.localPosition = Vector3.zero;
+            instance.localRotation = Quaternion.identity;
+            instance.localScale = prefab.transform.localScale;
             return instance;
         }
     }

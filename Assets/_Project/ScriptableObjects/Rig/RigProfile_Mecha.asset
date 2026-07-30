@@ -19,7 +19,7 @@ MonoBehaviour:
     Bone: 54
     BonePath: Hips/Spine02/Spine01/Spine
     LocalPosition: {x: -0.008828137, y: -0.049728326, z: -0.3999365}
-    LocalEulerAngles: {x: 0.03876383, y: 1.271581, z: 0.056387767}
+    LocalEulerAngles: {x: 0.038763836, y: 1.2715808, z: 0.056387767}
     LocalScale: {x: 0.45, y: 0.45, z: 0.45}
     VisualPrefab: {fileID: 919132149155446097, guid: bf497a068da248d4391924413c2113f2, type: 3}
     ShowForWeapon: {fileID: 11400000, guid: e7bd2d32e3731304aa481f3d2ee8f57b, type: 2}
@@ -31,4 +31,12 @@ MonoBehaviour:
     LocalScale: {x: 0.6, y: 0.6, z: 0.6}
     VisualPrefab: {fileID: 919132149155446097, guid: 7be56e6fb1cc2f14aad182b8e883f6c4, type: 3}
     ShowForWeapon: {fileID: 11400000, guid: 5d79123fa41107f47bb487ff40d41b1e, type: 2}
-  Muzzles: []
+  Muzzles:
+  - Id: laser_cannon
+    MountId: RightHandWeapon
+    LocalPosition: {x: 0.9579115, y: -0.0010954142, z: -0.00084069744}
+    LocalEulerAngles: {x: -0, y: 90, z: 0}
+  - Id: missile_pod
+    MountId: BackWeapon
+    LocalPosition: {x: 0.00021830201, y: -0.063369095, z: 0.91291076}
+    LocalEulerAngles: {x: -0, y: 0, z: 0}

@@ -176,6 +176,7 @@ GameObject:
   m_Component:
   - component: {fileID: 480147916}
   - component: {fileID: 480147915}
+  - component: {fileID: 480147917}
   m_Layer: 0
   m_Name: Directional Light
   m_TagString: Untagged
@@ -263,6 +264,35 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &480147917
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 480147914}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 474bcb49853aa07438625e644c072ee6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.UniversalAdditionalLightData
+  m_UsePipelineSettings: 1
+  m_AdditionalLightsShadowResolutionTier: 2
+  m_CustomShadowLayers: 0
+  m_LightCookieSize: {x: 1, y: 1}
+  m_LightCookieOffset: {x: 0, y: 0}
+  m_SoftShadowQuality: 0
+  m_RenderingLayersMask:
+    serializedVersion: 0
+    m_Bits: 1
+  m_ShadowRenderingLayersMask:
+    serializedVersion: 0
+    m_Bits: 1
+  m_Version: 4
+  m_LightLayerMask: 1
+  m_ShadowLayerMask: 1
+  m_RenderingLayers: 1
+  m_ShadowRenderingLayers: 1
 --- !u!1 &1615921978
 GameObject:
   m_ObjectHideFlags: 0
@@ -294,6 +324,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: MechaSurvivor.Gameplay::MechaSurvivor.Gameplay.RigLabController
   _builder: {fileID: 403042786}
   _orbitCamera: {fileID: 1958670769}
+  _gizmo: {fileID: 1958670773}
   _characterProfiles:
   - {fileID: 11400000, guid: 94fdc3f1a36015d428b8bda7e93b037e, type: 2}
   _enemyProfiles:
@@ -302,6 +333,12 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 8faaabe9723b39a4b83537af5ffadef5, type: 2}
   - {fileID: 11400000, guid: c36108be948b9894ea91467c8ef51bf8, type: 2}
   - {fileID: 11400000, guid: 20fe758f2fbc28147b2f9e78431bb932, type: 2}
+  _moveStep: 0.05
+  _moveStepFine: 0.005
+  _rotateStep: 5
+  _rotateStepFine: 0.5
+  _scaleStep: 0.05
+  _scaleStepFine: 0.005
   _hudRefreshInterval: 0.25
 --- !u!4 &1615921980
 Transform:
@@ -459,6 +496,7 @@ GameObject:
   - component: {fileID: 1958670771}
   - component: {fileID: 1958670770}
   - component: {fileID: 1958670769}
+  - component: {fileID: 1958670773}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -558,6 +596,19 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1958670773
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1958670768}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d603e87749e09bd4a971a3e481e26f2b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: MechaSurvivor.Gameplay::MechaSurvivor.Gameplay.RigLabGizmo
+  _axisLength: 0.5
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
