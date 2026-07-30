@@ -40,6 +40,9 @@ namespace MechaSurvivor.Gameplay
         [Tooltip("HUD 갱신 주기(초) — 매 프레임 문자열 할당을 피한다")]
         [SerializeField] private float _hudRefreshInterval = 0.25f;
 
+        [Header("UI 패널 (H 토글)")]
+        [SerializeField] private float _panelWidth = 280f;
+
         // 애니메이션 파라미터 (MechaAnimationDriver와 동일 규격 — Docs/05 §6)
         private static readonly int MoveXHash = Animator.StringToHash("MoveX");
         private static readonly int MoveZHash = Animator.StringToHash("MoveZ");
@@ -81,6 +84,14 @@ namespace MechaSurvivor.Gameplay
         private string _hudText = string.Empty;
         private GUIStyle _hudStyle;
 
+        // ── UI 패널 상태 ──
+        private bool _panelVisible = true;
+        private bool _fineStep;                 // 버튼 넛지 미세 모드 (핫키 Ctrl과 동일 스텝)
+        private Vector2 _panelScroll;
+        private readonly string[] _fields = new string[7];  // pos xyz / rot xyz / scale
+        private int _bufferedAdjustIndex = -2;  // 필드 버퍼가 가리키는 선택 (-2 = 강제 갱신)
+        private bool _textFieldFocused;         // 필드 타이핑 중엔 핫키 정지
+
         private RigProfileData[] CurrentList => _tab == 0 ? _characterProfiles : _enemyProfiles;
 
         private RigProfileData CurrentProfile
@@ -115,6 +126,11 @@ namespace MechaSurvivor.Gameplay
         {
             // 비포커스 Play 루프 정지 함정 (Docs/06 §7) — 랩은 백그라운드에서도 돌게 한다.
             Application.runInBackground = true;
+
+            for (int i = 0; i < _fields.Length; i++)
+            {
+                _fields[i] = string.Empty;
+            }
 
 #if UNITY_EDITOR
             // 시험 발사 룩업 — 배선 없이 항상 최신 에셋을 쓴다 (랩은 에디터 전용 씬).
@@ -154,6 +170,8 @@ namespace MechaSurvivor.Gameplay
                 _nextHudRefresh = Time.unscaledTime + _hudRefreshInterval;
                 _dirty = ComputeDirty();
                 RefreshHud();
+                // 핫키·씬 뷰 핸들 조정도 주기적으로 필드에 반영 (타이핑 중엔 OnGUI 쪽이 보호).
+                _bufferedAdjustIndex = -2;
             }
         }
 
@@ -266,6 +284,17 @@ namespace MechaSurvivor.Gameplay
             if (kb == null)
             {
                 return;
+            }
+
+            // 수치 입력 필드 타이핑 중엔 핫키가 오발동하지 않게 전부 정지.
+            if (_textFieldFocused)
+            {
+                return;
+            }
+
+            if (kb.hKey.wasPressedThisFrame)
+            {
+                _panelVisible = !_panelVisible;
             }
 
             if (kb.tabKey.wasPressedThisFrame)
@@ -657,40 +686,27 @@ namespace MechaSurvivor.Gameplay
 
             if (kb.digit1Key.wasPressedThisFrame)
             {
-                _stateLabel = "FlyIdle";
-                ApplyLocomotion(grounded: false, move: Vector2.zero);
+                ActFlyIdle();
             }
 
             if (kb.digit2Key.wasPressedThisFrame)
             {
-                AdvanceDirectionIf("Fly");
-                Vector2 dir = RigLabMath.DirectionForIndex(_directionIndex);
-                _stateLabel = "Fly";
-                ApplyLocomotion(grounded: false, move: dir);
+                ActFly();
             }
 
             if (kb.digit3Key.wasPressedThisFrame)
             {
-                _stateLabel = "GroundIdle";
-                ApplyLocomotion(grounded: true, move: Vector2.zero);
+                ActGroundIdle();
             }
 
             if (kb.digit4Key.wasPressedThisFrame)
             {
-                AdvanceDirectionIf("Walk");
-                Vector2 dir = RigLabMath.DirectionForIndex(_directionIndex);
-                _stateLabel = "Walk";
-                ApplyLocomotion(grounded: true, move: dir);
+                ActWalk();
             }
 
             if (kb.digit5Key.wasPressedThisFrame)
             {
-                AdvanceDirectionIf("Dash");
-                Vector2 dir = RigLabMath.DirectionForIndex(_directionIndex);
-                _stateLabel = "Dash";
-                _animator.SetFloat(DashXHash, dir.x);
-                _animator.SetFloat(DashZHash, dir.y);
-                _animator.SetTrigger(DashTriggerHash);
+                ActDash();
             }
 
             if (kb.digit6Key.wasPressedThisFrame)
@@ -710,27 +726,73 @@ namespace MechaSurvivor.Gameplay
 
             if (kb.digit9Key.wasPressedThisFrame)
             {
-                _stateLabel = "Hit";
-                _animator.SetTrigger(HitTriggerHash);
+                ActHit(heavy: false);
             }
 
             if (kb.digit0Key.wasPressedThisFrame)
             {
-                _stateLabel = "HitHeavy";
-                _animator.SetTrigger(HitHeavyTriggerHash);
+                ActHit(heavy: true);
             }
 
             if (kb.equalsKey.wasPressedThisFrame || kb.numpadPlusKey.wasPressedThisFrame)
             {
-                _playbackSpeed = RigLabMath.StepPlaybackSpeed(_playbackSpeed, 0.1f);
-                ApplyPlaybackSpeed();
+                ActSpeed(0.1f);
             }
 
             if (kb.minusKey.wasPressedThisFrame || kb.numpadMinusKey.wasPressedThisFrame)
             {
-                _playbackSpeed = RigLabMath.StepPlaybackSpeed(_playbackSpeed, -0.1f);
-                ApplyPlaybackSpeed();
+                ActSpeed(-0.1f);
             }
+        }
+
+        // 핫키·UI 버튼 공용 동작 — 같은 코드 경로를 태운다.
+
+        private void ActFlyIdle()
+        {
+            _stateLabel = "FlyIdle";
+            ApplyLocomotion(grounded: false, move: Vector2.zero);
+        }
+
+        private void ActFly()
+        {
+            AdvanceDirectionIf("Fly");
+            _stateLabel = "Fly";
+            ApplyLocomotion(grounded: false, move: RigLabMath.DirectionForIndex(_directionIndex));
+        }
+
+        private void ActGroundIdle()
+        {
+            _stateLabel = "GroundIdle";
+            ApplyLocomotion(grounded: true, move: Vector2.zero);
+        }
+
+        private void ActWalk()
+        {
+            AdvanceDirectionIf("Walk");
+            _stateLabel = "Walk";
+            ApplyLocomotion(grounded: true, move: RigLabMath.DirectionForIndex(_directionIndex));
+        }
+
+        private void ActDash()
+        {
+            AdvanceDirectionIf("Dash");
+            Vector2 dir = RigLabMath.DirectionForIndex(_directionIndex);
+            _stateLabel = "Dash";
+            _animator.SetFloat(DashXHash, dir.x);
+            _animator.SetFloat(DashZHash, dir.y);
+            _animator.SetTrigger(DashTriggerHash);
+        }
+
+        private void ActHit(bool heavy)
+        {
+            _stateLabel = heavy ? "HitHeavy" : "Hit";
+            _animator.SetTrigger(heavy ? HitHeavyTriggerHash : HitTriggerHash);
+        }
+
+        private void ActSpeed(float delta)
+        {
+            _playbackSpeed = RigLabMath.StepPlaybackSpeed(_playbackSpeed, delta);
+            ApplyPlaybackSpeed();
         }
 
         /// <summary>같은 이동 상태를 다시 누르면 8방을 한 칸 돌린다.</summary>
@@ -806,7 +868,7 @@ namespace MechaSurvivor.Gameplay
                 $"애니메이션  {anim}\n" +
                 "Tab 탭   ←/→ 대상(선택 없을 때)   [ ] 마운트/총구 선택   R 리셋   F 시험 발사   S 저장\n" +
                 "선택 중: 화살표 X/Z · PgUp/Dn Y · Shift=회전 · Ctrl=미세 · Alt+PgUp/Dn=스케일\n" +
-                "1 FlyIdle  2 Fly(8방)  3 GroundIdle  4 Walk(8방)  5 Dash(8방)  6/7/8 사격  9/0 피격  =/- 속도  우클릭/휠 카메라";
+                "1 FlyIdle  2 Fly(8방)  3 GroundIdle  4 Walk(8방)  5 Dash(8방)  6/7/8 사격  9/0 피격  =/- 속도  H 패널  우클릭/휠 카메라";
         }
 
         private void OnGUI()
@@ -818,6 +880,389 @@ namespace MechaSurvivor.Gameplay
             }
 
             GUI.Label(new Rect(12f, 12f, 1100f, 160f), _hudText, _hudStyle);
+
+            if (_panelVisible)
+            {
+                DrawPanel();
+            }
+
+            // 필드 포커스 감지는 OnGUI 안에서만 유효 — Update의 핫키 가드가 읽는다.
+            _textFieldFocused = GUIUtility.keyboardControl != 0;
+        }
+
+        // ── UI 패널 (Docs/06 — 핫키와 동일 기능의 버튼) ──────────
+
+        private void DrawPanel()
+        {
+            var area = new Rect(Screen.width - _panelWidth - 12f, 12f, _panelWidth, Screen.height - 24f);
+            GUILayout.BeginArea(area, GUI.skin.box);
+            _panelScroll = GUILayout.BeginScrollView(_panelScroll);
+
+            DrawTargetSection();
+            GUILayout.Space(8f);
+            DrawAdjustSection();
+            GUILayout.Space(8f);
+            DrawActionSection();
+            GUILayout.Space(8f);
+            DrawAnimationSection();
+
+            GUILayout.Space(6f);
+            GUILayout.Label("H: 패널 숨김/표시  ·  필드 입력 중엔 핫키 정지");
+            GUILayout.EndScrollView();
+            GUILayout.EndArea();
+        }
+
+        /// <summary>선택 상태 버튼 — 켜져 있으면 초록 틴트.</summary>
+        private bool ToggleButton(string label, bool active, params GUILayoutOption[] options)
+        {
+            Color old = GUI.backgroundColor;
+            GUI.backgroundColor = active ? new Color(0.5f, 1f, 0.5f) : old;
+            bool clicked = GUILayout.Button(label, options);
+            GUI.backgroundColor = old;
+            if (clicked)
+            {
+                GUIUtility.keyboardControl = 0;  // 버튼 조작 시 필드 포커스 해제 → 핫키 복귀
+            }
+
+            return clicked;
+        }
+
+        private bool ActionButton(string label, params GUILayoutOption[] options)
+        {
+            bool clicked = GUILayout.Button(label, options);
+            if (clicked)
+            {
+                GUIUtility.keyboardControl = 0;
+            }
+
+            return clicked;
+        }
+
+        private void DrawTargetSection()
+        {
+            GUILayout.Label("── 대상 ──");
+            GUILayout.BeginHorizontal();
+            for (int t = 0; t < 2; t++)
+            {
+                if (ToggleButton(TabNames[t], _tab == t) && _tab != t)
+                {
+                    _tab = t;
+                    SelectCurrent();
+                }
+            }
+
+            GUILayout.EndHorizontal();
+
+            GUILayout.BeginHorizontal();
+            if (ActionButton("◀", GUILayout.Width(32f)))
+            {
+                CycleTarget(-1);
+            }
+
+            RigProfileData profile = CurrentProfile;
+            GUILayout.Label(profile != null ? profile.name : "(없음)",
+                GUILayout.ExpandWidth(true));
+            if (ActionButton("▶", GUILayout.Width(32f)))
+            {
+                CycleTarget(+1);
+            }
+
+            GUILayout.EndHorizontal();
+        }
+
+        private void DrawAdjustSection()
+        {
+            GUILayout.Label("── 조정 항목 ──");
+            if (ToggleButton("선택 없음 (←/→ = 대상 순환)", _adjustIndex < 0))
+            {
+                _adjustIndex = -1;
+                SyncGizmo();
+            }
+
+            RigProfileData profile = CurrentProfile;
+            if (profile == null)
+            {
+                return;
+            }
+
+            for (int i = 0; i < MountCount; i++)
+            {
+                if (ToggleButton("마운트  " + profile.Mounts[i].Id, _adjustIndex == i))
+                {
+                    _adjustIndex = i;
+                    SyncGizmo();
+                }
+            }
+
+            for (int i = 0; i < MuzzleCount; i++)
+            {
+                int index = MountCount + i;
+                if (ToggleButton("총구  " + profile.Muzzles[i].Id, _adjustIndex == index))
+                {
+                    _adjustIndex = index;
+                    SyncGizmo();
+                }
+            }
+
+            if (!TryGetAdjustTarget(out Transform anchor, out bool isMuzzle, out _))
+            {
+                return;
+            }
+
+            RefreshFieldsIfStale(anchor, force: false);
+
+            GUILayout.Space(6f);
+            GUILayout.BeginHorizontal();
+            if (ToggleButton(_fineStep ? "미세 스텝 ON" : "미세 스텝 OFF", _fineStep))
+            {
+                _fineStep = !_fineStep;
+            }
+
+            if (ActionButton("R 리셋"))
+            {
+                ResetSelected(anchor, isMuzzle);
+                RefreshFieldsIfStale(anchor, force: true);
+            }
+
+            GUILayout.EndHorizontal();
+
+            float moveStep = _fineStep ? _moveStepFine : _moveStep;
+            float rotStep = _fineStep ? _rotateStepFine : _rotateStep;
+
+            GUILayout.Label($"위치 (스텝 {moveStep:0.###})");
+            DrawFieldRow(0);
+            DrawNudgeRow(isMove: true, (axis, sign) =>
+            {
+                Vector3 delta = Vector3.zero;
+                delta[axis] = sign * moveStep;
+                anchor.localPosition += delta;
+                RefreshFieldsIfStale(anchor, force: true);
+            });
+
+            GUILayout.Label($"회전 ° (스텝 {rotStep:0.#})");
+            DrawFieldRow(3);
+            DrawNudgeRow(isMove: false, (axis, sign) =>
+            {
+                Vector3 euler = Vector3.zero;
+                euler[axis] = sign * rotStep;
+                anchor.localRotation *= Quaternion.Euler(euler);
+                RefreshFieldsIfStale(anchor, force: true);
+            });
+
+            if (!isMuzzle)
+            {
+                float scaleStep = _fineStep ? _scaleStepFine : _scaleStep;
+                GUILayout.Label($"스케일 (균일, 스텝 {scaleStep:0.###})");
+                GUILayout.BeginHorizontal();
+                _fields[6] = GUILayout.TextField(_fields[6], GUILayout.ExpandWidth(true));
+                if (ActionButton("−", GUILayout.Width(36f)))
+                {
+                    anchor.localScale -= Vector3.one * scaleStep;
+                    RefreshFieldsIfStale(anchor, force: true);
+                }
+
+                if (ActionButton("+", GUILayout.Width(36f)))
+                {
+                    anchor.localScale += Vector3.one * scaleStep;
+                    RefreshFieldsIfStale(anchor, force: true);
+                }
+
+                GUILayout.EndHorizontal();
+            }
+
+            if (ActionButton("입력 값 적용"))
+            {
+                ApplyFields(anchor, isMuzzle);
+            }
+        }
+
+        /// <summary>수치 입력 3칸 (pos 또는 rot).</summary>
+        private void DrawFieldRow(int offset)
+        {
+            GUILayout.BeginHorizontal();
+            for (int i = 0; i < 3; i++)
+            {
+                _fields[offset + i] = GUILayout.TextField(_fields[offset + i], GUILayout.ExpandWidth(true));
+            }
+
+            GUILayout.EndHorizontal();
+        }
+
+        private static readonly string[] MoveNudgeLabels = { "X−", "X+", "Y−", "Y+", "Z−", "Z+" };
+        private static readonly string[] RotateNudgeLabels = { "P−", "P+", "Y−", "Y+", "R−", "R+" };
+
+        private void DrawNudgeRow(bool isMove, System.Action<int, float> nudge)
+        {
+            string[] labels = isMove ? MoveNudgeLabels : RotateNudgeLabels;
+            GUILayout.BeginHorizontal();
+            for (int i = 0; i < 3; i++)
+            {
+                if (ActionButton(labels[i * 2], GUILayout.ExpandWidth(true)))
+                {
+                    nudge(i, -1f);
+                }
+
+                if (ActionButton(labels[i * 2 + 1], GUILayout.ExpandWidth(true)))
+                {
+                    nudge(i, +1f);
+                }
+            }
+
+            GUILayout.EndHorizontal();
+        }
+
+        /// <summary>선택 변경·버튼 조정 후 필드 버퍼 동기화. 타이핑 중(포커스)엔 덮지 않는다.</summary>
+        private void RefreshFieldsIfStale(Transform anchor, bool force)
+        {
+            if (!force && _bufferedAdjustIndex == _adjustIndex)
+            {
+                return;
+            }
+
+            if (!force && GUIUtility.keyboardControl != 0)
+            {
+                return;
+            }
+
+            _bufferedAdjustIndex = _adjustIndex;
+            Vector3 pos = anchor.localPosition;
+            Vector3 rot = anchor.localEulerAngles;
+            _fields[0] = pos.x.ToString("0.####");
+            _fields[1] = pos.y.ToString("0.####");
+            _fields[2] = pos.z.ToString("0.####");
+            _fields[3] = rot.x.ToString("0.##");
+            _fields[4] = rot.y.ToString("0.##");
+            _fields[5] = rot.z.ToString("0.##");
+            _fields[6] = anchor.localScale.x.ToString("0.####");
+        }
+
+        private void ApplyFields(Transform anchor, bool isMuzzle)
+        {
+            GUIUtility.keyboardControl = 0;
+            bool ok = float.TryParse(_fields[0], out float px)
+                & float.TryParse(_fields[1], out float py)
+                & float.TryParse(_fields[2], out float pz)
+                & float.TryParse(_fields[3], out float rx)
+                & float.TryParse(_fields[4], out float ry)
+                & float.TryParse(_fields[5], out float rz);
+            if (!ok)
+            {
+                Debug.LogWarning("[RigLab] 입력 값 해석 실패 — 숫자만 입력하세요.");
+                return;
+            }
+
+            anchor.localPosition = new Vector3(px, py, pz);
+            anchor.localRotation = Quaternion.Euler(rx, ry, rz);
+            if (!isMuzzle && float.TryParse(_fields[6], out float scale))
+            {
+                anchor.localScale = Vector3.one * scale;
+            }
+
+            RefreshFieldsIfStale(anchor, force: true);
+        }
+
+        private void DrawActionSection()
+        {
+            GUILayout.Label("── 동작 ──");
+            GUILayout.BeginHorizontal();
+            if (ActionButton("F 시험 발사"))
+            {
+                TestFire();
+            }
+
+            if (ActionButton(_dirty ? "S 저장 ●" : "S 저장"))
+            {
+                SaveProfile();
+            }
+
+            GUILayout.EndHorizontal();
+        }
+
+        private void DrawAnimationSection()
+        {
+            GUILayout.Label("── 애니메이션 ──");
+            if (_animator == null)
+            {
+                GUILayout.Label("없음 (AC 없는 대상 — 스킵)");
+                return;
+            }
+
+            GUILayout.BeginHorizontal();
+            if (ToggleButton("FlyIdle", _stateLabel == "FlyIdle"))
+            {
+                ActFlyIdle();
+            }
+
+            if (ToggleButton("Fly ▸8방", _stateLabel == "Fly"))
+            {
+                ActFly();
+            }
+
+            GUILayout.EndHorizontal();
+
+            GUILayout.BeginHorizontal();
+            if (ToggleButton("GroundIdle", _stateLabel == "GroundIdle"))
+            {
+                ActGroundIdle();
+            }
+
+            if (ToggleButton("Walk ▸8방", _stateLabel == "Walk"))
+            {
+                ActWalk();
+            }
+
+            GUILayout.EndHorizontal();
+
+            GUILayout.BeginHorizontal();
+            if (ToggleButton("Dash ▸8방", _stateLabel == "Dash"))
+            {
+                ActDash();
+            }
+
+            if (ActionButton("피격"))
+            {
+                ActHit(heavy: false);
+            }
+
+            if (ActionButton("강피격"))
+            {
+                ActHit(heavy: true);
+            }
+
+            GUILayout.EndHorizontal();
+
+            GUILayout.Label("사격 유지 토글");
+            GUILayout.BeginHorizontal();
+            if (ToggleButton("경화기", _fireGroup == MechaAnimParams.FireGroupLight))
+            {
+                ToggleFire(MechaAnimParams.FireGroupLight);
+            }
+
+            if (ToggleButton("발사기", _fireGroup == MechaAnimParams.FireGroupLauncher))
+            {
+                ToggleFire(MechaAnimParams.FireGroupLauncher);
+            }
+
+            if (ToggleButton("중화기", _fireGroup == MechaAnimParams.FireGroupHeavy))
+            {
+                ToggleFire(MechaAnimParams.FireGroupHeavy);
+            }
+
+            GUILayout.EndHorizontal();
+
+            GUILayout.BeginHorizontal();
+            if (ActionButton("속도 −", GUILayout.ExpandWidth(true)))
+            {
+                ActSpeed(-0.1f);
+            }
+
+            GUILayout.Label($"x{_playbackSpeed:0.0}", GUILayout.Width(44f));
+            if (ActionButton("속도 +", GUILayout.ExpandWidth(true)))
+            {
+                ActSpeed(0.1f);
+            }
+
+            GUILayout.EndHorizontal();
         }
     }
 }
