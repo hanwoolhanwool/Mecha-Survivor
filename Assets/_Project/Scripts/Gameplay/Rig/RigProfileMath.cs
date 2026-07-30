@@ -7,6 +7,9 @@ namespace MechaSurvivor.Gameplay
     /// </summary>
     public static class RigProfileMath
     {
+        /// <summary>적 주 공격 총구의 프로필 내 식별자 규약 (Docs/06 §3.1).</summary>
+        public const string EnemyMainMuzzleId = "enemy_main";
+
         /// <summary>빌더가 만드는 마운트 앵커 이름 규약. 씬의 기존 수동 배치와 같은 이름을 쓴다.</summary>
         public static string MountObjectName(string id) => "Mount_" + id;
 
@@ -54,6 +57,33 @@ namespace MechaSurvivor.Gameplay
             target.localPosition = localPosition;
             target.localRotation = Quaternion.Euler(localEulerAngles);
             target.localScale = localScale;
+        }
+
+        /// <summary>
+        /// 적 총구 오프셋 해석 (Docs/06 §3.3): 리그 프로필에 enemy_main 총구(모델 루트 기준)가
+        /// 있으면 그 값이 우선, 없으면 EnemyData.MuzzleOffset 폴백.
+        /// </summary>
+        public static Vector3 ResolveEnemyMuzzleOffset(EnemyData data)
+        {
+            if (data == null)
+            {
+                return Vector3.zero;
+            }
+
+            RigProfileData profile = data.RigProfile;
+            if (profile != null && profile.Muzzles != null)
+            {
+                for (int i = 0; i < profile.Muzzles.Length; i++)
+                {
+                    RigProfileData.MuzzleDef def = profile.Muzzles[i];
+                    if (def.Id == EnemyMainMuzzleId && string.IsNullOrEmpty(def.MountId))
+                    {
+                        return def.LocalPosition;
+                    }
+                }
+            }
+
+            return data.MuzzleOffset;
         }
 
         /// <summary>

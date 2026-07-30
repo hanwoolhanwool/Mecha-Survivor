@@ -42,6 +42,7 @@ namespace MechaSurvivor.Gameplay
         private bool _released;
         private float _empSlowFactor = 1f;
         private float _empEndTime;
+        private Vector3 _muzzleOffset;
 
         /// <summary>EMP 감전 중 — 이동 슬로우 + 사격 봉쇄 (GDD 3.4-10). 피격 연출도 읽는다.</summary>
         public bool IsEmpAffected => Time.time < _empEndTime;
@@ -69,6 +70,7 @@ namespace MechaSurvivor.Gameplay
             _released = false;
             _empSlowFactor = 1f;
             _empEndTime = 0f;
+            _muzzleOffset = RigProfileMath.ResolveEnemyMuzzleOffset(data);
 
             if (_health != null)
             {
@@ -300,7 +302,7 @@ namespace MechaSurvivor.Gameplay
             _nextAttackTime = Time.time + Data.AttackInterval;
 
             // 총구 오프셋은 데이터화 (Docs/06 §3.3) — 회전만 적용, 스케일은 무시 (종전 동작 보존).
-            Vector3 muzzle = transform.position + transform.rotation * Data.MuzzleOffset;
+            Vector3 muzzle = transform.position + transform.rotation * _muzzleOffset;
             Ballistics.TryPredictInterceptDirection(
                 muzzle, _player.position, _playerVelocity, Data.ProjectileSpeed,
                 out Vector3 direction);

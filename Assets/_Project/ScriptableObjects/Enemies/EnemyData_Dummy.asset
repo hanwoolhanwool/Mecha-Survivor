@@ -26,6 +26,8 @@ MonoBehaviour:
   ProjectileSpeed: 35
   ProjectileDamage: 6
   ProjectilePrefab: {fileID: 0}
+  MuzzleOffset: {x: 0, y: 1.5, z: 0}
+  RigProfile: {fileID: 11400000, guid: 1f4a19bc3687cc84584ada2cb39b7329, type: 2}
   SeparationRadius: 0
   ExpReward: 0
   Prefab: {fileID: 0}
