@@ -61,14 +61,14 @@ namespace MechaSurvivor.Gameplay
                 return;
             }
 
-            // 포드 안의 장전 미사일에서 발사 — 소비한 모델 위치가 곧 발사 위치.
-            // 랙이 없거나(다른 씬) 초과분(레벨 발사 수 > 슬롯 12)은 총구 폴백.
+            // 포드 안의 장전 미사일에서 발사 — 소비한 모델의 보이는 위치(렌더러 바운즈)가
+            // 곧 발사 위치. 랙이 없거나(다른 씬) 초과분(레벨 발사 수 > 슬롯 12)은 총구 폴백.
             Vector3 origin = Muzzle.position;
             if (_rack != null)
             {
-                if (_rack.TryConsumeNext(out Transform slot))
+                if (_rack.TryConsumeNext(out _, out Vector3 firePosition))
                 {
-                    origin = slot.position;
+                    origin = firePosition;
                 }
 
                 _rack.PlayFire();

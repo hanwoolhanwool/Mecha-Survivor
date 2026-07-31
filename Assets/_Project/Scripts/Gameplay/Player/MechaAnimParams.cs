@@ -63,6 +63,7 @@ namespace MechaSurvivor.Gameplay
             { "emp_field", FireGroupLight },
             { "gravity_well", FireGroupLight },
             { "missile_pod", FireGroupLauncher },
+            { "twin_rocket", FireGroupLauncher },
             { "cluster_bomb", FireGroupLauncher },
             { "orbital_strike", FireGroupLauncher },
             { "railgun", FireGroupHeavy },

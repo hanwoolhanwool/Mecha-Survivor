@@ -16,6 +16,9 @@ namespace MechaSurvivor.Gameplay
         [Tooltip("Fire 클립 재생용 (모델에 클립이 없으면 비움)")]
         [SerializeField] private Animator _animator;
 
+        [Tooltip("트윈 로켓 발사구 (포드 입구) — 좌/우 교대 사출")]
+        [SerializeField] private Transform[] _launchPorts;
+
         private static readonly int FireStateHash = Animator.StringToHash("Fire");
 
         private Transform[] _slots;   // 발사 순서 정렬 (R/L 교대, Inner → Outer)
@@ -86,15 +89,57 @@ namespace MechaSurvivor.Gameplay
         /// <summary>장전된 다음 미사일을 소비(숨김)하고 그 트랜스폼을 준다. 다 떨어지면 false.</summary>
         public bool TryConsumeNext(out Transform slot)
         {
+            return TryConsumeNext(out slot, out _);
+        }
+
+        /// <summary>
+        /// 소비 + 실제 발사 위치 반환. 위치는 숨기기 전에 렌더러 바운즈에서 캡처한다
+        /// (숨긴 뒤에는 바운즈가 갱신되지 않는다).
+        /// </summary>
+        public bool TryConsumeNext(out Transform slot, out Vector3 firePosition)
+        {
             if (_slots != null && _nextFire < _loaded)
             {
                 slot = _slots[_nextFire];
                 _nextFire++;
+                firePosition = FirePositionOf(slot);
                 slot.gameObject.SetActive(false);
                 return true;
             }
 
             slot = null;
+            firePosition = Vector3.zero;
+            return false;
+        }
+
+        /// <summary>
+        /// 슬롯의 실제 발사 위치. 스킨 메시라 트랜스폼은 컨테이너(포드 중앙)에 몰려 있으므로
+        /// 렌더러 바운즈 중심(눈에 보이는 미사일 위치)을 쓴다. 렌더러가 없으면 트랜스폼 폴백.
+        /// </summary>
+        public static Vector3 FirePositionOf(Transform slot)
+        {
+            if (slot != null && slot.TryGetComponent(out Renderer renderer))
+            {
+                return renderer.bounds.center;
+            }
+
+            return slot != null ? slot.position : Vector3.zero;
+        }
+
+        /// <summary>발사구를 좌/우 순환으로 준다 (index 증가 = 교대). 포트 미배선이면 false.</summary>
+        public bool TryGetLaunchPort(int index, out Transform port)
+        {
+            if (_launchPorts != null && _launchPorts.Length > 0)
+            {
+                int wrapped = ((index % _launchPorts.Length) + _launchPorts.Length) % _launchPorts.Length;
+                port = _launchPorts[wrapped];
+                if (port != null)
+                {
+                    return true;
+                }
+            }
+
+            port = null;
             return false;
         }
 

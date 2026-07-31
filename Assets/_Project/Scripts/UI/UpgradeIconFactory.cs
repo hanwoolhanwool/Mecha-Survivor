@@ -110,6 +110,7 @@ namespace MechaSurvivor.UI
             {
                 case "part_gatling": return Gatling(p);
                 case "part_missile_pod": return Missile(p);
+                case "part_twin_rocket": return Missile(p);   // 자매 무기 — 동일 계열 아이콘
                 case "part_beam": return Beam(p);
                 case "part_gravity_well": return GravityWell(p);
                 case "part_laser_cannon": return LaserCannon(p);

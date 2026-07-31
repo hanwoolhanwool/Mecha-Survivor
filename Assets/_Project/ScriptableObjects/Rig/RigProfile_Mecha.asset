@@ -40,3 +40,7 @@ MonoBehaviour:
     MountId: BackWeapon
     LocalPosition: {x: 0.00021830201, y: -0.063369095, z: 0.91291076}
     LocalEulerAngles: {x: -0, y: 0, z: 0}
+  - Id: twin_rocket
+    MountId: BackWeapon
+    LocalPosition: {x: 0.00021830201, y: -0.063369095, z: 0.91291076}
+    LocalEulerAngles: {x: -0, y: 0, z: 0}

@@ -177,6 +177,7 @@ namespace MechaSurvivor.Tests.EditMode
             Assert.AreEqual(MechaAnimParams.FireGroupLight, MechaAnimParams.GetFireGroup("gatling"));
             Assert.AreEqual(MechaAnimParams.FireGroupLight, MechaAnimParams.GetFireGroup("gravity_well"));
             Assert.AreEqual(MechaAnimParams.FireGroupLauncher, MechaAnimParams.GetFireGroup("missile_pod"));
+            Assert.AreEqual(MechaAnimParams.FireGroupLauncher, MechaAnimParams.GetFireGroup("twin_rocket"));
             Assert.AreEqual(MechaAnimParams.FireGroupLauncher, MechaAnimParams.GetFireGroup("orbital_strike"));
             Assert.AreEqual(MechaAnimParams.FireGroupHeavy, MechaAnimParams.GetFireGroup("railgun"));
             Assert.AreEqual(MechaAnimParams.FireGroupHeavy, MechaAnimParams.GetFireGroup("shotgun_cannon"));

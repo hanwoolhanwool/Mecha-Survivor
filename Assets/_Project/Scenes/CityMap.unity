@@ -129481,6 +129481,7 @@ MonoBehaviour:
   _heavyWeaponIds:
   - beam
   - missile_pod
+  - twin_rocket
   _heavyFireShake: 0.18
   _kickWeaponIds:
   - railgun
@@ -250570,6 +250571,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: a51d57d9a65fee24f9a7ef532307bb2c, type: 2}
   - {fileID: 11400000, guid: f4b3ddca79dd14e498f589ed90b3edce, type: 2}
   - {fileID: 11400000, guid: dcb4ba9e0db4ba049937da7ccf6e540b, type: 2}
+  - {fileID: 0}
   _recipes:
   - {fileID: 11400000, guid: 299bd0104e54f9d45a8f87f39f101fa8, type: 2}
   - {fileID: 11400000, guid: d393b71133300a544a1bf5c99e8ff3ec, type: 2}

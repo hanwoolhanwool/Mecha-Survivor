@@ -58,6 +58,38 @@ namespace MechaSurvivor.Gameplay
         /// </summary>
         public void LaunchMissile(in ProjectileLaunchData data, Vector3 fallbackTarget)
         {
+            // ① 수직 팝업 — 미사일마다 조금씩 다른 방향으로.
+            Quaternion jitter = Quaternion.Euler(
+                Random.Range(-_popupJitterAngle, _popupJitterAngle),
+                Random.Range(0f, 360f),
+                0f);
+            BeginMissileFlight(data, fallbackTarget, jitter * Vector3.up);
+        }
+
+        /// <summary>
+        /// 지정 방향 직사출 (포드 입구 등 — Docs/06 후속). ① 팝업이 수직 대신 사출 방향으로
+        /// 진행하고, 이후 정렬 → 곡선 유도는 동일하다. 관 사출이라 흩뿌림은 좁게 준다.
+        /// </summary>
+        public void LaunchMissileFrom(
+            in ProjectileLaunchData data, Vector3 fallbackTarget, Vector3 launchDirection)
+        {
+            Vector3 dir = launchDirection.sqrMagnitude > 1e-4f
+                ? launchDirection.normalized
+                : Vector3.up;
+
+            Vector3 reference = Mathf.Abs(Vector3.Dot(dir, Vector3.up)) > 0.9f
+                ? Vector3.right
+                : Vector3.up;
+            Vector3 ortho = Vector3.Cross(dir, reference).normalized;
+            Quaternion tilt = Quaternion.AngleAxis(
+                Random.Range(0f, _popupJitterAngle * 0.4f), ortho);
+            Quaternion spin = Quaternion.AngleAxis(Random.Range(0f, 360f), dir);
+            BeginMissileFlight(data, fallbackTarget, spin * tilt * dir);
+        }
+
+        private void BeginMissileFlight(
+            in ProjectileLaunchData data, Vector3 fallbackTarget, Vector3 popupDirection)
+        {
             Launch(data);
 
             _fallbackTarget = fallbackTarget;
@@ -66,13 +98,6 @@ namespace MechaSurvivor.Gameplay
             _phaseAge = 0f;
             _homingAge = 0f;
             _retarget = null;
-
-            // ① 수직 팝업 — 미사일마다 조금씩 다른 방향으로.
-            Quaternion jitter = Quaternion.Euler(
-                Random.Range(-_popupJitterAngle, _popupJitterAngle),
-                Random.Range(0f, 360f),
-                0f);
-            Vector3 popupDirection = jitter * Vector3.up;
             Velocity = popupDirection * _popupSpeed;
 
             // ③에서 쓸 곡선 편향 — 진행 축에 수직인 임의 방향.

@@ -28,6 +28,7 @@ namespace MechaSurvivor.Utilities
             new Recipe("gatling", Gatling),
             new Recipe("laser_cannon", LaserCannon),
             new Recipe("missile_pod", MissilePod),
+            new Recipe("twin_rocket", MissilePod),   // 자매 무기 — 동일 발사음 재사용
             new Recipe("shotgun_cannon", ShotgunCannon),
             new Recipe("cluster_bomb", ClusterBomb),
             new Recipe("beam", Beam),

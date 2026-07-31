@@ -110,6 +110,36 @@ namespace MechaSurvivor.Tests.EditMode
         }
 
         [Test]
+        public void TryGetLaunchPort_CyclesLeftRight()
+        {
+            var left = new GameObject("LaunchPort_L").transform;
+            left.SetParent(_root.transform, false);
+            var right = new GameObject("LaunchPort_R").transform;
+            right.SetParent(_root.transform, false);
+
+            var so = new UnityEditor.SerializedObject(_rack);
+            var ports = so.FindProperty("_launchPorts");
+            ports.arraySize = 2;
+            ports.GetArrayElementAtIndex(0).objectReferenceValue = left;
+            ports.GetArrayElementAtIndex(1).objectReferenceValue = right;
+            so.ApplyModifiedPropertiesWithoutUndo();
+
+            Assert.IsTrue(_rack.TryGetLaunchPort(0, out Transform p0));
+            Assert.AreSame(left, p0);
+            Assert.IsTrue(_rack.TryGetLaunchPort(1, out Transform p1));
+            Assert.AreSame(right, p1);
+            Assert.IsTrue(_rack.TryGetLaunchPort(2, out Transform p2));
+            Assert.AreSame(left, p2, "인덱스는 좌/우로 순환해야 한다.");
+        }
+
+        [Test]
+        public void TryGetLaunchPort_NoPorts_ReturnsFalse()
+        {
+            Assert.IsFalse(_rack.TryGetLaunchPort(0, out _),
+                "포트 미배선(다른 포드 모델)이면 총구 폴백을 위해 false여야 한다.");
+        }
+
+        [Test]
         public void SetLoaded_AfterConsume_ReloadsAndResetsOrder()
         {
             _rack.SetLoaded(4);

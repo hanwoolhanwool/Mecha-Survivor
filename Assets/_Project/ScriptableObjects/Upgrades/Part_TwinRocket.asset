@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0fec32232a3c4d343a342c30faa6f9a5, type: 3}
+  m_Name: Part_TwinRocket
+  m_EditorClassIdentifier: MechaSurvivor.Gameplay::MechaSurvivor.Gameplay.PartUpgradeData
+  Id: part_twin_rocket
+  DisplayName: "\uD2B8\uC708 \uB85C\uCF13"
+  Description: "\uD3EC\uB4DC \uC88C\uC6B0 \uBC1C\uC0AC\uAD6C\uC5D0\uC11C \uAD50\uB300\uB85C
+    \uC9C1\uC0AC\uCD9C\uD558\uB294 \uC720\uB3C4 \uB85C\uCF13. \uAD00\uC5D0\uC11C
+    \uBFDC\uC5B4\uC838 \uB098\uC628 \uB4A4 \uACE1\uC120\uC744 \uADF8\uB9AC\uBA70
+    \uBAA9\uD45C\uB85C \uAEBE\uC778\uB2E4."
+  Icon: {fileID: 0}
+  Category: 0
+  Rarity: 1
+  MaxLevel: 5
+  WeaponPrefab: {fileID: 2460169471993702074, guid: c84320a5209f54946982723a5bfe6b2b, type: 3}
+  Weapon: {fileID: 11400000, guid: 498105e2e2d8d414086da460f178c22f, type: 2}
+  UnlocksWeaponSlot: 0

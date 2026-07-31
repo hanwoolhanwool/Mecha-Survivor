@@ -34,6 +34,13 @@ MonoBehaviour:
     PitchMax: 1.05
     MinInterval: 0.08
     Spatial: 0
+  - Id: twin_rocket
+    Clip: {fileID: 8300000, guid: bc9ee36cb4e610f4f9759f4e13484558, type: 3}
+    Volume: 0.8
+    PitchMin: 0.95
+    PitchMax: 1.05
+    MinInterval: 0.1
+    Spatial: 0
   - Id: shotgun_cannon
     Clip: {fileID: 8300000, guid: 796b6fa5000fb8c4c89b991992319caa, type: 3}
     Volume: 0.8

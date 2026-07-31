@@ -149,6 +149,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: MechaSurvivor.UI::MechaSurvivor.UI.PauseController
   _input: {fileID: 175836622}
+  _settingsPanel: {fileID: 0}
 --- !u!4 &37980820
 Transform:
   m_ObjectHideFlags: 0
@@ -1374,6 +1375,7 @@ MonoBehaviour:
   _aimer: {fileID: 175836627}
   _droneRig: {fileID: 175836636}
   _weaponMount: {fileID: 124129973}
+  _rigBuilder: {fileID: 0}
 --- !u!4 &175836626
 Transform:
   m_ObjectHideFlags: 0
@@ -7165,6 +7167,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: MechaSurvivor.UI::MechaSurvivor.UI.LevelUpPanel
   _upgradeService: {fileID: 175836623}
+  _selectLockSeconds: 0.45
 --- !u!4 &1107310866
 Transform:
   m_ObjectHideFlags: 0
@@ -8710,7 +8713,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: MechaSurvivor.Systems::MechaSurvivor.Systems.AudioDirector
   _library: {fileID: 11400000, guid: ea275d8782a13be41a39364f8e4fbb3b, type: 2}
-  _masterVolume: 0.8
   _voiceCount: 20
   _throttleWindow: 0.05
   _throttleBudget: 8
@@ -11452,6 +11454,7 @@ MonoBehaviour:
   - {fileID: 5654431551398502496, guid: f9ac3554b55e43f49b8ee6e21a206899, type: 3}
   - {fileID: 180758841849358318, guid: 36089f14647a52949a318a59941d98b5, type: 3}
   - {fileID: 6533753863634590202, guid: 01acf6c470ae357498523bc99b2fc73a, type: 3}
+  - {fileID: 0}
   _dummyPrefab: {fileID: 4940205979431293377, guid: 37180f70a75d6b04cb5853447a39b2e6, type: 3}
   _dummyData: {fileID: 11400000, guid: c6c5c37e12bb25f4ba3dacd8987f743b, type: 2}
   _dummyCount: 10
