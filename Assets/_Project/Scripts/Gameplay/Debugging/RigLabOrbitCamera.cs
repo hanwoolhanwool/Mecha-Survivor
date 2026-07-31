@@ -20,7 +20,9 @@ namespace MechaSurvivor.Gameplay
         [SerializeField] private float _startPitch = 5f;
 
         [SerializeField] private float _rotateSensitivity = 0.25f;
-        [SerializeField] private float _zoomSensitivity = 0.01f;
+
+        [Tooltip("휠 1노치당 거리 변화 비율 (0.12 = 12%)")]
+        [SerializeField] private float _zoomSensitivity = 0.12f;
 
         [Tooltip("휠 클릭 드래그 팬 — 거리 비례라 줌 아웃할수록 크게 움직인다")]
         [SerializeField] private float _panSensitivity = 0.0015f;
@@ -68,8 +70,10 @@ namespace MechaSurvivor.Gameplay
                 float scroll = mouse.scroll.ReadValue().y;
                 if (scroll != 0f)
                 {
+                    // 기기별 스크롤 스케일 차이(±1 vs ±120)에 폭주하지 않게 노치 단위로 클램프.
+                    float notch = Mathf.Clamp(scroll, -1f, 1f);
                     _distance = Mathf.Clamp(
-                        _distance - scroll * _zoomSensitivity * _distance,
+                        _distance - notch * _zoomSensitivity * _distance,
                         _minDistance, _maxDistance);
                 }
             }

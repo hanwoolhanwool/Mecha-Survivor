@@ -333,6 +333,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 8faaabe9723b39a4b83537af5ffadef5, type: 2}
   - {fileID: 11400000, guid: c36108be948b9894ea91467c8ef51bf8, type: 2}
   - {fileID: 11400000, guid: 20fe758f2fbc28147b2f9e78431bb932, type: 2}
+  _flyHoverHeight: 1.2
   _moveStep: 0.05
   _moveStepFine: 0.005
   _rotateStep: 5
@@ -340,6 +341,7 @@ MonoBehaviour:
   _scaleStep: 0.05
   _scaleStepFine: 0.005
   _hudRefreshInterval: 0.25
+  _panelWidth: 280
 --- !u!4 &1615921980
 Transform:
   m_ObjectHideFlags: 0
@@ -520,8 +522,10 @@ MonoBehaviour:
   _minDistance: 1.5
   _maxDistance: 25
   _pivotHeight: 1.5
+  _startPitch: 5
   _rotateSensitivity: 0.25
-  _zoomSensitivity: 0.01
+  _zoomSensitivity: 0.12
+  _panSensitivity: 0.0015
 --- !u!81 &1958670770
 AudioListener:
   m_ObjectHideFlags: 0
