@@ -1250,6 +1250,15 @@ namespace MechaSurvivor.Gameplay
 
             GUILayout.EndHorizontal();
 
+            // 명시적 중지 — 켜진 그룹 버튼 재클릭과 같은 동작이지만 눈에 띄게 따로 둔다.
+            GUI.enabled = _fireGroup >= 0;
+            if (ActionButton("■ 사격 중지"))
+            {
+                ToggleFire(_fireGroup);
+            }
+
+            GUI.enabled = true;
+
             GUILayout.BeginHorizontal();
             if (ActionButton("속도 −", GUILayout.ExpandWidth(true)))
             {
