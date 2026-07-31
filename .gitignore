@@ -61,3 +61,6 @@ crashlytics-build.properties
 
 # 프로파일러
 /[Pp]rofiler*.data
+
+# Git LFS 훅 오설치 부산물 (리터럴 dev/null 폴더)
+dev/null/
