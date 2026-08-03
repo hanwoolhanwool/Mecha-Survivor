@@ -136,9 +136,16 @@ neck  U 26 -14 -16   | Head    U 20 -12 -26
 RightShoulder L -85   6 | RightArm L -55 -62 | RightForeArm L   5 -22 | RightHand L -12 -32
 LeftShoulder  L  95   8 | LeftArm  L 100 -10 | LeftForeArm  L 118 -20 | LeftHand  L 124 -30
 RightUpLeg L -48 -45 | RightLeg L 158  -8 | RightFoot L 168 -40 | RightToeBase L 168 -45
-LeftUpLeg  L 130 -42 | LeftLeg  L 103 -58 | LeftFoot  L 108 -75 | LeftToeBase  L 108 -80
+LeftUpLeg  L 155 -48 | LeftLeg  L 158 -36 | LeftFoot  L 158 -55 | LeftToeBase  L 158 -62
 Hips location = (0, 0.02, +0.20) 월드 / 프레임 30에서 z −0.05
 ```
+
+왼다리는 2026-08-03 수정값이다. 초기값(UpLeg 130/−42, Leg 103/−58, Foot 108/−75, Toe 108/−80)은
+① 다리가 뒤가 아니라 옆으로 벌어지고 ② 정강이 el이 허벅지보다 가팔라 **무릎이 뒤로 22° 꺾인
+역관절**이었다(사용자 지적 "왼쪽다리가 돌아가 있다"). 판정 요령: 무릎캡 방향 ≈ normalize(허벅지방향
+− 정강이방향)이 **전방-아래(−Y,−Z)** 를 향해야 정상. 트레일 다리는 정강이 el이 허벅지 el보다
+**완만해야**(덜 음수) 자연 굴곡이 된다. 수정 시 프레임 30 사웨이는 기존 델타(본별 0.7~3.5°)를
+쿼터니언 델타로 옮겨 보존했고, 60=0 봉합 유지.
 
 ### 9-3. 내보내기 절차 (★ Root 함정 포함 — 이대로 하지 않으면 클립이 안 생긴다)
 
