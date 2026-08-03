@@ -59,6 +59,33 @@ namespace MechaSurvivor.Tests.EditMode
         }
 
         [Test]
+        public void CycleWithNone_CyclesThroughNoneAndBackToStart()
+        {
+            // -1(없음) → 0 → 1 → 2 → -1 (마운트/총구 선택, 포즈 클립 선택 공용)
+            Assert.AreEqual(0, RigLabMath.CycleWithNone(-1, 1, 3));
+            Assert.AreEqual(1, RigLabMath.CycleWithNone(0, 1, 3));
+            Assert.AreEqual(2, RigLabMath.CycleWithNone(1, 1, 3));
+            Assert.AreEqual(-1, RigLabMath.CycleWithNone(2, 1, 3), "마지막 다음은 '없음'으로 돌아온다.");
+        }
+
+        [Test]
+        public void CycleWithNone_NegativeDeltaAndEmptyList()
+        {
+            Assert.AreEqual(2, RigLabMath.CycleWithNone(-1, -1, 3), "'없음'에서 역방향은 마지막.");
+            Assert.AreEqual(-1, RigLabMath.CycleWithNone(0, -1, 3));
+            Assert.AreEqual(-1, RigLabMath.CycleWithNone(0, 1, 0), "빈 목록은 항상 '없음'.");
+            Assert.AreEqual(-1, RigLabMath.CycleWithNone(-1, 1, 0));
+        }
+
+        [Test]
+        public void CycleWithNone_SingleEntry_TogglesWithNone()
+        {
+            // 포즈 클립이 1개일 때 P 키는 켜기/끄기 토글처럼 동작해야 한다.
+            Assert.AreEqual(0, RigLabMath.CycleWithNone(-1, 1, 1));
+            Assert.AreEqual(-1, RigLabMath.CycleWithNone(0, 1, 1));
+        }
+
+        [Test]
         public void ResolveEnemyMuzzleOffset_NoProfile_UsesEnemyData()
         {
             var data = ScriptableObject.CreateInstance<EnemyData>();

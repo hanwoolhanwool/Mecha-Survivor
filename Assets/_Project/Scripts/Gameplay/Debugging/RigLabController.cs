@@ -1,5 +1,7 @@
 using UnityEngine;
+using UnityEngine.Animations;
 using UnityEngine.InputSystem;
+using UnityEngine.Playables;
 using MechaSurvivor.Systems;
 
 namespace MechaSurvivor.Gameplay
@@ -12,7 +14,7 @@ namespace MechaSurvivor.Gameplay
     /// 조작: Tab 캐릭터↔적 탭 · ←/→ 대상 순환 · [ ] 마운트/총구 선택 ·
     /// (선택 중) 화살표+PgUp/Dn 이동, Shift=회전, Ctrl=미세, Alt+PgUp/Dn=스케일 ·
     /// R 리셋 · F 시험 발사 · S 저장 · 1~5 이동 상태(8방) · 6/7/8 사격 토글 ·
-    /// 9/0 피격 · =/- 재생 속도 · 우클릭 드래그/휠 카메라.
+    /// 9/0 피격 · P 포즈 클립 순환 · =/- 재생 속도 · 우클릭 드래그/휠 카메라.
     /// </summary>
     public sealed class RigLabController : MonoBehaviour
     {
@@ -24,6 +26,11 @@ namespace MechaSurvivor.Gameplay
         [Header("대상 카탈로그 (Docs/06 §4.1)")]
         [SerializeField] private RigProfileData[] _characterProfiles;
         [SerializeField] private RigProfileData[] _enemyProfiles;
+
+        [Header("포즈 클립 (Docs/07 — 전시용, AC에 없는 클립)")]
+        [Tooltip("P 키로 순환 재생. AnimatorController를 거치지 않고 PlayableGraph로 직접 물린다 — "
+            + "게임용 AC_Mecha는 건드리지 않는다")]
+        [SerializeField] private AnimationClip[] _poseClips;
 
         [Header("배치")]
         [Tooltip("비행 상태에서 바닥 위로 띄우는 높이. 지상 상태는 최저점이 바닥에 닿게 자동 보정")]
@@ -66,6 +73,10 @@ namespace MechaSurvivor.Gameplay
         private int _directionIndex;            // 8방 순환 (이동/대쉬 공용)
         private int _fireGroup = -1;            // -1 = 사격 꺼짐
         private string _stateLabel = "FlyIdle";
+
+        private int _poseIndex = -1;            // -1 = 포즈 재생 안 함
+        private PlayableGraph _poseGraph;
+        private AnimationClipPlayable _posePlayable;
 
         private int _adjustIndex = -1;          // -1=조정 안 함, 0..M-1=마운트, M..=총구
         private bool _dirty;
@@ -158,6 +169,8 @@ namespace MechaSurvivor.Gameplay
 
         private void OnDisable()
         {
+            // 그래프를 안 지우면 Play 종료 시 누수 경고가 뜬다.
+            StopPoseGraph();
             Application.runInBackground = false;
         }
 
@@ -179,6 +192,10 @@ namespace MechaSurvivor.Gameplay
 
         private void SelectCurrent()
         {
+            // 대상이 바뀌면 이전 Animator가 파괴된다 — 물려 있던 포즈 그래프를 먼저 끊는다.
+            StopPoseGraph();
+            _poseIndex = -1;
+
             ReleaseTestWeapon();
             _adjustIndex = -1;
             SyncGizmo();
@@ -348,16 +365,7 @@ namespace MechaSurvivor.Gameplay
         /// <summary>[ ] 순환: 없음(-1) → 마운트들 → 총구들 → 없음. 없음일 때 ←/→는 대상 순환.</summary>
         private void CycleAdjust(int delta)
         {
-            int count = MountCount + MuzzleCount;
-            if (count == 0)
-            {
-                _adjustIndex = -1;
-                SyncGizmo();
-                return;
-            }
-
-            // -1 포함 순환 (count+1 칸을 돌리고 -1 오프셋).
-            _adjustIndex = RigLabMath.CycleIndex(_adjustIndex + 1, delta, count + 1) - 1;
+            _adjustIndex = RigLabMath.CycleWithNone(_adjustIndex, delta, MountCount + MuzzleCount);
             SyncGizmo();
         }
 
@@ -734,6 +742,11 @@ namespace MechaSurvivor.Gameplay
                 ActHit(heavy: true);
             }
 
+            if (kb.pKey.wasPressedThisFrame)
+            {
+                ActCyclePose();
+            }
+
             if (kb.equalsKey.wasPressedThisFrame || kb.numpadPlusKey.wasPressedThisFrame)
             {
                 ActSpeed(0.1f);
@@ -745,16 +758,102 @@ namespace MechaSurvivor.Gameplay
             }
         }
 
+        // ── 포즈 클립 재생 (Docs/07 §9-5) ────────────────────────
+        //
+        // 전시용 포즈(Mecha_Pose_HeroLunge 등)는 AC_Mecha에 상태를 만들지 않는다 —
+        // 게임용 컨트롤러를 확인용 클립으로 오염시키지 않으려고, 랩에서만 PlayableGraph를
+        // Animator에 직접 물려 재생한다. 그래프를 파괴하면 컨트롤러 그래프로 되돌아온다.
+
+        private bool PoseActive => _poseGraph.IsValid();
+
+        private int PoseCount => _poseClips != null ? _poseClips.Length : 0;
+
+        private AnimationClip CurrentPoseClip =>
+            _poseIndex >= 0 && _poseIndex < PoseCount ? _poseClips[_poseIndex] : null;
+
+        /// <summary>P: 없음 → 포즈들 → 없음 순환.</summary>
+        private void ActCyclePose()
+        {
+            if (_animator == null)
+            {
+                return;
+            }
+
+            SetPoseIndex(RigLabMath.CycleWithNone(_poseIndex, +1, PoseCount));
+        }
+
+        /// <summary>UI 버튼용 직접 지정 — 켜져 있는 항목을 다시 누르면 해제.</summary>
+        private void TogglePose(int index)
+        {
+            SetPoseIndex(_poseIndex == index ? -1 : index);
+        }
+
+        private void SetPoseIndex(int index)
+        {
+            StopPoseGraph();
+            _poseIndex = index;
+
+            AnimationClip clip = CurrentPoseClip;
+            if (clip == null || _animator == null)
+            {
+                _poseIndex = -1;
+                ActFlyIdle();               // 포즈 해제 → 기본 상태로 복귀
+                return;
+            }
+
+            _poseGraph = PlayableGraph.Create("RigLabPose");
+            _poseGraph.SetTimeUpdateMode(DirectorUpdateMode.GameTime);
+            AnimationPlayableOutput output = AnimationPlayableOutput.Create(_poseGraph, "Pose", _animator);
+            _posePlayable = AnimationClipPlayable.Create(_poseGraph, clip);
+            _posePlayable.SetApplyFootIK(false);
+            output.SetSourcePlayable(_posePlayable);
+            _poseGraph.Play();
+
+            _stateLabel = "포즈 " + clip.name;
+            _fireGroup = -1;
+            ApplyPlaybackSpeed();
+
+            // 공중 포즈는 루트 아래로 크게 뻗는다 — 바닥에 파묻히지 않게 높이를 다시 잰다.
+            _grounded = false;
+            MeasureGroundOffset();
+            ApplyRootHeight();
+        }
+
+        private void StopPoseGraph()
+        {
+            if (_poseGraph.IsValid())
+            {
+                _poseGraph.Destroy();
+            }
+        }
+
+        /// <summary>포즈 재생 중 다른 상태 키를 누르면 먼저 컨트롤러로 되돌린다.</summary>
+        private void ExitPose()
+        {
+            if (!PoseActive)
+            {
+                return;
+            }
+
+            StopPoseGraph();
+            _poseIndex = -1;
+            ApplyPlaybackSpeed();
+            MeasureGroundOffset();
+            ApplyRootHeight();
+        }
+
         // 핫키·UI 버튼 공용 동작 — 같은 코드 경로를 태운다.
 
         private void ActFlyIdle()
         {
+            ExitPose();
             _stateLabel = "FlyIdle";
             ApplyLocomotion(grounded: false, move: Vector2.zero);
         }
 
         private void ActFly()
         {
+            ExitPose();
             AdvanceDirectionIf("Fly");
             _stateLabel = "Fly";
             ApplyLocomotion(grounded: false, move: RigLabMath.DirectionForIndex(_directionIndex));
@@ -762,12 +861,14 @@ namespace MechaSurvivor.Gameplay
 
         private void ActGroundIdle()
         {
+            ExitPose();
             _stateLabel = "GroundIdle";
             ApplyLocomotion(grounded: true, move: Vector2.zero);
         }
 
         private void ActWalk()
         {
+            ExitPose();
             AdvanceDirectionIf("Walk");
             _stateLabel = "Walk";
             ApplyLocomotion(grounded: true, move: RigLabMath.DirectionForIndex(_directionIndex));
@@ -775,6 +876,7 @@ namespace MechaSurvivor.Gameplay
 
         private void ActDash()
         {
+            ExitPose();
             AdvanceDirectionIf("Dash");
             Vector2 dir = RigLabMath.DirectionForIndex(_directionIndex);
             _stateLabel = "Dash";
@@ -785,6 +887,7 @@ namespace MechaSurvivor.Gameplay
 
         private void ActHit(bool heavy)
         {
+            ExitPose();
             _stateLabel = heavy ? "HitHeavy" : "Hit";
             _animator.SetTrigger(heavy ? HitHeavyTriggerHash : HitTriggerHash);
         }
@@ -822,6 +925,12 @@ namespace MechaSurvivor.Gameplay
 
         private void ToggleFire(int group)
         {
+            // 사격은 상체 레이어라 포즈(전신 그래프)와 같이 못 쓴다 — 포즈에서 먼저 빠져나온다.
+            if (PoseActive)
+            {
+                ActFlyIdle();
+            }
+
             _fireGroup = _fireGroup == group ? -1 : group;
             _animator.SetBool(FireHash, _fireGroup >= 0);
             _animator.SetInteger(FireTypeHash, Mathf.Max(_fireGroup, 0));
@@ -832,6 +941,12 @@ namespace MechaSurvivor.Gameplay
             if (_animator != null)
             {
                 _animator.speed = _playbackSpeed;
+            }
+
+            // Animator.speed는 PlayableGraph 출력에 걸리지 않는다 — 플레이어블에 직접 준다.
+            if (_poseGraph.IsValid())
+            {
+                _posePlayable.SetSpeed(_playbackSpeed);
             }
         }
 
@@ -868,7 +983,8 @@ namespace MechaSurvivor.Gameplay
                 $"애니메이션  {anim}\n" +
                 "Tab 탭   ←/→ 대상(선택 없을 때)   [ ] 마운트/총구 선택   R 리셋   F 시험 발사   S 저장\n" +
                 "선택 중: 화살표 X/Z · PgUp/Dn Y · Shift=회전 · Ctrl=미세 · Alt+PgUp/Dn=스케일\n" +
-                "1 FlyIdle  2 Fly(8방)  3 GroundIdle  4 Walk(8방)  5 Dash(8방)  6/7/8 사격  9/0 피격  =/- 속도  H 패널  우클릭/휠 카메라";
+                "1 FlyIdle  2 Fly(8방)  3 GroundIdle  4 Walk(8방)  5 Dash(8방)  6/7/8 사격  9/0 피격  "
+                + $"P 포즈({PoseCount})  =/- 속도  H 패널  우클릭/휠 카메라";
         }
 
         private void OnGUI()
@@ -1258,6 +1374,24 @@ namespace MechaSurvivor.Gameplay
             }
 
             GUI.enabled = true;
+
+            if (PoseCount > 0)
+            {
+                GUILayout.Label("포즈 클립 (P 순환 · AC 밖의 전시용)");
+                for (int i = 0; i < PoseCount; i++)
+                {
+                    AnimationClip poseClip = _poseClips[i];
+                    if (poseClip == null)
+                    {
+                        continue;
+                    }
+
+                    if (ToggleButton(poseClip.name, _poseIndex == i))
+                    {
+                        TogglePose(i);
+                    }
+                }
+            }
 
             GUILayout.BeginHorizontal();
             if (ActionButton("속도 −", GUILayout.ExpandWidth(true)))

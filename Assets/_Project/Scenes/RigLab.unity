@@ -333,6 +333,8 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 8faaabe9723b39a4b83537af5ffadef5, type: 2}
   - {fileID: 11400000, guid: c36108be948b9894ea91467c8ef51bf8, type: 2}
   - {fileID: 11400000, guid: 20fe758f2fbc28147b2f9e78431bb932, type: 2}
+  _poseClips:
+  - {fileID: -623603649343465320, guid: 0b253e78b4468854e9c66f65bf594ecd, type: 3}
   _flyHoverHeight: 1.2
   _moveStep: 0.05
   _moveStepFine: 0.005

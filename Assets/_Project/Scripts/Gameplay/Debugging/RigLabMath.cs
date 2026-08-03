@@ -29,5 +29,14 @@ namespace MechaSurvivor.Gameplay
         {
             return count <= 0 ? 0 : (((current + delta) % count) + count) % count;
         }
+
+        /// <summary>
+        /// "선택 없음(-1)"을 포함한 순환 — -1 → 0 → … → count-1 → -1.
+        /// 마운트/총구 선택과 포즈 클립 선택이 같은 규칙을 쓴다. 목록이 비면 항상 -1.
+        /// </summary>
+        public static int CycleWithNone(int current, int delta, int count)
+        {
+            return count <= 0 ? -1 : CycleIndex(current + 1, delta, count + 1) - 1;
+        }
     }
 }

@@ -108,11 +108,21 @@ Humanoid 리그이므로 Blender 직접 키프레임 제작과 Mixamo 리타게�
 ```python
 use_selection=True, object_types={'ARMATURE'},   # Riging_Meshy 아마추어만 선택
 add_leaf_bones=False,
+use_armature_deform_only=True,                   # ★ 컨트롤 본 제외 (아래 함정 참조)
 bake_anim=True, bake_anim_use_all_actions=False, bake_anim_use_nla_strips=False,
 bake_anim_force_startend_keying=True, bake_anim_simplify_factor=0.0,
 apply_unit_scale=True, apply_scale_options='FBX_SCALE_ALL',   # ★ 아래 함정 참조
 axis_forward='-Z', axis_up='Y',
 ```
+- **★ 본 계층 함정 (2026-08-01 실제 발생, 07 문서 P0):** FBX의 본 계층이 `Mecha.fbx`의
+  MechaAvatar(**최상위=Hips, 디폼 본 24개**)와 다르면 **Humanoid + CopyFromOther가 조용히
+  실패한다** — AnimationClip 서브에셋이 0개가 되는데 **콘솔에는 에러가 안 뜬다.**
+  현재 리그에는 `Root`(비디폼)와 IK/Pole/Aim 컨트롤 본 9개가 있으므로 둘 다 빼야 한다:
+  IK/Pole/Aim은 `use_armature_deform_only=True`가 처리하지만, **`Root`는 Hips의 부모라
+  이 옵션으로도 남는다** → 내보내기 전용 복제 리그에서 Root를 삭제하고 내보낸다
+  (절차·컨텍스트 오버라이드 요령은 `07_HeroPose.md` §9-3).
+  진단: `ModelImporter.importedTakeInfos.Length`(정상 1) / `LoadAllAssetsAtPath`의
+  Transform 개수(정상 25, Root 포함 26). Generic으로 두면 정상 임포트되므로 오판하기 쉽다.
 - **★ 스케일 함정 (P0에서 실제 발생):** `apply_scale_options='FBX_SCALE_NONE'`(기본값)으로
   내보내면 fileScale=0.01이 되는데, `Mecha.fbx`는 fileScale=1이다. 이 불일치 상태로 Humanoid
   리타게팅하면 **Hips 이동값이 ×100으로 튀어 기체가 5m 위로 떠오른다.**
