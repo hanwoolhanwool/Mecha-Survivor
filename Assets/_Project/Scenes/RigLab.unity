@@ -338,6 +338,7 @@ MonoBehaviour:
   - {fileID: -623603649343465320, guid: b1683b49da47a54479d8e1066fc1cff2, type: 3}
   - {fileID: -623603649343465320, guid: 80335930e66444c4e9caf4a38235fcaa, type: 3}
   - {fileID: -623603649343465320, guid: dff116ad627a54745b2fa17598e06cc3, type: 3}
+  - {fileID: -623603649343465320, guid: 832b92f3d4751514e8d72012a4d9578b, type: 3}
   _flyHoverHeight: 1.2
   _moveStep: 0.05
   _moveStepFine: 0.005
