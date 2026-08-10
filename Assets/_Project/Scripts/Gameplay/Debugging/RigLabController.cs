@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Animations;
 using UnityEngine.InputSystem;
@@ -11,7 +12,8 @@ namespace MechaSurvivor.Gameplay
     /// 마운트·총구·애니메이션을 눈으로 확인하고, 조정 결과를 프로필(SO)에 저장한다 —
     /// 랩에서 보는 것 = 본편에서 나오는 것.
     ///
-    /// 조작: Tab 캐릭터↔적 탭 · ←/→ 대상 순환 · [ ] 마운트/총구 선택 ·
+    /// 조작: Tab 캐릭터↔적 탭 · ←/→ 대상 순환 · W 장착 무기 순환(조정 항목도 그 무기 것만) ·
+    /// [ ] 마운트/총구 선택 ·
     /// (선택 중) 화살표+PgUp/Dn 이동, Shift=회전, Ctrl=미세, Alt+PgUp/Dn=스케일 ·
     /// R 리셋 · F 시험 발사 · S 저장 · 1~5 이동 상태(8방) · 6/7/8 사격 토글 ·
     /// 9/0 피격 · P 포즈 클립 순환 · =/- 재생 속도 · 우클릭 드래그/휠 카메라.
@@ -79,12 +81,26 @@ namespace MechaSurvivor.Gameplay
         private AnimationClipPlayable _posePlayable;
 
         private int _adjustIndex = -1;          // -1=조정 안 함, 0..M-1=마운트, M..=총구
+
+        // 장착 무기로 걸러낸 조정 항목의 전역 인덱스. 목록·[ ] 순환이 이걸 따르고,
+        // 저장·dirty 검사는 여전히 프로필 전체를 훑는다 (안 보이는 항목의 값도 지켜야 한다).
+        private readonly List<int> _visibleAdjust = new();
+
         private bool _dirty;
         private bool _grounded;                 // 현재 이동 상태 (루트 높이 결정)
         private float _groundOffset;            // 모델 최저점→바닥 보정 (대상 선택 시 자동 측정)
 
         private Weapon _testWeapon;             // 시험 발사용 실제 무기 인스턴스
         private string _testWeaponId;
+
+        // ── 장착 무기 (본편 WeaponMountVisuals를 랩에서 수동 재현) ──
+        private static readonly WeaponData[] NoWeapons = new WeaponData[0];
+        private readonly List<WeaponData> _equipBuffer = new();
+        private WeaponData[] _equippables = NoWeapons;
+        private int _equipIndex = -1;           // -1 = 전체 표시(랩 기본), 0.. = 그 무기만
+        private MountHand _equipHand = MountHand.Any;   // 장착 손 (Any = 좌우 다 표시)
+
+        private static readonly string[] HandNames = { "양손 전부", "오른손", "왼손" };
 
 #if UNITY_EDITOR
         private PartUpgradeData[] _weaponParts; // WeaponData.Id → 무기 프리팹 룩업
@@ -130,6 +146,19 @@ namespace MechaSurvivor.Gameplay
             {
                 RigProfileData p = CurrentProfile;
                 return p != null && p.Muzzles != null ? p.Muzzles.Length : 0;
+            }
+        }
+
+        private WeaponData EquippedWeapon =>
+            _equipIndex >= 0 && _equipIndex < _equippables.Length ? _equippables[_equipIndex] : null;
+
+        /// <summary>장착 무기의 Id — 전체 표시 모드면 null (표시 규칙이 "전부 켬"으로 바뀐다).</summary>
+        private string EquippedWeaponId
+        {
+            get
+            {
+                WeaponData equipped = EquippedWeapon;
+                return equipped != null ? equipped.Id : null;
             }
         }
 
@@ -213,21 +242,11 @@ namespace MechaSurvivor.Gameplay
                 _animator.cullingMode = AnimatorCullingMode.AlwaysAnimate;
             }
 
-            // WeaponMountVisuals가 없는 랩에서는 장착 모델을 전부 켜서 눈으로 확인한다.
-            RigProfileData profile = CurrentProfile;
-            if (profile != null && profile.Mounts != null)
-            {
-                for (int i = 0; i < profile.Mounts.Length; i++)
-                {
-                    if (_builder.TryGetMount(profile.Mounts[i].Id, out Transform mount))
-                    {
-                        for (int c = 0; c < mount.childCount; c++)
-                        {
-                            mount.GetChild(c).gameObject.SetActive(true);
-                        }
-                    }
-                }
-            }
+            // 대상이 바뀌면 무기 목록도 바뀐다 — 전체 표시(랩 기본)로 되돌린 뒤 다시 수집한다.
+            _equipIndex = -1;
+            CollectEquippables();
+            ApplyEquipVisibility();
+            RebuildVisibleAdjust();
 
             if (_orbitCamera != null)
             {
@@ -293,6 +312,184 @@ namespace MechaSurvivor.Gameplay
             SelectCurrent();
         }
 
+        // ── 장착 무기 (Docs/06 §4.2-①) ──────────────────────────
+        //
+        // 본편에선 WeaponMountVisuals가 보유 무기에 맞춰 장착 모델을 켜고 끈다. 랩엔 그게 없어
+        // 종전에는 전 모델을 한꺼번에 켰고, 같은 손을 쓰는 마운트끼리 겹쳐 보였다. 여기서 무기를
+        // 골라 본편과 같은 규칙으로 하나만 남긴다 — 랩에서 보는 것 = 본편에서 나오는 것.
+
+        /// <summary>장착 후보 = 마운트가 ShowForWeapon으로 지목한 무기들 (등장 순서, 중복 제거).</summary>
+        private void CollectEquippables()
+        {
+            _equipBuffer.Clear();
+            RigProfileData profile = CurrentProfile;
+            if (profile != null && profile.Mounts != null)
+            {
+                for (int i = 0; i < profile.Mounts.Length; i++)
+                {
+                    WeaponData weapon = profile.Mounts[i].ShowForWeapon;
+                    if (weapon != null && !_equipBuffer.Contains(weapon))
+                    {
+                        _equipBuffer.Add(weapon);
+                    }
+                }
+            }
+
+            _equippables = _equipBuffer.Count > 0 ? _equipBuffer.ToArray() : NoWeapons;
+        }
+
+        /// <summary>
+        /// 마운트 자식 중 장착 모델만 켜고 끈다. 총구 앵커도 마운트의 자식이라 접두사로
+        /// 걸러내야 한다 — 같이 끄면 시험 발사·기즈모가 가리킬 지점이 사라진다.
+        /// </summary>
+        private void ApplyEquipVisibility()
+        {
+            RigProfileData profile = CurrentProfile;
+            if (profile == null || profile.Mounts == null)
+            {
+                return;
+            }
+
+            string equippedId = EquippedWeaponId;
+            for (int i = 0; i < profile.Mounts.Length; i++)
+            {
+                RigProfileData.MountDef def = profile.Mounts[i];
+                if (!_builder.TryGetMount(def.Id, out Transform mount))
+                {
+                    continue;
+                }
+
+                bool show = RigLabMath.ShouldShowMount(MountWeaponId(def), equippedId)
+                    && RigProfileMath.MatchesHand(def.Hand, _equipHand);
+
+                for (int c = 0; c < mount.childCount; c++)
+                {
+                    Transform child = mount.GetChild(c);
+                    if (child.name.StartsWith(
+                        RigProfileMath.MuzzleNamePrefix, System.StringComparison.Ordinal))
+                    {
+                        continue;
+                    }
+
+                    child.gameObject.SetActive(show);
+                }
+            }
+        }
+
+        /// <summary>W 순환: 전체 표시(-1) → 무기들 → 전체 표시.</summary>
+        private void CycleEquip(int delta)
+        {
+            _equipIndex = RigLabMath.CycleWithNone(_equipIndex, delta, _equippables.Length);
+            ApplyEquip();
+        }
+
+        private void SetEquip(int index)
+        {
+            _equipIndex = index;
+            ApplyEquip();
+        }
+
+        /// <summary>E 순환: 양손 전부 → 오른손 → 왼손 (Docs/06 §3.4 좌우 마운트 확인용).</summary>
+        private void CycleEquipHand()
+        {
+            _equipHand = (MountHand)RigLabMath.CycleIndex((int)_equipHand, +1, 3);
+            ApplyEquip();
+        }
+
+        private void SetEquipHand(MountHand hand)
+        {
+            _equipHand = hand;
+            ApplyEquip();
+        }
+
+        private void ApplyEquip()
+        {
+            ApplyEquipVisibility();
+            RebuildVisibleAdjust();
+
+            // 시험 발사 무기는 Id로 캐시된다 — 장착이 바뀌면 버려서 다음 F가 새 무기를 물게 한다.
+            ReleaseTestWeapon();
+            SyncFireGroupToEquip();
+        }
+
+        /// <summary>
+        /// 조정 항목을 장착 무기 것만 남긴다 — 무기를 고르고 나면 다른 무기의 마운트·총구는
+        /// 화면에 모델도 없어서 만져도 보이지 않는다. 전체 표시 모드(-1)에서는 전부 나온다.
+        /// </summary>
+        private void RebuildVisibleAdjust()
+        {
+            _visibleAdjust.Clear();
+            RigProfileData profile = CurrentProfile;
+            if (profile != null)
+            {
+                string equippedId = EquippedWeaponId;
+
+                for (int i = 0; i < MountCount; i++)
+                {
+                    RigProfileData.MountDef def = profile.Mounts[i];
+                    if (RigLabMath.ShouldShowMount(MountWeaponId(def), equippedId)
+                        && RigProfileMath.MatchesHand(def.Hand, _equipHand))
+                    {
+                        _visibleAdjust.Add(i);
+                    }
+                }
+
+                for (int i = 0; i < MuzzleCount; i++)
+                {
+                    RigProfileData.MuzzleDef def = profile.Muzzles[i];
+                    if (RigLabMath.ShouldShowMuzzle(def.Id, OwnerMountWeaponId(profile, def.MountId),
+                            equippedId)
+                        && RigProfileMath.MatchesHand(
+                            RigProfileMath.ResolveMuzzleHand(profile, def.MountId), _equipHand))
+                    {
+                        _visibleAdjust.Add(MountCount + i);
+                    }
+                }
+            }
+
+            // 걸러져 사라진 항목을 계속 조정하고 있으면 기즈모만 남고 목록엔 없다 — 선택을 푼다.
+            if (_adjustIndex >= 0 && !_visibleAdjust.Contains(_adjustIndex))
+            {
+                _adjustIndex = -1;
+                SyncGizmo();
+            }
+        }
+
+        private static string MountWeaponId(RigProfileData.MountDef def) =>
+            def != null && def.ShowForWeapon != null ? def.ShowForWeapon.Id : null;
+
+        /// <summary>총구가 달린 마운트의 표시 조건 무기 Id (마운트가 없으면 null).</summary>
+        private static string OwnerMountWeaponId(RigProfileData profile, string mountId)
+        {
+            if (string.IsNullOrEmpty(mountId) || profile.Mounts == null)
+            {
+                return null;
+            }
+
+            for (int i = 0; i < profile.Mounts.Length; i++)
+            {
+                if (profile.Mounts[i].Id == mountId)
+                {
+                    return MountWeaponId(profile.Mounts[i]);
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>사격을 켜 둔 채 무기를 바꾸면 반동 그룹도 그 무기 것으로 따라간다.</summary>
+        private void SyncFireGroupToEquip()
+        {
+            WeaponData equipped = EquippedWeapon;
+            if (_animator == null || _fireGroup < 0 || equipped == null)
+            {
+                return;
+            }
+
+            _fireGroup = MechaAnimParams.GetFireGroup(equipped.Id);
+            _animator.SetInteger(FireTypeHash, _fireGroup);
+        }
+
         // ── 핫키 ────────────────────────────────────────────────
 
         private void ReadHotkeys()
@@ -318,6 +515,16 @@ namespace MechaSurvivor.Gameplay
             {
                 _tab = 1 - _tab;
                 SelectCurrent();
+            }
+
+            if (kb.wKey.wasPressedThisFrame)
+            {
+                CycleEquip(+1);
+            }
+
+            if (kb.eKey.wasPressedThisFrame)
+            {
+                CycleEquipHand();
             }
 
             if (kb.leftBracketKey.wasPressedThisFrame)
@@ -362,10 +569,15 @@ namespace MechaSurvivor.Gameplay
 
         // ── 마운트·총구 조정 (Docs/06 §4.2-②③) ──────────────────
 
-        /// <summary>[ ] 순환: 없음(-1) → 마운트들 → 총구들 → 없음. 없음일 때 ←/→는 대상 순환.</summary>
+        /// <summary>
+        /// [ ] 순환: 없음(-1) → 마운트들 → 총구들 → 없음. 없음일 때 ←/→는 대상 순환.
+        /// 순환 대상은 장착 무기로 걸러낸 목록 — 패널에 안 보이는 항목이 선택되면 안 된다.
+        /// </summary>
         private void CycleAdjust(int delta)
         {
-            _adjustIndex = RigLabMath.CycleWithNone(_adjustIndex, delta, MountCount + MuzzleCount);
+            int slot = _visibleAdjust.IndexOf(_adjustIndex);   // 미선택(-1)이면 그대로 -1
+            slot = RigLabMath.CycleWithNone(slot, delta, _visibleAdjust.Count);
+            _adjustIndex = slot >= 0 ? _visibleAdjust[slot] : -1;
             SyncGizmo();
         }
 
@@ -390,8 +602,12 @@ namespace MechaSurvivor.Gameplay
             if (muzzleIndex < MuzzleCount)
             {
                 isMuzzle = true;
-                id = profile.Muzzles[muzzleIndex].Id;
-                return _builder.TryGetMuzzle(id, out anchor);
+                RigProfileData.MuzzleDef def = profile.Muzzles[muzzleIndex];
+                id = def.Id;
+                // ★ 손을 넘겨야 한다 — 좌우 마운트가 같은 무기 Id의 총구를 하나씩 이고 있어서
+                //   Id만으로 찾으면 둘 다 오른손 앵커를 가리킨다 (조정도 저장도 엉뚱해진다).
+                return _builder.TryGetMuzzle(
+                    id, RigProfileMath.ResolveMuzzleHand(profile, def.MountId), out anchor);
             }
 
             return false;
@@ -494,14 +710,27 @@ namespace MechaSurvivor.Gameplay
                 return;
             }
 
-            // 선택 항목이 총구면 그 총구, 아니면 첫 총구.
+            // 총구 우선순위: 조정 중인 총구 > 장착 무기의 총구 > 첫 총구.
+            // ★ 앵커는 (Id, 손)으로 찾는다 — 좌우 마운트가 같은 무기 Id를 공유한다 (Docs/06 §3.4).
             string muzzleId = profile.Muzzles[0].Id;
-            if (TryGetAdjustTarget(out _, out bool isMuzzle, out string selectedId) && isMuzzle)
+            MountHand muzzleHand = RigProfileMath.ResolveMuzzleHand(profile, profile.Muzzles[0].MountId);
+
+            string equippedId = EquippedWeaponId;
+            if (equippedId != null && _builder.TryGetMuzzle(equippedId, _equipHand, out _))
             {
-                muzzleId = selectedId;
+                muzzleId = equippedId;
+                muzzleHand = _equipHand;
             }
 
-            if (!_builder.TryGetMuzzle(muzzleId, out Transform anchor))
+            Transform anchor;
+            if (TryGetAdjustTarget(out Transform selected, out bool isMuzzle, out string selectedId)
+                && isMuzzle)
+            {
+                // 조정 중인 총구가 있으면 방금 맞춘 그 앵커에서 쏜다.
+                muzzleId = selectedId;
+                anchor = selected;
+            }
+            else if (!_builder.TryGetMuzzle(muzzleId, muzzleHand, out anchor))
             {
                 return;
             }
@@ -614,7 +843,8 @@ namespace MechaSurvivor.Gameplay
                 for (int i = 0; i < profile.Muzzles.Length; i++)
                 {
                     RigProfileData.MuzzleDef def = profile.Muzzles[i];
-                    if (_builder.TryGetMuzzle(def.Id, out Transform anchor))
+                    if (_builder.TryGetMuzzle(def.Id,
+                        RigProfileMath.ResolveMuzzleHand(profile, def.MountId), out Transform anchor))
                     {
                         def.LocalPosition = anchor.localPosition;
                         def.LocalEulerAngles = anchor.localEulerAngles;
@@ -666,7 +896,8 @@ namespace MechaSurvivor.Gameplay
                 for (int i = 0; i < profile.Muzzles.Length; i++)
                 {
                     RigProfileData.MuzzleDef def = profile.Muzzles[i];
-                    if (!_builder.TryGetMuzzle(def.Id, out Transform anchor))
+                    if (!_builder.TryGetMuzzle(def.Id,
+                        RigProfileMath.ResolveMuzzleHand(profile, def.MountId), out Transform anchor))
                     {
                         continue;
                     }
@@ -972,16 +1203,26 @@ namespace MechaSurvivor.Gameplay
             }
             else
             {
-                adjust = "없음 ([ ] 로 선택)";
+                adjust = $"없음 ([ ] 로 선택 — 후보 {_visibleAdjust.Count}개)";
             }
 
             string dirtyMark = _dirty ? "  ● 미저장 변경 — S 저장!" : "";
 
+            WeaponData equipped = EquippedWeapon;
+            string equip = _equippables.Length == 0
+                ? "(무기 마운트 없음)"
+                : equipped != null
+                    ? $"{equipped.DisplayName} ({equipped.Id})  {_equipIndex + 1}/{_equippables.Length}"
+                      + $"  손 {HandNames[(int)_equipHand]}  — 조정 항목도 이 무기 것만 표시"
+                    : $"전체 표시 (무기 {_equippables.Length}종)  손 {HandNames[(int)_equipHand]}";
+
             _hudText =
                 $"[리그 실험실]  탭 {TabNames[_tab]}  대상 {target}{dirtyMark}\n" +
+                $"장착  {equip}\n" +
                 $"조정  {adjust}\n" +
                 $"애니메이션  {anim}\n" +
-                "Tab 탭   ←/→ 대상(선택 없을 때)   [ ] 마운트/총구 선택   R 리셋   F 시험 발사   S 저장\n" +
+                "Tab 탭   ←/→ 대상(선택 없을 때)   W 장착 무기   E 장착 손   [ ] 마운트/총구 선택   "
+                + "R 리셋   F 시험 발사   S 저장\n" +
                 "선택 중: 화살표 X/Z · PgUp/Dn Y · Shift=회전 · Ctrl=미세 · Alt+PgUp/Dn=스케일\n" +
                 "1 FlyIdle  2 Fly(8방)  3 GroundIdle  4 Walk(8방)  5 Dash(8방)  6/7/8 사격  9/0 피격  "
                 + $"P 포즈({PoseCount})  =/- 속도  H 패널  우클릭/휠 카메라";
@@ -995,7 +1236,7 @@ namespace MechaSurvivor.Gameplay
                 _hudStyle.normal.textColor = new Color(0.6f, 0.9f, 1f);
             }
 
-            GUI.Label(new Rect(12f, 12f, 1100f, 160f), _hudText, _hudStyle);
+            GUI.Label(new Rect(12f, 12f, 1100f, 180f), _hudText, _hudStyle);
 
             if (_panelVisible)
             {
@@ -1015,6 +1256,8 @@ namespace MechaSurvivor.Gameplay
             _panelScroll = GUILayout.BeginScrollView(_panelScroll);
 
             DrawTargetSection();
+            GUILayout.Space(8f);
+            DrawEquipSection();
             GUILayout.Space(8f);
             DrawAdjustSection();
             GUILayout.Space(8f);
@@ -1086,9 +1329,59 @@ namespace MechaSurvivor.Gameplay
             GUILayout.EndHorizontal();
         }
 
+        private void DrawEquipSection()
+        {
+            GUILayout.Label("── 장착 무기 (W 순환) ──");
+            if (_equippables.Length == 0)
+            {
+                GUILayout.Label("(이 대상엔 무기 마운트가 없다)");
+                return;
+            }
+
+            GUILayout.Label("장착 손 (E 순환)");
+            GUILayout.BeginHorizontal();
+            for (int h = 0; h < 3; h++)
+            {
+                var hand = (MountHand)h;
+                if (ToggleButton(HandNames[h], _equipHand == hand) && _equipHand != hand)
+                {
+                    SetEquipHand(hand);
+                }
+            }
+
+            GUILayout.EndHorizontal();
+
+            if (ToggleButton("전체 표시 (겹쳐 보임)", _equipIndex < 0) && _equipIndex >= 0)
+            {
+                SetEquip(-1);
+            }
+
+            for (int i = 0; i < _equippables.Length; i++)
+            {
+                WeaponData weapon = _equippables[i];
+                if (weapon == null)
+                {
+                    continue;
+                }
+
+                if (ToggleButton($"{weapon.DisplayName}  ({weapon.Id})", _equipIndex == i)
+                    && _equipIndex != i)
+                {
+                    SetEquip(i);
+                }
+            }
+        }
+
         private void DrawAdjustSection()
         {
-            GUILayout.Label("── 조정 항목 ──");
+            WeaponData equipped = EquippedWeapon;
+            int total = MountCount + MuzzleCount;
+            bool filtered = _visibleAdjust.Count < total;
+            GUILayout.Label(filtered
+                ? $"── 조정 항목 · {(equipped != null ? equipped.DisplayName : "전체")}"
+                  + $" / {HandNames[(int)_equipHand]} ({_visibleAdjust.Count}/{total}) ──"
+                : "── 조정 항목 (전체) ──");
+
             if (ToggleButton("선택 없음 (←/→ = 대상 순환)", _adjustIndex < 0))
             {
                 _adjustIndex = -1;
@@ -1101,23 +1394,39 @@ namespace MechaSurvivor.Gameplay
                 return;
             }
 
-            for (int i = 0; i < MountCount; i++)
+            if (_visibleAdjust.Count == 0)
             {
-                if (ToggleButton("마운트  " + profile.Mounts[i].Id, _adjustIndex == i))
-                {
-                    _adjustIndex = i;
-                    SyncGizmo();
-                }
+                GUILayout.Label(total > 0
+                    ? "(이 무기·손 조합에 딸린 마운트·총구가 없다)"
+                    : "(이 대상엔 마운트·총구가 없다)");
+                return;
             }
 
-            for (int i = 0; i < MuzzleCount; i++)
+            for (int i = 0; i < _visibleAdjust.Count; i++)
             {
-                int index = MountCount + i;
-                if (ToggleButton("총구  " + profile.Muzzles[i].Id, _adjustIndex == index))
+                int index = _visibleAdjust[i];
+                string label;
+                if (index < MountCount)
+                {
+                    label = "마운트  " + profile.Mounts[index].Id;
+                }
+                else
+                {
+                    RigProfileData.MuzzleDef muzzle = profile.Muzzles[index - MountCount];
+                    // 같은 Id의 좌우 총구가 나란히 뜨므로 어느 마운트 것인지 붙여 준다.
+                    label = "총구  " + muzzle.Id
+                        + (string.IsNullOrEmpty(muzzle.MountId) ? "" : "  @" + muzzle.MountId);
+                }
+                if (ToggleButton(label, _adjustIndex == index))
                 {
                     _adjustIndex = index;
                     SyncGizmo();
                 }
+            }
+
+            if (filtered)
+            {
+                GUILayout.Label("↑ 장착 무기·손에 걸리는 항목만 — 전부 보려면 '전체 표시' + '양손 전부'");
             }
 
             if (!TryGetAdjustTarget(out Transform anchor, out bool isMuzzle, out _))

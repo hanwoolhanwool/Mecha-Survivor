@@ -27,6 +27,10 @@ namespace MechaSurvivor.Gameplay
         [Tooltip("WeaponFiredEvent 후 Fire 파라미터를 유지하는 시간(초) — 자동 연사 사이 끊김 방지")]
         [SerializeField] private float _fireWindow = 0.3f;
 
+        [Header("무기 포즈 (Docs/05 §10-B8·B10)")]
+        [Tooltip("총 종류 무기 발사 후 전신 포즈를 유지하는 시간(초)")]
+        [SerializeField] private float _poseHoldSeconds = 2f;
+
         [Header("피격")]
         [Tooltip("강피격 판정 임계값 — 대미지가 최대체력의 이 비율 이상이면 강피격")]
         [SerializeField] private float _heavyHitFraction = 0.15f;
@@ -43,13 +47,25 @@ namespace MechaSurvivor.Gameplay
         private static readonly int FireTypeHash = Animator.StringToHash("FireType");
         private static readonly int HitHeavyTriggerHash = Animator.StringToHash("HitHeavyTrigger");
         private static readonly int VerticalYHash = Animator.StringToHash("VerticalY");
+        private static readonly int PoseTypeHash = Animator.StringToHash("PoseType");
+        private static readonly int FireMotionHash = Animator.StringToHash("FireMotion");
+        private static readonly int FireMotionTriggerHash = Animator.StringToHash("FireMotionTrigger");
 
         private MechaController _controller;
         private float _fireUntil;
         private int _fireGroup;
+        private float _poseUntil;
+        private int _poseType;
+        private int _fireMotion;
+        private bool _fireMotionPending;
         private bool _hitPending;
         private bool _heavyHitPending;
         private bool _wasDashing;
+
+        /// <summary>
+        /// 전신 무기 포즈 유지창이 열려 있는가 — MechaVisuals가 요 고정 판단에 읽는다.
+        /// </summary>
+        public bool IsWeaponPoseActive => MechaAnimParams.IsFireActive(Time.time, _poseUntil);
 
         private void Awake()
         {
@@ -85,6 +101,25 @@ namespace MechaSurvivor.Gameplay
             bool windowActive = MechaAnimParams.IsFireActive(now, _fireUntil);
             _fireGroup = MechaAnimParams.ResolveFireGroup(_fireGroup, incoming, windowActive);
             _fireUntil = MechaAnimParams.ExtendFireWindow(now, _fireWindow);
+
+            // 전신 포즈 무기만 포즈 유지창을 갱신한다 — None 무기는 창을 늘리지도 줄이지도 않는다.
+            // 포즈 코드는 발사 측이 실어 보낸다 (파지 방식 × 장착 손 — Docs/05 §10-B10).
+            int incomingPose = evt.PoseType;
+            if (incomingPose != MechaAnimParams.FirePoseNone)
+            {
+                bool poseWindowActive = MechaAnimParams.IsFireActive(now, _poseUntil);
+                _poseType = MechaAnimParams.ResolveFirePose(_poseType, incomingPose, poseWindowActive);
+                _poseUntil = MechaAnimParams.ExtendFireWindow(now, _poseHoldSeconds);
+            }
+
+            // 발사 모션 — 한 발마다 재생되는 단발 동작 (Docs/05 §10-B11).
+            // 경합 규칙(승격 유지)을 쓰지 않는다: 트리거는 순간값이라 "방금 쏜 무기"가 곧 정답이다.
+            int motion = MechaAnimParams.GetFireMotion(evt.WeaponId);
+            if (motion != MechaAnimParams.FireMotionNone)
+            {
+                _fireMotion = motion;
+                _fireMotionPending = true;
+            }
         }
 
         private void OnPlayerDamaged(PlayerDamagedEvent evt)
@@ -128,6 +163,23 @@ namespace MechaSurvivor.Gameplay
                 _dampTime, dt);
             _animator.SetBool(FireHash, MechaAnimParams.IsFireActive(Time.time, _fireUntil));
             _animator.SetInteger(FireTypeHash, _fireGroup);
+
+            bool poseActive = MechaAnimParams.IsFireActive(Time.time, _poseUntil);
+            if (!poseActive)
+            {
+                _poseType = MechaAnimParams.FirePoseNone;
+            }
+
+            _animator.SetInteger(PoseTypeHash, _poseType);
+
+            // 발사 모션 트리거 — 상태 진입 조건이 PoseType·FireMotion 을 같이 보므로
+            // 반드시 두 정수를 먼저 쓴 뒤 트리거를 올린다 (순서가 바뀌면 한 프레임 놓친다).
+            if (_fireMotionPending)
+            {
+                _fireMotionPending = false;
+                _animator.SetInteger(FireMotionHash, _fireMotion);
+                _animator.SetTrigger(FireMotionTriggerHash);
+            }
 
             if (_heavyHitPending)
             {

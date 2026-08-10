@@ -48,6 +48,14 @@ namespace MechaSurvivor.Gameplay
         public Weapon GetWeapon(int index) =>
             index >= 0 && index < MaxSlots ? _slots[index] : null;
 
+        /// <summary>
+        /// 슬롯 번호 → 장착 손. 짝수 = 오른손, 홀수 = 왼손 (Docs/05 §10-B10).
+        /// 격납고 로드아웃은 기재 순서대로 슬롯 0·1을 채우므로 이 규칙이 곧
+        /// "먼저 쓴 무기 = 오른손, 둘째 = 왼손"이 된다. 확장 슬롯 2·3도 같은 교대를 잇는다.
+        /// </summary>
+        public static WeaponHand HandForSlot(int slot) =>
+            (slot & 1) == 0 ? WeaponHand.Right : WeaponHand.Left;
+
         private void Update()
         {
             if (_input == null)
@@ -103,6 +111,11 @@ namespace MechaSurvivor.Gameplay
 
             Weapon old = _slots[index];
             _slots[index] = weapon;
+            if (weapon != null)
+            {
+                weapon.SetHand(HandForSlot(index));
+            }
+
             return old;
         }
 
@@ -114,6 +127,13 @@ namespace MechaSurvivor.Gameplay
                 if (_slots[i] == null)
                 {
                     _slots[i] = weapon;
+                    // 손은 슬롯이 정한다 — 장착 경로(초기 자동/업그레이드/교체)가 여럿이라
+                    // 여기서 한 번만 주입해야 로드아웃 순서와 어긋나지 않는다.
+                    if (weapon != null)
+                    {
+                        weapon.SetHand(HandForSlot(i));
+                    }
+
                     return i;
                 }
             }
@@ -139,11 +159,19 @@ namespace MechaSurvivor.Gameplay
         }
 
         /// <summary>이미 장착된 무기인지 (중복 획득 방지·강화 판정용).</summary>
-        public bool Has(WeaponData data)
+        public bool Has(WeaponData data) => HasInHand(data, MountHand.Any);
+
+        /// <summary>
+        /// 그 무기를 지정한 손에 들고 있는지 (장착 모델 표시 판정 — Docs/06 §3.4).
+        /// hand가 Any면 손을 안 가린다 = 기존 Has와 같다.
+        /// </summary>
+        public bool HasInHand(WeaponData data, MountHand hand)
         {
             for (int i = 0; i < MaxSlots; i++)
             {
-                if (_slots[i] != null && _slots[i].Data == data)
+                Weapon weapon = _slots[i];
+                if (weapon != null && weapon.Data == data
+                    && RigProfileMath.MatchesHand(hand, RigProfileMath.ToMountHand(weapon.Hand)))
                 {
                     return true;
                 }

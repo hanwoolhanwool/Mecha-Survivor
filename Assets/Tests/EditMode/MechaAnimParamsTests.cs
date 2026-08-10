@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using NUnit.Framework;
 using UnityEngine;
 using MechaSurvivor.Gameplay;
@@ -206,6 +207,124 @@ namespace MechaSurvivor.Tests.EditMode
         {
             Assert.AreEqual(MechaAnimParams.FireGroupLight, MechaAnimParams.ResolveFireGroup(
                 MechaAnimParams.FireGroupHeavy, MechaAnimParams.FireGroupLight, false));
+        }
+
+        [Test]
+        public void ResolveWeaponPose_OneHanded_SplitsByHand()
+        {
+            // 손 지정의 핵심 — 같은 파지 방식이라도 슬롯이 정한 손에 따라 다른 포즈.
+            Assert.AreEqual(MechaAnimParams.FirePoseHero,
+                MechaAnimParams.ResolveWeaponPose(WeaponGrip.OneHanded, WeaponHand.Right));
+            Assert.AreEqual(MechaAnimParams.FirePoseHeroLeft,
+                MechaAnimParams.ResolveWeaponPose(WeaponGrip.OneHanded, WeaponHand.Left));
+        }
+
+        [Test]
+        public void ResolveWeaponPose_TwoHanded_SplitsByGripHand()
+        {
+            // 두 손을 다 쓰지만 **그립을 쥐는 손**은 하나뿐이고 무기 모델이 그 손에 붙는다
+            // (Docs/06 §3.4). 손을 무시하면 왼손 슬롯의 두손 무기가
+            // "빈 오른손으로 쥐는 자세 + 왼손에 매달린 총"이 된다.
+            Assert.AreEqual(MechaAnimParams.FirePoseHeroTwoHand,
+                MechaAnimParams.ResolveWeaponPose(WeaponGrip.TwoHanded, WeaponHand.Right));
+            Assert.AreEqual(MechaAnimParams.FirePoseHeroTwoHandLeft,
+                MechaAnimParams.ResolveWeaponPose(WeaponGrip.TwoHanded, WeaponHand.Left));
+        }
+
+        [Test]
+        public void ResolveWeaponPose_NonGun_ReturnsNone()
+        {
+            // 포즈는 옵트인 — 총이 아닌 무기(필드·등 발사대)는 전신 포즈를 트리거하면 안 된다
+            // (반동 그룹의 Light 폴백과 반대 방향의 기본값).
+            Assert.AreEqual(MechaAnimParams.FirePoseNone,
+                MechaAnimParams.ResolveWeaponPose(WeaponGrip.None, WeaponHand.Right));
+            Assert.AreEqual(MechaAnimParams.FirePoseNone,
+                MechaAnimParams.ResolveWeaponPose(WeaponGrip.None, WeaponHand.Left));
+        }
+
+        [Test]
+        public void ResolveFirePose_WindowRules_MatchFireGroup()
+        {
+            // 유지창 내 승격만 — 창이 닫히면 들어온 값으로 재설정.
+            Assert.AreEqual(2, MechaAnimParams.ResolveFirePose(MechaAnimParams.FirePoseHero, 2, true));
+            Assert.AreEqual(2, MechaAnimParams.ResolveFirePose(2, MechaAnimParams.FirePoseHero, true));
+            Assert.AreEqual(MechaAnimParams.FirePoseHero,
+                MechaAnimParams.ResolveFirePose(2, MechaAnimParams.FirePoseHero, false));
+        }
+
+        [Test]
+        public void FirePoseCodes_AreDistinctAndOrderedByPriority()
+        {
+            // 값 = 우선순위 체계 + AC_Mecha WeaponPose 레이어의 PoseType Equals n 조건과 짝.
+            // 두손(3·4)이 최상위 — 두 손이 다 묶인 포즈가 한손 포즈에 덮이면 총을 놓은 그림이 된다.
+            Assert.AreEqual(0, MechaAnimParams.FirePoseNone);
+            Assert.AreEqual(1, MechaAnimParams.FirePoseHero);
+            Assert.AreEqual(2, MechaAnimParams.FirePoseHeroLeft);
+            Assert.AreEqual(3, MechaAnimParams.FirePoseHeroTwoHand);
+            Assert.AreEqual(4, MechaAnimParams.FirePoseHeroTwoHandLeft);
+
+            Assert.AreEqual(MechaAnimParams.FirePoseHeroLeft, MechaAnimParams.ResolveFirePose(
+                MechaAnimParams.FirePoseHero, MechaAnimParams.FirePoseHeroLeft, true));
+            Assert.AreEqual(MechaAnimParams.FirePoseHeroTwoHand, MechaAnimParams.ResolveFirePose(
+                MechaAnimParams.FirePoseHeroLeft, MechaAnimParams.FirePoseHeroTwoHand, true));
+            Assert.AreEqual(MechaAnimParams.FirePoseHeroTwoHandLeft, MechaAnimParams.ResolveFirePose(
+                MechaAnimParams.FirePoseHeroTwoHand, MechaAnimParams.FirePoseHeroTwoHandLeft, true));
+        }
+
+        [Test]
+        public void ResolveWeaponPose_CoversEveryGripAndHand_WithDistinctCodes()
+        {
+            // 파지×손 6조합이 전부 서로 다른 코드로 떨어져야 AC 상태 4개가 빠짐없이 쓰인다.
+            // (총이 아닌 무기만 좌우가 같은 None으로 합쳐진다.)
+            var seen = new HashSet<int>
+            {
+                MechaAnimParams.ResolveWeaponPose(WeaponGrip.OneHanded, WeaponHand.Right),
+                MechaAnimParams.ResolveWeaponPose(WeaponGrip.OneHanded, WeaponHand.Left),
+                MechaAnimParams.ResolveWeaponPose(WeaponGrip.TwoHanded, WeaponHand.Right),
+                MechaAnimParams.ResolveWeaponPose(WeaponGrip.TwoHanded, WeaponHand.Left),
+                MechaAnimParams.ResolveWeaponPose(WeaponGrip.None, WeaponHand.Right),
+            };
+
+            Assert.AreEqual(5, seen.Count, "파지×손 조합이 같은 포즈 코드로 뭉쳤다.");
+        }
+
+        [Test]
+        public void HandForSlot_FirstSlotIsRight_SecondIsLeft()
+        {
+            // 격납고 로드아웃의 기재 순서 = 슬롯 순서 → 첫 무기가 오른손, 둘째가 왼손.
+            Assert.AreEqual(WeaponHand.Right, WeaponSlots.HandForSlot(0));
+            Assert.AreEqual(WeaponHand.Left, WeaponSlots.HandForSlot(1));
+            Assert.AreEqual(WeaponHand.Right, WeaponSlots.HandForSlot(2));
+            Assert.AreEqual(WeaponHand.Left, WeaponSlots.HandForSlot(3));
+        }
+
+        [Test]
+        public void SelectVisualYaw_PoseActive_LocksToCamera()
+        {
+            // 이동 중이라도 포즈 유지창이 열려 있으면 조준(카메라) 방향 — 방향별 포즈의 성립 조건.
+            Assert.AreEqual(30f, MechaAnimParams.SelectVisualYaw(
+                true, true, true, cameraYaw: 30f, moveYaw: 120f, currentYaw: 0f));
+        }
+
+        [Test]
+        public void SelectVisualYaw_PoseActiveWithoutCamera_FallsBackToMove()
+        {
+            Assert.AreEqual(120f, MechaAnimParams.SelectVisualYaw(
+                true, false, true, cameraYaw: 0f, moveYaw: 120f, currentYaw: 0f));
+        }
+
+        [Test]
+        public void SelectVisualYaw_NoPose_KeepsExistingPolicy()
+        {
+            // 이동 중 → 이동 방향
+            Assert.AreEqual(120f, MechaAnimParams.SelectVisualYaw(
+                false, true, true, cameraYaw: 30f, moveYaw: 120f, currentYaw: 0f));
+            // 정지 → 카메라 방향
+            Assert.AreEqual(30f, MechaAnimParams.SelectVisualYaw(
+                false, true, false, cameraYaw: 30f, moveYaw: 0f, currentYaw: 77f));
+            // 정지 + 카메라 없음 → 현상 유지
+            Assert.AreEqual(77f, MechaAnimParams.SelectVisualYaw(
+                false, false, false, cameraYaw: 0f, moveYaw: 0f, currentYaw: 77f));
         }
 
         [Test]

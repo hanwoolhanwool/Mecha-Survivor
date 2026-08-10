@@ -13,8 +13,66 @@ namespace MechaSurvivor.Gameplay
         /// <summary>빌더가 만드는 마운트 앵커 이름 규약. 씬의 기존 수동 배치와 같은 이름을 쓴다.</summary>
         public static string MountObjectName(string id) => "Mount_" + id;
 
+        /// <summary>
+        /// 총구 앵커 이름 접두사. 총구는 마운트의 자식으로 붙으므로, 마운트 자식을 켜고 끌 때
+        /// 이 접두사로 총구를 걸러내야 한다 — 총구까지 끄면 발사 지점이 사라진다.
+        /// </summary>
+        public const string MuzzleNamePrefix = "Muzzle_";
+
         /// <summary>빌더가 만드는 총구 앵커 이름 규약.</summary>
-        public static string MuzzleObjectName(string id) => "Muzzle_" + id;
+        public static string MuzzleObjectName(string id) => MuzzleNamePrefix + id;
+
+        // ── 손 규약 (Docs/06 §3.4) ──────────────────────────────
+        //
+        // 같은 무기를 좌우 어느 손에도 들 수 있게 되면서 "무기 Id 하나 = 총구 하나"가 깨졌다.
+        // 총구는 (무기 Id, 손)으로 식별하고, 손이 Any인 것(등 마운트·적)은 종전대로 Id만 쓴다.
+
+        /// <summary>총구 사전 키 — 손이 Any면 무기 Id 그대로 (기존 프로필·적과 호환).</summary>
+        public static string MuzzleKey(string id, MountHand hand)
+        {
+            switch (hand)
+            {
+                case MountHand.Right:
+                    return id + "@R";
+                case MountHand.Left:
+                    return id + "@L";
+                default:
+                    return id;
+            }
+        }
+
+        /// <summary>
+        /// 마운트의 손 조건이 장착 손과 맞는가. 어느 한쪽이 Any면 통과 —
+        /// 손 조건 없는 마운트는 항상 표시되고, 손을 특정하지 않은 조회는 좌우를 안 가린다.
+        /// </summary>
+        public static bool MatchesHand(MountHand mountHand, MountHand hand) =>
+            mountHand == MountHand.Any || hand == MountHand.Any || mountHand == hand;
+
+        /// <summary>장착 손 → 마운트 손 조건. 실제 장착은 항상 좌우 중 하나라 Any가 안 나온다.</summary>
+        public static MountHand ToMountHand(WeaponHand hand) =>
+            hand == WeaponHand.Left ? MountHand.Left : MountHand.Right;
+
+        /// <summary>
+        /// 총구가 딸린 마운트의 손. 총구에 손 필드를 따로 두지 않는 이유 — 총구는 마운트의
+        /// 자식이라 손이 갈릴 수 없고, 두 곳에 적으면 어긋날 여지만 생긴다.
+        /// </summary>
+        public static MountHand ResolveMuzzleHand(RigProfileData profile, string mountId)
+        {
+            if (profile == null || profile.Mounts == null || string.IsNullOrEmpty(mountId))
+            {
+                return MountHand.Any;
+            }
+
+            for (int i = 0; i < profile.Mounts.Length; i++)
+            {
+                if (profile.Mounts[i].Id == mountId)
+                {
+                    return profile.Mounts[i].Hand;
+                }
+            }
+
+            return MountHand.Any;
+        }
 
         /// <summary>
         /// 본 해석: Humanoid 본 우선(아바타가 Humanoid이고 Bone이 유효할 때),

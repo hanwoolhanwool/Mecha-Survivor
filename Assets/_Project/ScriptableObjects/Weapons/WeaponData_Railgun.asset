@@ -15,6 +15,7 @@ MonoBehaviour:
   Id: railgun
   DisplayName: "\uB808\uC77C\uAC74"
   Role: 2
+  Grip: 1
   Damage: 60
   BaseCooldown: 6.5
   HoldToFire: 0

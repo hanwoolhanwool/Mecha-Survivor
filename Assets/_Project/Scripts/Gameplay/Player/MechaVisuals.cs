@@ -27,6 +27,10 @@ namespace MechaSurvivor.Gameplay
         [Header("하체 요 회전 — 이동 방향을 드르륵 따라간다")]
         [SerializeField] private float _yawFollowResponse = 10f;
 
+        [Tooltip("무기 포즈 유지창 판단용. 비우면 컨트롤러의 드라이버를 자동 참조. " +
+                 "포즈 중에는 요를 조준(카메라) 방향에 고정한다 — 방향별 포즈의 성립 조건")]
+        [SerializeField] private MechaAnimationDriver _animationDriver;
+
         [Header("대시 에어 트레일 — 대시 창 동안만 방출")]
         [SerializeField] private TrailRenderer[] _dashTrails;
 
@@ -44,6 +48,11 @@ namespace MechaSurvivor.Gameplay
                 _basePosition = _visualRoot.localPosition;
             }
 
+            if (_animationDriver == null && _controller != null)
+            {
+                _animationDriver = _controller.GetComponent<MechaAnimationDriver>();
+            }
+
             SetTrailsEmitting(false);
         }
 
@@ -59,15 +68,13 @@ namespace MechaSurvivor.Gameplay
             Vector2 planar = new(velocity.x, velocity.z);
 
             // ── 하체 요: 이동 중이면 이동 방향, 정지 중이면 카메라 방향을 천천히 따라간다.
-            float targetYaw = _visualYaw;
-            if (planar.sqrMagnitude > 0.5f)
-            {
-                targetYaw = Mathf.Atan2(planar.x, planar.y) * Mathf.Rad2Deg;
-            }
-            else if (_camera != null)
-            {
-                targetYaw = _camera.Yaw;
-            }
+            //    무기 포즈 유지 중에는 조준(카메라) 방향 고정 — 몸짓만 이동 방향을 말한다.
+            bool isMoving = planar.sqrMagnitude > 0.5f;
+            float moveYaw = isMoving ? Mathf.Atan2(planar.x, planar.y) * Mathf.Rad2Deg : _visualYaw;
+            bool poseActive = _animationDriver != null && _animationDriver.IsWeaponPoseActive;
+            float targetYaw = MechaAnimParams.SelectVisualYaw(
+                poseActive, _camera != null, isMoving,
+                _camera != null ? _camera.Yaw : 0f, moveYaw, _visualYaw);
 
             _visualYaw = Mathf.LerpAngle(_visualYaw, targetYaw,
                 1f - Mathf.Exp(-_yawFollowResponse * dt));

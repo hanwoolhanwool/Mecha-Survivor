@@ -46,12 +46,23 @@ namespace MechaSurvivor.Core
         public PlayerLeveledUpEvent(int newLevel) => NewLevel = newLevel;
     }
 
-    /// <summary>무기 발사. 통계(발사 횟수·가동률)와 카메라 셰이크가 구독.</summary>
+    /// <summary>무기 발사. 통계(발사 횟수·가동률)와 카메라 셰이크·애니메이션이 구독.</summary>
     public readonly struct WeaponFiredEvent : IEvent
     {
         public readonly string WeaponId;
 
-        public WeaponFiredEvent(string weaponId) => WeaponId = weaponId;
+        /// <summary>
+        /// 전신 사격 포즈 코드 (Animator의 PoseType 그대로). 0 = 포즈 없음.
+        /// 포즈는 무기 데이터(파지 방식)와 장착 손의 함수라 발사 측만 알 수 있다 —
+        /// Core는 값을 나르기만 하고 의미는 Gameplay(MechaAnimParams)가 정의한다.
+        /// </summary>
+        public readonly int PoseType;
+
+        public WeaponFiredEvent(string weaponId, int poseType = 0)
+        {
+            WeaponId = weaponId;
+            PoseType = poseType;
+        }
     }
 
     /// <summary>데미지 성립. 통계(무기별 기여도)가 구독 — 전투 코드는 통계의 존재를 모른다.</summary>

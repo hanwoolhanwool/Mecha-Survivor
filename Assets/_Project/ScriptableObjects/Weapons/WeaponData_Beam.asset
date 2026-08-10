@@ -15,6 +15,7 @@ MonoBehaviour:
   Id: beam
   DisplayName: "\uB300\uCD9C\uB825 \uBE54"
   Role: 2
+  Grip: 2
   Damage: 70
   BaseCooldown: 9
   HoldToFire: 0

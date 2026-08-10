@@ -20,6 +20,12 @@ namespace MechaSurvivor.Gameplay
         /// <summary>강화 레벨 (1~MaxLevel). 파츠 강화가 올린다.</summary>
         public int Level { get; private set; } = 1;
 
+        /// <summary>
+        /// 장착된 손 — WeaponSlots가 슬롯 번호로 정한다 (Docs/05 §10-B10).
+        /// 미장착 상태의 기본값은 오른손. 두손 총은 이 값을 쓰지 않는다.
+        /// </summary>
+        public WeaponHand Hand { get; private set; } = WeaponHand.Right;
+
         private float _cooldownEndTime;
         private float _lastEffectiveCooldown = 1f;
 
@@ -40,6 +46,9 @@ namespace MechaSurvivor.Gameplay
         /// <summary>런타임 장착(업그레이드로 무기를 얻을 때) 지원.</summary>
         public void SetData(WeaponData data) => _data = data;
 
+        /// <summary>장착 손 주입 — WeaponSlots 전용 (슬롯이 손의 단일 진실 공급원).</summary>
+        public void SetHand(WeaponHand hand) => Hand = hand;
+
         public void SetLevel(int level) => Level = Mathf.Max(1, level);
 
         /// <summary>쿨다운 확인만 한다. 통과 시 발사하고 다음 쿨다운을 시작한다.</summary>
@@ -59,7 +68,9 @@ namespace MechaSurvivor.Gameplay
             _lastEffectiveCooldown = Mathf.Max(cooldown, 0.0001f);
             _cooldownEndTime = Time.time + _lastEffectiveCooldown;
 
-            EventBus<WeaponFiredEvent>.Raise(new WeaponFiredEvent(_data.Id));
+            // 전신 포즈는 (파지 방식, 장착 손)의 함수 — 둘 다 아는 건 발사 측뿐이다.
+            EventBus<WeaponFiredEvent>.Raise(new WeaponFiredEvent(
+                _data.Id, MechaAnimParams.ResolveWeaponPose(_data.Grip, Hand)));
             return true;
         }
 

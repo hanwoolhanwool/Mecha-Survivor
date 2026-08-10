@@ -67,18 +67,20 @@ namespace MechaSurvivor.Gameplay
 
             weapon.SetLevel(1);
 
-            // 포신 추종 (Docs/06 §8-1): 프로필에 이 무기의 총구가 정의돼 있으면 거기서 발사한다.
-            if (weapon.Data != null && _rigBuilder != null
-                && _rigBuilder.TryGetMuzzle(weapon.Data.Id, out Transform muzzle))
-            {
-                weapon.SetMuzzle(muzzle);
-            }
-
             if (_weaponSlots.Equip(weapon) < 0)
             {
                 // 빈 슬롯 없음 — 회수.
                 PoolManager.Instance.Despawn(weapon);
                 return null;
+            }
+
+            // 포신 추종 (Docs/06 §8-1): 프로필에 이 무기의 총구가 정의돼 있으면 거기서 발사한다.
+            // ★ 반드시 Equip 뒤 — 슬롯이 손을 정하고, 총구는 손별로 다르다 (Docs/06 §3.4).
+            if (weapon.Data != null && _rigBuilder != null
+                && _rigBuilder.TryGetMuzzle(weapon.Data.Id,
+                    RigProfileMath.ToMountHand(weapon.Hand), out Transform muzzle))
+            {
+                weapon.SetMuzzle(muzzle);
             }
 
             return weapon;

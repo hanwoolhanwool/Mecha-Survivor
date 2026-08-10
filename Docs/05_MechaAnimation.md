@@ -1,4 +1,4 @@
-# 05 — 주인공 기체(Mecha.fbx) 애니메이션 제작 계획서
+/resuem# 05 — 주인공 기체(Mecha.fbx) 애니메이션 제작 계획서
 
 작성일: 2026-07-28
 대상 에셋: `Assets/_Project/Art/Models/Mecha/Mecha.fbx`
@@ -440,6 +440,209 @@ Avatar, Bake Into Pose 3종). 소스 액션은 `Mecha Ver 2.blend`에 fake user�
 - **백업**: 교체 전 기존 8액션을 `*_v1`로 복제(fake_user) — blend는 저장소 밖이라 git 복구 불가.
 - **함정 체크**: 05 P5 전환 순서(DashTrigger 우선)·스냅 파라미터는 클립 교체와 무관하게 유지.
   §4-확정 ★ 2건(FBX_SCALE_ALL·씬 범위=액션 범위) 준수.
+
+### B8. 무기별 전신 사격 포즈 — 레이저 캐논 히어로 포즈 ✅ 완료 (2026-08-05)
+
+- **목적**: 포즈 무기(1차: `laser_cannon`)를 **쏘는 동안 + 발사 후 유지창(기본 2s)** 동안
+  전신을 방향별 히어로 포즈로 고정한다. 무기별 애니메이션 확장의 기반 구조.
+- **확장 규약 (새 무기 포즈 추가 절차 — 이 3개가 전부)**:
+  1. ~~`MechaAnimParams`에 포즈 상수 1개 + `FirePoses` 사전에 1줄~~
+     → **B10에서 대체됨**: 포즈는 `(WeaponData.Grip, 장착 손)`이 정한다. 기존 무기에
+     포즈를 붙이려면 `Grip`만 채우면 되고, ①은 *새 포즈 종류*를 만들 때만 필요하다
+     (상수 1개 = `FirePoseXxx`, 값 = 우선순위).
+  2. 포즈 클립 제작·임포트 (§4-확정 그대로).
+  3. `AC_Mecha`의 **WeaponPose 레이어**에 상태 1개 추가 — Empty→상태 전환 조건
+     `PoseType Equals n`(진입 0.12s), 상태→Empty 전환 `PoseType NotEqual n`(이탈 0.25s).
+     드라이버·씬은 무변경.
+- **컨트롤러**: `WeaponPose` 레이어를 **UpperBody 다음, Hit(Additive) 앞**(인덱스 2)에 삽입 —
+  전신 Override(마스크 없음, weight 1)라 포즈 중 상체 반동(ShootLight)을 덮고, 피격/수직
+  Additive는 그 위에 계속 얹힌다. `HeroPose` 상태 = 2D Freeform Directional BT(MoveX/MoveZ):
+  중앙 `Mecha_Pose_HeroIdle`, 축 4방 `Mecha_Pose_HeroLunge{,_L,_R,_B}` — 대각 입력은 인접
+  블렌드(B3 롤백과 동일 방침). 새 파라미터 `PoseType`(Int, 0=None).
+  ※ FL(−0.71, 0.71)만 예외로 전용 클립 `Mecha_Pose_HeroLunge_FL` 배선 — B8-1 참조.
+- **드라이버**: `OnWeaponFired` → 포즈 코드(B10부터 `evt.PoseType`)가 None이 아니면 포즈 유지창 갱신
+  (`_poseHoldSeconds`, 인스펙터 기본 2s). 경합은 반동 그룹과 동일 규칙(`ResolveFirePose` —
+  유지창 내 승격만). 유지창이 닫히면 `PoseType=0` 복귀. 매핑 없는 무기는 포즈에 영향 없음.
+- **요 정책 (방향별 포즈의 성립 조건)**: 포즈 유지창 동안 `MechaVisuals`가 시각 요를
+  **조준(카메라) 방향에 고정**한다 (`MechaAnimParams.SelectVisualYaw`,
+  `MechaVisuals._animationDriver` — 비우면 컨트롤러의 드라이버 자동 참조로 씬 무변경).
+  요가 이동을 따라가면 MoveX/MoveZ가 (0,1)로 수렴해 F 포즈만 보인다 (07 §10-1 원칙:
+  총구·시선 고정 + 몸짓만 이동 방향). 평시 정책(이동 방향 추종)은 그대로.
+- **검증 (2026-08-05)**: 빌드 0 / 콘솔 0 / EditMode **264개 전부 통과**(신규 6 — 포즈 매핑·
+  경합·요 선택). Play 스모크: `laser_cannon` 발사 이벤트 중 좌이동 유지 → 요 고정 상태로
+  MoveX −0.90 유지 = L 포즈 지속 재생 확인 (`Docs/Renders/HeroPose/B8_unity_pose_L.png`).
+  참고 — 무기는 입력 홀드 발사라 자동 발사가 없다: Play 검증 시 `WeaponFiredEvent`를
+  수동 발생시킬 것 (`EventBus<T>.Raise(ref evt)`).
+- **알려진 한계 / 튜닝 여지**: ① 비행 중 정지 사격 시 중앙 클립이 지상 스탠스(HeroIdle) —
+  어색하면 비행 전용 중앙 클립 분기 검토. ② 포즈 중 대쉬는 WeaponPose가 덮는다
+  (대쉬 클립도 같은 히어로 런지라 실루엣 연속 — 의도 수용). ③ 유지창 동안 요가 카메라에
+  고정되므로 레이저 연사 빌드에서는 사실상 상시 조준 고정(구 C안과 유사)이 된다 —
+  체감이 다르면 `_poseHoldSeconds`로 조절.
+
+### B8-1. FL 대각 하체 수정 — 전용 클립 `Mecha_Pose_HeroLunge_FL` ✅ 완료 (2026-08-06)
+
+- **문제 (사용자 지적)**: 정면 좌측 대각(FL) 이동 중 포즈의 하체가 부자연스러움.
+  원인 — F와 R은 다리 역할이 같아(오른다리 리드 턱 + 왼다리 트레일 신전) FR 인접 블렌드는
+  다리끼리 맞아떨어지지만, L은 반대(왼다리 리드)라 **FL 블렌드에서 리드/트레일이 본별로
+  충돌**해 하체가 무너진다. F가 양쪽 블렌드에 공유되므로 L 클립 수정만으로는 해결 불가.
+- **해법 (사용자 지시 = FR 하체 미러)**: FL 지점(−0.71, 0.71)에만 전용 클립을 배선.
+  Blender에서 프레임별(0~60) 합성 — **하체(Hips + 다리 8본 + Hips location) =
+  slerp(F, R, 0.5)의 좌우 미러**, **상체 13본(척추·목·머리·양팔) = slerp(F, L, 0.5)**
+  (기존 블렌드 결과 유지라 조준·상체는 변화 없음). 나머지 대각 3방(FR/BL/BR)은 인접 블렌드 유지.
+- **이 리그의 미러 공식 (실증)**: 본 이름 Left↔Right 교차 + 쿼터니언 `(w, x, −y, −z)`,
+  Hips location은 X 성분 부호 반전 — L/R 액션의 트레일 다리(스펙상 정확한 미러)에서 성분
+  일치로 검증. 검증: 루프 봉합 f0=f60 / 사웨이 5.0cm(동일 진폭·기준높이) / 무릎캡 전방.
+- **임포트 함정 (신규)**: `animationType=Human` + `sourceAvatar`만 설정하면
+  **`avatarSetup`이 CopyFromOther로 안 잡혀 조용히 실패**한다 — 증상은 Root 함정과 동일
+  (클립 0·`importedTakeInfos` 0·콘솔 무에러, Generic으로 두면 정상). Humanoid 전환 시
+  `avatarSetup = ModelImporterAvatarSetup.CopyFromOther`를 반드시 명시할 것.
+- **검증 (2026-08-06)**: 빌드 0 / 콘솔 0 / EditMode 271 통과. Unity 에디트 모드 샘플링으로
+  FL(신규 클립) vs FR(기존 블렌드) 정면 렌더가 정확한 미러 실루엣 확인
+  (`Docs/Renders/HeroPose/FL_unity_front.png`·`FR_unity_front.png`, Blender 원본
+  `FL_f0_*.png`). 드라이버·씬·코드 무변경. 잔여: HeroPoseLeft(LH) BT와 대쉬 대각에는
+  미적용 — 필요해지면 같은 레시피로 확장.
+
+### B9. 왼손 무기 히어로 포즈 세트 — 미러 클립 + HeroPoseLeft ✅ 완료 (2026-08-05)
+
+- **목적**: 미래 왼손 무기 대비 — B8 확장 규약 3단계 중 ②(클립)·③(상태)을 선반영하고,
+  ①(무기 매핑)은 비워둔다.
+  → **B10(2026-08-08)에서 활성화**: 매핑이 아니라 `WeaponData.Grip = OneHanded` +
+  홀수 슬롯(로드아웃 둘째 무기)이면 자동으로 이 포즈가 걸린다.
+- **클립 (미러 채택 — 사용자 결정)**: 오른손 5클립을 같은 FBX 임포트 설정에서
+  `mirror=true`로 복제 (§8-6 대각 클립과 동일 방식, Blender 무변경). 왼손 무기는 좌우
+  반전이 해부학적으로 정확한 경우라 미러가 의미상 올바르다 (07 §10-6 참조).
+  `Mecha_Pose_HeroIdle_LH` / `Mecha_Pose_HeroLunge_LH`(F) / `_LH_L`(원본 `_R` 미러) /
+  `_LH_R`(원본 `_L` 미러) / `_LH_B` — **L/R은 기울기가 뒤바뀌므로 기능명을 교차**했다.
+- **컨트롤러**: WeaponPose 레이어에 `HeroPoseLeft` 상태 추가 — B8과 동일 구조의
+  2D Freeform Directional BT(MoveX/MoveZ, 중앙 Idle_LH + 축 4방), Empty↔ 전환 조건은
+  `PoseType Equals/NotEqual 2` (진입 0.12s / 이탈 0.25s).
+- **코드**: `MechaAnimParams.FirePoseHeroLeft = 2` 상수만 추가 (값 = 우선순위 — 유지창 내
+  오른손 히어로(1)보다 승격). 드라이버·씬 무변경.
+- **주의 — 마운트는 별개**: 포즈는 팔만 움직인다. 실제 왼손 무기 추가 시
+  `RigProfile_Mecha`에 LeftHand 본 마운트 엔트리도 함께 만들어야 무기 모델이 왼손에 붙는다.
+- **검증 (2026-08-05)**: 빌드 0 / 콘솔 0 / EditMode 271 통과(신규 1 —
+  `FirePoseHeroLeft_IsDistinctAndPromotesOverHero`). RigLab Play에서 `PoseType=2` 강제 →
+  `HeroPoseLeft` 진입·미러 재생 확인. 렌더: `Docs/Renders/HeroPose/LH_unity_pose_idle_close.png`
+  ·`LH_unity_pose_idle_frontleft.png`, 오른손 비교 `RH_unity_pose_idle_close_ref.png`.
+
+### B10. 손 지정 = 로드아웃 순서, 포즈 = 파지 방식 × 손 ✅ 배선 완료 (2026-08-08)
+
+사용자 요구: **격납고 로드아웃의 첫 무기 = 오른손, 둘째 = 왼손.** 총 종류면 그 손의 히어로
+포즈, 두손 총이면 두손 포즈.
+
+- **포즈 선택의 근거를 바꿨다 (B8 확장 규약 ① 대체)**: 무기 ID 사전
+  (`MechaAnimParams.FirePoses`)은 **제거**됐다. 같은 무기라도 로드아웃 순서에 따라 손이
+  바뀌므로 포즈는 무기 고유값일 수 없다 — 이제 `(파지 방식, 장착 손)`의 함수다.
+  ```
+  MechaAnimParams.ResolveWeaponPose(WeaponGrip grip, WeaponHand hand)
+      OneHanded + Right  → FirePoseHero            (1)
+      OneHanded + Left   → FirePoseHeroLeft        (2)
+      TwoHanded + Right  → FirePoseHeroTwoHand     (3)
+      TwoHanded + Left   → FirePoseHeroTwoHandLeft (4)
+      None               → FirePoseNone            (0)
+  ```
+  **새 무기 포즈 확장 절차**: `WeaponData.Grip`만 채우면 끝 (코드·AC 무변경).
+  새 *포즈 종류*를 늘릴 때만 상수 1개 + AC 상태 1개 (B8 규약 ②③은 그대로).
+- **파지 방식 (`WeaponData.Grip`)**: 총 종류 여부와 손 개수를 한 필드로 합쳤다.
+  분류 — `OneHanded`: 개틀링·레이저 캐논·레일건 / `TwoHanded`: 산탄 캐논·대출력 빔 /
+  `None`: 미사일 포드·트윈 로켓·클러스터 폭탄·EMP 필드·그래비티 웰·궤도 폭격.
+- **손 배정 (`WeaponSlots.HandForSlot`)**: 짝수 슬롯 = 오른손, 홀수 = 왼손. 로드아웃은
+  기재 순서대로 슬롯 0·1을 채우므로 이 규칙이 곧 "먼저 쓴 무기 = 오른손"이다. 확장 슬롯
+  2·3도 교대를 잇는다. 주입은 `Equip`/`ReplaceSlot` 안에서 **한 번만** — 장착 경로가
+  여럿(초기 자동/업그레이드/교체)이라 호출부에 흩어 놓으면 순서와 어긋난다.
+- **이벤트 전달**: `WeaponFiredEvent`에 `PoseType`(int) 추가 — 파지 방식과 손을 둘 다 아는
+  건 발사 측(`Weapon.TryFire`)뿐이다. Core는 값을 나르기만 하고 의미는 Gameplay가 정의한다.
+  기본값 0이라 기존 호출부·구독자 전부 무영향. 드라이버는 사전 조회 대신 `evt.PoseType`을 쓴다.
+- **두손 포즈(PoseType=3·4)** ✅ — `HeroPoseTwoHand`(오른그립) + `HeroPoseTwoHandLeft`(왼그립)
+  두 상태, 클립 각 5종. 제작 레시피·리그 실측 제약·함정은 **07 §10-7**이 원본.
+- **★ 두손도 손을 가린다 (2026-08-08 수정)**: 처음엔 "두 손을 다 쓰니 손 구분이 없다"고 보고
+  `TwoHanded`가 손을 무시했는데, **좌우 마운트가 생기면서(06 §3.4) 전제가 깨졌다** —
+  두 손을 쓰더라도 **그립을 쥐는 손은 하나**고 무기 모델은 그 손에 붙는다.
+  방치하면 `loadout_gatling`의 대출력 빔(슬롯 1 = 왼손)이 **"빈 오른손으로 쥐는 자세 +
+  왼손에 매달린 총"** 이 되고 총구도 반대쪽(`beam@L`)에서 나간다.
+- **알려진 갭 (이번 범위 밖 — 별도 결정 필요)**:
+  1. ~~왼손 무기 모델 마운트 없음~~ → ✅ **해소 (2026-08-08)**: 손에 드는 무기 3종에
+     미러 왼손 마운트를 추가하고 `WeaponMountVisuals`를 손 기준으로 분기했다.
+     사양·미러 산출·함정은 **06 §3.4**가 원본.
+  2. **오른손 마운트 겹침 (기존 결함)**: `RightHandWeapon`/`RightHandGatling`/`RightHandBeam`이
+     같은 본·같은 로컬값이라 개틀링+빔 로드아웃(`loadout_gatling`)에서 두 모델이 **동시에
+     오른손에 겹쳐 표시**된다. 손 지정과 무관하게 이전부터 있던 문제 — 다만 빔이 두손 무기라
+     실질적으로는 "두손 무기와 한손 무기를 같은 손에 쥔 로드아웃"이라는 데이터 모순이 먼저다.
+  3. **포즈 경합**: 유지창 내 승격만(B8 규칙) 유지 — 두손(3) > 왼손(2) > 오른손(1).
+     개틀링(연사)+빔(두손) 조합에서 빔을 한 번 쏘면 개틀링 연사가 유지창을 계속 갱신해
+     두손 포즈가 길게 남는다. 체감이 나쁘면 "최신 발사 우선 + 최소 유지시간"으로 규칙 교체 검토.
+- **검증 (2026-08-08)**: 빌드 오류 0(경고 4 = 기존 MSB3277 노이즈) / 콘솔 에러 0 /
+  EditMode **315개 전부 통과**(신규 7 — 파지×손 포즈 해석 3, 슬롯→손 배정 1,
+  `WeaponPoseWiringTests` 3: PoseType↔AC 상태 일치·두손 BT 구성·무기 파지 분류).
+  **배선 가드가 중요한 이유**: 포즈 코드(C#)와 상태 진입 조건(컨트롤러 에셋)이 다른 파일에
+  있어서 한쪽만 바뀌면 콘솔 에러 없이 포즈만 안 나온다.
+
+### B11. 무기별 발사 모션 — 산탄 캐논 반동 킥 + 펌프 재장전 ✅ 완료 (2026-08-08)
+
+사용자 요구: **"두손 무기 애니메이션은 있지만 샷건 모션 애니메이션은 없다."**
+
+- **문제의 정체**: `WeaponPose` 레이어는 **마스크 없는 전신 Override(weight 1)** 라서
+  UpperBody 반동 상태(ShootLight/Launcher/Heavy)를 **통째로 덮는다**. 그래서 포즈 무기는
+  쏘는 동안 **정지한 브레이스 루프만 재생**된다 — 산탄 캐논은 쿨다운 2.4초 단발이라
+  이 정지가 특히 크게 보인다. 반동을 보이게 하려면 **같은 레이어의 단발 상태**로 넣어야 한다.
+- **포즈 vs 모션 (개념 분리)**: `FirePose*`는 *쏘는 동안 유지하는 자세*(루프),
+  `FireMotion*`은 *한 발마다 재생되는 단발 동작*(0.9초 비루프)이다.
+  포즈는 `(파지 방식, 손)`이 정하지만 **모션은 무기가 정한다** — 같은 두손 무기라도
+  대출력 빔은 지속 빔이라 펌프 동작이 어울리지 않는다. 좌우 그립 구분은 이미 PoseType(3/4)이
+  하고 있어서 컨트롤러가 `ShotgunFire` / `ShotgunFireLeft` 를 알아서 고른다.
+- **승인 타임라인 (30fps, 0~27프레임 = 0.9초)**:
+  `0.00s` 브레이스 → `0.067s(f2)` 킥 정점(총구 +16°, 상체 후경, Hips −총축 9cm) →
+  `0.20s(f6)` 반동 흡수 → `0.27s(f8)` 언더슈트(−22%) →
+  `0.40s(f12)` 왼손 슬라이드 후퇴 8.5cm → `0.60s(f18)` 폐쇄 충격(총구 −4°) →
+  `0.87s(f26)` 브레이스 복귀.
+- **제작 (07 §10-8이 원본)**: 브레이스 f0 포즈를 기준으로 삼고 킥·펌프를 얹은 뒤
+  **양팔만 2본 IK로 다시 푼다**. 방향 5종(Idle/F/L/R/B) 각각 제작 — 왼손 접점이 총 표면에
+  붙어 있어야 해서 방향별 재계산이 필수다(Additive 한 장으로는 비F 방향에서 손이 총을 벗어난다).
+  왼그립 5종은 `mirror=true` 임포트(L/R 기능명 교차, B9 규약 그대로).
+- **컨트롤러**: WeaponPose 레이어에 `ShotgunFire` / `ShotgunFireLeft` 상태 —
+  두손 포즈와 같은 2D Freeform Directional BT(MoveX/MoveZ, 중앙 + 축 4방).
+  - 진입: `HeroPoseTwoHand(Left)` → `[FireMotionTrigger + FireMotion Equals 1]` 0.08s,
+    **그리고 `Empty` → 같은 조건 + `PoseType Equals 3/4`** — 포즈 유지창이 닫힌 뒤의 첫 발이
+    브레이스를 거치느라 0.12초 늦게 반동하는 것을 막는다.
+  - 이탈: `PoseType NotEqual 3/4` → Empty (0.25s, **전환 배열 맨 앞**) /
+    Exit Time 1.0 → 브레이스 복귀 (0.15s).
+  - **전환 순서가 곧 동작이다**: 트리거 전환이 포즈 이탈 전환보다 뒤에 있으면 조용히 가로채인다.
+    `WeaponFireMotionTests`가 `transitions[0]` 을 직접 검사한다.
+- **클립이 브레이스 f0에서 시작·종료한다**: f0 = f27 = 해당 방향 브레이스의 프레임 0이라
+  진입/복귀 양쪽이 봉합된다(Unity 실측 오차 4.5mm = Humanoid 리타게팅 양자화).
+  대신 0.9초 동안 부유 사웨이가 멈추는데, 반동 자체가 큰 수직 운동이라 문제되지 않는다.
+- **코드**: `MechaAnimParams.GetFireMotion(weaponId)` + 드라이버가
+  `FireMotion`(Int) → `FireMotionTrigger`(Trigger) **순서대로** 쓴다(순서가 바뀌면 한 프레임 놓친다).
+  `GetFireGroup`과 달리 **미지 무기는 폴백하지 않는다**(None) — 신무기가 남의 펌프 동작을
+  물려받으면 총도 안 든 채 슬라이드를 당긴다.
+- **★ 함정 — 내보내기 리그의 오브젝트 트랜스폼**: 원본 리그 `Riging_Meshy_IK` 는 Blender에서
+  **x = 2.5178 에 놓여 있다.** 내보내기 복제본이 이 오프셋을 물고 나가면 Humanoid가 Hips를
+  아마추어 공간 좌표로 구워서 **Unity에서 발사할 때마다 기체가 2.5m 옆으로 순간이동**한다
+  (콘솔 무에러, 클립·본 수·리타게팅 전부 정상으로 보인다). 내보내기 복제본은 **반드시
+  `matrix_world = Identity`** 로 만들고 어서션할 것. 진단은 `hips.position.x` 실측.
+- **★ 함정 보강 — EDIT 모드 진입**: 07 §9-3의 `temp_override(active_object=…, selected_objects=…)`
+  **만으로는 부족하다.** `mode_set`이 `{'FINISHED'}`를 반환하면서도 모드는 OBJECT로 남고
+  `edit_bones`가 빈 컬렉션이 된다 → Root·힙아머 본이 안 지워져 디폼 27본이 나간다.
+  뷰레이어의 **실제 선택·활성 상태**(`select_set(True)` + `view_layer.objects.active`)를
+  만든 뒤 오버라이드해야 진입한다. 진단은 `len(edit_bones)` 어서션.
+- **산출물**: 액션 `Mecha_Fire_ShotgunPump{,_L,_R,_B}` · `Mecha_Fire_ShotgunPumpIdle`
+  (0~27 / 30fps / fcurve 91) → `Rigged/Mecha_Anim_ShotgunPump{,Idle,_L,_R,_B}.fbx`
+  (전부 take 1 / Transform 25 / 0.90s / 비루프) + 미러 5클립 = **클립 10종**.
+- **검증 (2026-08-08)**: 빌드 오류 0(경고 4 = 기존 MSB3277 노이즈) / 콘솔 에러 0 /
+  EditMode **345개 전부 통과**(신규 8 — `WeaponFireMotionTests`).
+  - Blender 전 방향·전 프레임 제약: 왼손 도달 ≤ 0.4545 (한계 0.4557) / 팔꿈치–총 ≥ 0.234
+    (총 반경 0.085) / 머리–총 ≥ 0.232 / IK 오차 0 / f0·f27 = 브레이스 f0 (오차 0.00003°).
+  - Unity 실측(에디트 모드 샘플링): 총구 최대 상승 16.4~16.8° / 손 간격 0.245 → 0.167
+    (펌프 행정) / Hips 최대 이동 0.090 m / 봉합 4.5mm.
+  - Play 스모크(Game 씬): `WeaponFiredEvent("shotgun_cannon", 3)` 수동 발생 →
+    `PoseType=3 / FireMotion=1` → `ShotgunFire` 진입 → Exit Time 후 `HeroPoseTwoHand` 복귀 확인.
+  - 렌더 `Docs/Renders/ShotgunFire/unity_F_f{00,02,06,12,18}_{rside,fl34}.png`
+    (실제 산탄 캐논 모델을 오른손 마운트에 붙여 촬영).
+- **알려진 한계**: ① 포즈 경합(B10 갭 3)이 그대로 적용된다 — 왼그립 두손 무기가 먼저 쏴서
+  PoseType이 4로 승격된 상태에서 오른손 산탄 캐논이 쏘면 `ShotgunFireLeft`가 나온다.
+  ② 대각 4방은 인접 블렌드(B8-1의 FL 전용 클립에 해당하는 보정 미적용 — 하체가 브레이스와
+  동일하므로 같은 증상이 나오면 같은 레시피로 확장). ③ 쿨다운이 0.9초 밑으로 내려가면
+  모션이 겹친다(현재 기본 2.4초라 여유 있음 — 겹치면 트리거가 큐잉되어 한 번 더 재생된다).
 
 ### B6. 폴리시 잔여 (알려진 한계 — 필요 시)
 

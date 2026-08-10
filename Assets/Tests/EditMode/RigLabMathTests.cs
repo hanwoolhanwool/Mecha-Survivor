@@ -85,6 +85,138 @@ namespace MechaSurvivor.Tests.EditMode
             Assert.AreEqual(-1, RigLabMath.CycleWithNone(0, 1, 1));
         }
 
+        // ── 장착 무기 표시 규칙 ──────────────────────────────────
+
+        [Test]
+        public void ShouldShowMount_NothingEquipped_ShowsEverything()
+        {
+            // 랩 기본값(전체 표시) — 종전처럼 모든 장착 모델을 한꺼번에 본다.
+            Assert.IsTrue(RigLabMath.ShouldShowMount("laser_cannon", null));
+            Assert.IsTrue(RigLabMath.ShouldShowMount("gatling", string.Empty));
+            Assert.IsTrue(RigLabMath.ShouldShowMount(null, null));
+        }
+
+        [Test]
+        public void ShouldShowMount_Equipped_ShowsOnlyMatchingWeapon()
+        {
+            Assert.IsTrue(RigLabMath.ShouldShowMount("beam", "beam"));
+            Assert.IsFalse(RigLabMath.ShouldShowMount("gatling", "beam"),
+                "다른 무기의 마운트는 숨겨야 같은 손 모델끼리 겹치지 않는다.");
+            Assert.IsFalse(RigLabMath.ShouldShowMount("laser_cannon", "beam"));
+        }
+
+        [Test]
+        public void ShouldShowMount_UnboundMount_StaysVisibleWhileEquipped()
+        {
+            // ShowForWeapon이 없는 마운트는 무기 조건이 없는 장식 — 장착과 무관하게 남는다.
+            Assert.IsTrue(RigLabMath.ShouldShowMount(null, "beam"));
+            Assert.IsTrue(RigLabMath.ShouldShowMount(string.Empty, "beam"));
+        }
+
+        [Test]
+        public void ShouldShowMount_IsCaseSensitiveOnWeaponId()
+        {
+            // WeaponData.Id는 통계 집계 키라 대소문자까지 정확히 일치해야 한다.
+            Assert.IsFalse(RigLabMath.ShouldShowMount("Beam", "beam"));
+        }
+
+        // ── 조정 항목 필터 (총구) ────────────────────────────────
+
+        [Test]
+        public void ShouldShowMuzzle_NothingEquipped_ShowsEverything()
+        {
+            // 전체 표시 모드 = 종전 동작 — 조정 항목 목록이 프로필 전체다.
+            Assert.IsTrue(RigLabMath.ShouldShowMuzzle("beam", "gatling", null));
+            Assert.IsTrue(RigLabMath.ShouldShowMuzzle("beam", "gatling", string.Empty));
+        }
+
+        [Test]
+        public void ShouldShowMuzzle_OwnMuzzle_AlwaysShown()
+        {
+            // 장착 무기 자신의 총구는 마운트 조건과 무관하게 조정 대상이어야 한다
+            // (마운트 없이 모델 루트에서 쏘는 무기도 여기에 걸린다).
+            Assert.IsTrue(RigLabMath.ShouldShowMuzzle("beam", "beam", "beam"));
+            Assert.IsTrue(RigLabMath.ShouldShowMuzzle("beam", null, "beam"));
+        }
+
+        [Test]
+        public void ShouldShowMuzzle_OtherWeaponMount_Hidden()
+        {
+            // 다른 무기의 마운트에 달린 총구는 모델도 안 보이므로 목록에서 뺀다.
+            Assert.IsFalse(RigLabMath.ShouldShowMuzzle("gatling", "gatling", "beam"));
+            Assert.IsFalse(RigLabMath.ShouldShowMuzzle("laser_cannon", "laser_cannon", "beam"));
+        }
+
+        [Test]
+        public void ShouldShowMuzzle_SharedMount_ShowsSiblingMuzzles()
+        {
+            // 등 마운트는 missile_pod가 켜고 twin_rocket 총구를 함께 이고 있다 —
+            // 모델이 보이는 동안 형제 총구도 만질 수 있어야 조정이 막히지 않는다.
+            Assert.IsTrue(RigLabMath.ShouldShowMuzzle("twin_rocket", "missile_pod", "missile_pod"));
+        }
+
+        [Test]
+        public void ShouldShowMuzzle_UnboundMount_StaysVisible()
+        {
+            // 무기 조건 없는 마운트(또는 모델 루트 기준 총구)는 걸러내면 조정 방법이 사라진다.
+            Assert.IsTrue(RigLabMath.ShouldShowMuzzle("enemy_main", null, "beam"));
+            Assert.IsTrue(RigLabMath.ShouldShowMuzzle("enemy_main", string.Empty, "beam"));
+        }
+
+        // ── 손 규약 (Docs/06 §3.4) ──────────────────────────────
+
+        [Test]
+        public void MuzzleKey_AnyHand_KeepsPlainId()
+        {
+            // 등 마운트·적 총구는 종전 그대로 무기 Id가 키다 — 기존 프로필과 호환된다.
+            Assert.AreEqual("missile_pod", RigProfileMath.MuzzleKey("missile_pod", MountHand.Any));
+            Assert.AreEqual("gatling@R", RigProfileMath.MuzzleKey("gatling", MountHand.Right));
+            Assert.AreEqual("gatling@L", RigProfileMath.MuzzleKey("gatling", MountHand.Left));
+        }
+
+        [Test]
+        public void MatchesHand_AnyOnEitherSide_Passes()
+        {
+            // 손 조건 없는 마운트는 항상 표시, 손을 특정하지 않은 조회는 좌우를 안 가린다.
+            Assert.IsTrue(RigProfileMath.MatchesHand(MountHand.Any, MountHand.Left));
+            Assert.IsTrue(RigProfileMath.MatchesHand(MountHand.Right, MountHand.Any));
+        }
+
+        [Test]
+        public void MatchesHand_OppositeHands_Fails()
+        {
+            // 이게 무너지면 무기 하나가 양손에 동시에 나타난다.
+            Assert.IsFalse(RigProfileMath.MatchesHand(MountHand.Right, MountHand.Left));
+            Assert.IsFalse(RigProfileMath.MatchesHand(MountHand.Left, MountHand.Right));
+            Assert.IsTrue(RigProfileMath.MatchesHand(MountHand.Left, MountHand.Left));
+        }
+
+        [Test]
+        public void ToMountHand_MapsWeaponHand()
+        {
+            Assert.AreEqual(MountHand.Right, RigProfileMath.ToMountHand(WeaponHand.Right));
+            Assert.AreEqual(MountHand.Left, RigProfileMath.ToMountHand(WeaponHand.Left));
+        }
+
+        [Test]
+        public void ResolveMuzzleHand_TakesHandFromOwningMount()
+        {
+            var profile = ScriptableObject.CreateInstance<RigProfileData>();
+            profile.Mounts = new[]
+            {
+                new RigProfileData.MountDef { Id = "L", Hand = MountHand.Left },
+                new RigProfileData.MountDef { Id = "Back", Hand = MountHand.Any },
+            };
+
+            Assert.AreEqual(MountHand.Left, RigProfileMath.ResolveMuzzleHand(profile, "L"));
+            Assert.AreEqual(MountHand.Any, RigProfileMath.ResolveMuzzleHand(profile, "Back"));
+            // 모델 루트 기준 총구(마운트 없음)와 이름이 틀린 마운트는 Any로 떨어진다.
+            Assert.AreEqual(MountHand.Any, RigProfileMath.ResolveMuzzleHand(profile, ""));
+            Assert.AreEqual(MountHand.Any, RigProfileMath.ResolveMuzzleHand(profile, "없는마운트"));
+
+            Object.DestroyImmediate(profile);
+        }
+
         [Test]
         public void ResolveEnemyMuzzleOffset_NoProfile_UsesEnemyData()
         {

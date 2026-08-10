@@ -34,7 +34,26 @@ namespace MechaSurvivor.Gameplay
 
         public bool TryGetMount(string id, out Transform mount) => _mounts.TryGetValue(id, out mount);
 
-        public bool TryGetMuzzle(string id, out Transform muzzle) => _muzzles.TryGetValue(id, out muzzle);
+        /// <summary>손을 특정하지 않은 조회 — 우선순위 폴백으로 아무 손이나 찾는다.</summary>
+        public bool TryGetMuzzle(string id, out Transform muzzle) =>
+            TryGetMuzzle(id, MountHand.Any, out muzzle);
+
+        /// <summary>
+        /// 총구 조회 (Docs/06 §3.4). 그 손 전용 → 손 무관 → 오른손 → 왼손 순으로 떨어진다.
+        /// 폴백이 있어야 한쪽 손 마운트만 있는 무기를 반대 손에 들어도 발사 지점이 남는다.
+        /// </summary>
+        public bool TryGetMuzzle(string id, MountHand hand, out Transform muzzle)
+        {
+            if (hand != MountHand.Any
+                && _muzzles.TryGetValue(RigProfileMath.MuzzleKey(id, hand), out muzzle))
+            {
+                return true;
+            }
+
+            return _muzzles.TryGetValue(id, out muzzle)
+                || _muzzles.TryGetValue(RigProfileMath.MuzzleKey(id, MountHand.Right), out muzzle)
+                || _muzzles.TryGetValue(RigProfileMath.MuzzleKey(id, MountHand.Left), out muzzle);
+        }
 
         /// <summary>RigLab 대상 전환용 — 교체 후 Build()를 다시 부른다.</summary>
         public void SetProfile(RigProfileData profile, Animator animator = null)
@@ -133,6 +152,7 @@ namespace MechaSurvivor.Gameplay
                         bindings.Add(new WeaponMountVisuals.MountBinding
                         {
                             Weapon = def.ShowForWeapon,
+                            Hand = def.Hand,
                             Model = visual.gameObject,
                         });
                     }
@@ -154,11 +174,14 @@ namespace MechaSurvivor.Gameplay
                         continue;
                     }
 
+                    // 좌우 마운트가 같은 무기 Id의 총구를 하나씩 이므로 사전 키에 손을 섞는다.
+                    // 앵커 이름은 마운트 아래에서만 유일하면 되니 Id 그대로 둔다.
+                    MountHand hand = RigProfileMath.ResolveMuzzleHand(profile, def.MountId);
                     Transform anchor = RigProfileMath.GetOrCreateAnchor(
                         parent, RigProfileMath.MuzzleObjectName(def.Id));
                     RigProfileMath.ApplyLocal(
                         anchor, def.LocalPosition, def.LocalEulerAngles, Vector3.one);
-                    muzzles[def.Id] = anchor;
+                    muzzles[RigProfileMath.MuzzleKey(def.Id, hand)] = anchor;
                 }
             }
 

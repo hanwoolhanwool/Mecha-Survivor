@@ -15,6 +15,7 @@ MonoBehaviour:
   Id: shotgun_cannon
   DisplayName: "\uC0B0\uD0C4 \uCE90\uB17C"
   Role: 1
+  Grip: 2
   Damage: 4
   BaseCooldown: 2.4
   HoldToFire: 0

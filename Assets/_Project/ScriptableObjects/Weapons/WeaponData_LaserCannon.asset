@@ -15,6 +15,7 @@ MonoBehaviour:
   Id: laser_cannon
   DisplayName: "\uB808\uC774\uC800 \uCE90\uB17C"
   Role: 0
+  Grip: 1
   Damage: 3
   BaseCooldown: 1.1
   HoldToFire: 1

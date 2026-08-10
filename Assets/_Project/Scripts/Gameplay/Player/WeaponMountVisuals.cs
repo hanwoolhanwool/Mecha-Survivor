@@ -16,6 +16,9 @@ namespace MechaSurvivor.Gameplay
             [Tooltip("이 무기를 보유하면")]
             public WeaponData Weapon;
 
+            [Tooltip("그리고 이 손에 들고 있으면 (Any = 손 무관 — 등 마운트)")]
+            public MountHand Hand;
+
             [Tooltip("이 모델을 켠다 (본에 붙은 외형 오브젝트)")]
             public GameObject Model;
         }
@@ -51,7 +54,9 @@ namespace MechaSurvivor.Gameplay
                     continue;
                 }
 
-                bool show = slots.Has(weapon);
+                // 손까지 봐야 한다 — 좌우 마운트가 같은 무기를 지목하므로 보유만 보면
+                // 무기 하나가 양손에 동시에 뜬다 (Docs/06 §3.4).
+                bool show = slots.HasInHand(weapon, bindings[i].Hand);
                 if (model.activeSelf != show)
                 {
                     model.SetActive(show);

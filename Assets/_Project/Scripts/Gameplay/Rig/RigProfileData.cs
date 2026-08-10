@@ -3,6 +3,18 @@ using UnityEngine;
 namespace MechaSurvivor.Gameplay
 {
     /// <summary>
+    /// 마운트가 담당하는 손 (Docs/06 §3.4). 같은 무기의 좌/우 마운트를 구분하는 유일한 근거다 —
+    /// 이게 없으면 무기 하나가 양손에 동시에 나타난다.
+    /// Any = 손과 무관 (등 마운트·적 공격 등) — 어느 손에 들든 표시된다.
+    /// </summary>
+    public enum MountHand
+    {
+        Any,
+        Right,
+        Left,
+    }
+
+    /// <summary>
     /// 리그 프로필 — 기체/적 모델의 마운트(장착 모델)·총구(투사체 생성 위치) 정의 (Docs/06).
     /// 씬에 손으로 배치하지 않는다: 조정 결과는 전부 여기 저장되고 RigBuilder가 스폰 시 재구성한다.
     /// 수치는 RigLab 씬에서 눈으로 보며 조정·저장한다.
@@ -32,6 +44,10 @@ namespace MechaSurvivor.Gameplay
 
             [Tooltip("이 무기를 보유할 때만 표시 (WeaponMountVisuals 바인딩). 비우면 항상 표시")]
             public WeaponData ShowForWeapon;
+
+            [Tooltip("이 마운트가 담당하는 손. 같은 무기의 좌우 마운트를 가르는 값 — "
+                + "Any면 어느 손에 들어도 표시된다 (등 마운트·장식)")]
+            public MountHand Hand = MountHand.Any;
         }
 
         [System.Serializable]

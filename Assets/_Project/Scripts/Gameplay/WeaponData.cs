@@ -19,6 +19,28 @@ namespace MechaSurvivor.Gameplay
     }
 
     /// <summary>
+    /// 총기 파지 방식 (Docs/05 §10-B10) — 사격 히어로 포즈를 고르는 유일한 근거다.
+    /// "총 종류인가"와 "손을 몇 개 쓰는가"를 한 필드로 합쳤다: 총이 아니면 손 포즈가 없고,
+    /// 총이면 한손(장착 손에 따라 좌/우) 또는 두손(손과 무관) 둘 중 하나다.
+    /// </summary>
+    public enum WeaponGrip
+    {
+        None,       // 총 종류 아님 — 전신 포즈 없음 (등 발사대·필드·설치·지원 화력)
+        OneHanded,  // 한손 총 — 장착 손(로드아웃 순서)에 따라 오른손/왼손 포즈
+        TwoHanded,  // 두손 총 — 슬롯이 어디든 두손 포즈 (산탄 캐논·대출력 빔)
+    }
+
+    /// <summary>
+    /// 무기가 장착된 손. 격납고 로드아웃의 기재 순서가 곧 손이다 —
+    /// 첫 무기 = 오른손, 둘째 = 왼손 (배정 규칙은 WeaponSlots.HandForSlot).
+    /// </summary>
+    public enum WeaponHand
+    {
+        Right,
+        Left,
+    }
+
+    /// <summary>
     /// 무기 정의 데이터 (GDD 8.2). 발사 자원 필드는 없다 — 쿨다운이 전부다 (GDD 3.1).
     /// 화려함(연출)은 코드가 아니라 이 데이터로 조절한다 (GDD 3.4).
     /// </summary>
@@ -32,6 +54,9 @@ namespace MechaSurvivor.Gameplay
 
         [Header("역할 — 로테이션에서의 자리")]
         public WeaponRole Role = WeaponRole.Sustain;
+
+        [Tooltip("총기 파지 방식 — 사격 시 전신 히어로 포즈 선택 근거. None = 총 종류 아님(포즈 없음)")]
+        public WeaponGrip Grip = WeaponGrip.None;
 
         [Header("발사")]
         public float Damage = 5f;

@@ -15,6 +15,7 @@ MonoBehaviour:
   Id: gatling
   DisplayName: "\uAC1C\uD2C0\uB9C1"
   Role: 0
+  Grip: 1
   Damage: 4
   BaseCooldown: 0.12
   HoldToFire: 1

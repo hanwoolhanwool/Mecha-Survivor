@@ -19,10 +19,11 @@ MonoBehaviour:
     Bone: 54
     BonePath: Hips/Spine02/Spine01/Spine
     LocalPosition: {x: -0.008828137, y: 0.15027167, z: -0.29993647}
-    LocalEulerAngles: {x: 315.0388, y: 1.2152311, z: 0.07969049}
+    LocalEulerAngles: {x: 315.0388, y: 1.2152311, z: 0.079690665}
     LocalScale: {x: 0.45, y: 0.45, z: 0.45}
     VisualPrefab: {fileID: 3359176211500965717, guid: c9fcb94d91ac2b044a328ce4b929899d, type: 3}
     ShowForWeapon: {fileID: 11400000, guid: e7bd2d32e3731304aa481f3d2ee8f57b, type: 2}
+    Hand: 0
   - Id: RightHandWeapon
     Bone: 18
     BonePath: Hips/Spine02/Spine01/Spine/RightShoulder/RightArm/RightForeArm/RightHand
@@ -31,6 +32,70 @@ MonoBehaviour:
     LocalScale: {x: 0.6, y: 0.6, z: 0.6}
     VisualPrefab: {fileID: 919132149155446097, guid: 7be56e6fb1cc2f14aad182b8e883f6c4, type: 3}
     ShowForWeapon: {fileID: 11400000, guid: 5d79123fa41107f47bb487ff40d41b1e, type: 2}
+    Hand: 1
+  - Id: RightHandGatling
+    Bone: 18
+    BonePath: Hips/Spine02/Spine01/Spine/RightShoulder/RightArm/RightForeArm/RightHand
+    LocalPosition: {x: 0, y: 0.35000002, z: -0.049999993}
+    LocalEulerAngles: {x: 353.8271, y: 280.40558, z: 88.40139}
+    LocalScale: {x: 0.6, y: 0.6, z: 0.6}
+    VisualPrefab: {fileID: 981900478321646165, guid: 74010446d50810e458b0210921db2aac, type: 3}
+    ShowForWeapon: {fileID: 11400000, guid: a6e66cb2112622745b0148279d7a5db8, type: 2}
+    Hand: 1
+  - Id: RightHandBeam
+    Bone: 18
+    BonePath: Hips/Spine02/Spine01/Spine/RightShoulder/RightArm/RightForeArm/RightHand
+    LocalPosition: {x: 0, y: 0.35000002, z: -0.049999993}
+    LocalEulerAngles: {x: 353.82712, y: 280.40558, z: 88.401344}
+    LocalScale: {x: 0.6, y: 0.6, z: 0.6}
+    VisualPrefab: {fileID: 919132149155446097, guid: f2e9f3d2d03da5e4a91f68c9cc3eeb1a, type: 3}
+    ShowForWeapon: {fileID: 11400000, guid: 3f896e59e42bfbe47ab9b3308ebc4acd, type: 2}
+    Hand: 1
+  - Id: LeftHandWeapon
+    Bone: 17
+    BonePath: Hips/Spine02/Spine01/Spine/LeftShoulder/LeftArm/LeftForeArm/LeftHand
+    LocalPosition: {x: 0.000000059604638, y: 0.35000008, z: -0.050000057}
+    LocalEulerAngles: {x: 6.172914, y: 259.59442, z: 88.40134}
+    LocalScale: {x: 0.6, y: 0.6, z: 0.6}
+    VisualPrefab: {fileID: 919132149155446097, guid: 7be56e6fb1cc2f14aad182b8e883f6c4, type: 3}
+    ShowForWeapon: {fileID: 11400000, guid: 5d79123fa41107f47bb487ff40d41b1e, type: 2}
+    Hand: 2
+  - Id: LeftHandGatling
+    Bone: 17
+    BonePath: Hips/Spine02/Spine01/Spine/LeftShoulder/LeftArm/LeftForeArm/LeftHand
+    LocalPosition: {x: 0.000000059604638, y: 0.35000008, z: -0.050000057}
+    LocalEulerAngles: {x: 6.172949, y: 259.59445, z: 88.4014}
+    LocalScale: {x: 0.6, y: 0.6, z: 0.6}
+    VisualPrefab: {fileID: 981900478321646165, guid: 74010446d50810e458b0210921db2aac, type: 3}
+    ShowForWeapon: {fileID: 11400000, guid: a6e66cb2112622745b0148279d7a5db8, type: 2}
+    Hand: 2
+  - Id: LeftHandBeam
+    Bone: 17
+    BonePath: Hips/Spine02/Spine01/Spine/LeftShoulder/LeftArm/LeftForeArm/LeftHand
+    LocalPosition: {x: 0.000000059604638, y: 0.35000008, z: -0.050000057}
+    LocalEulerAngles: {x: 6.172914, y: 259.59442, z: 88.40134}
+    LocalScale: {x: 0.6, y: 0.6, z: 0.6}
+    VisualPrefab: {fileID: 919132149155446097, guid: f2e9f3d2d03da5e4a91f68c9cc3eeb1a, type: 3}
+    ShowForWeapon: {fileID: 11400000, guid: 3f896e59e42bfbe47ab9b3308ebc4acd, type: 2}
+    Hand: 2
+  - Id: RightHandShotgun
+    Bone: 18
+    BonePath: Hips/Spine02/Spine01/Spine/RightShoulder/RightArm/RightForeArm/RightHand
+    LocalPosition: {x: 0, y: 0.35000002, z: -0.049999993}
+    LocalEulerAngles: {x: 353.82712, y: 280.40558, z: 88.401344}
+    LocalScale: {x: 0.6, y: 0.6, z: 0.6}
+    VisualPrefab: {fileID: 919132149155446097, guid: c1b8f39378545e348b7424d8a4055599, type: 3}
+    ShowForWeapon: {fileID: 11400000, guid: a560f01afe34bb44299e0a3fed19ad51, type: 2}
+    Hand: 1
+  - Id: LeftHandShotgun
+    Bone: 17
+    BonePath: Hips/Spine02/Spine01/Spine/LeftShoulder/LeftArm/LeftForeArm/LeftHand
+    LocalPosition: {x: 0.000000059604638, y: 0.35000008, z: -0.050000057}
+    LocalEulerAngles: {x: 6.172914, y: 259.59442, z: 88.40134}
+    LocalScale: {x: 0.6, y: 0.6, z: 0.6}
+    VisualPrefab: {fileID: 919132149155446097, guid: c1b8f39378545e348b7424d8a4055599, type: 3}
+    ShowForWeapon: {fileID: 11400000, guid: a560f01afe34bb44299e0a3fed19ad51, type: 2}
+    Hand: 2
   Muzzles:
   - Id: laser_cannon
     MountId: RightHandWeapon
@@ -44,3 +109,31 @@ MonoBehaviour:
     MountId: BackWeapon
     LocalPosition: {x: 0.00021830201, y: -0.063369095, z: 0.91291076}
     LocalEulerAngles: {x: -0, y: 0, z: 0}
+  - Id: gatling
+    MountId: RightHandGatling
+    LocalPosition: {x: 1.0500002, y: -0.000000007450581, z: 0}
+    LocalEulerAngles: {x: -0, y: 89.999985, z: -0.00000081745577}
+  - Id: beam
+    MountId: RightHandBeam
+    LocalPosition: {x: 0.96, y: 0.031, z: -0.0072}
+    LocalEulerAngles: {x: -0, y: 90, z: 0}
+  - Id: laser_cannon
+    MountId: LeftHandWeapon
+    LocalPosition: {x: 0.9579111, y: -0.0010955334, z: 0.0008402889}
+    LocalEulerAngles: {x: -0.000021129817, y: 90.000015, z: -0.00000784822}
+  - Id: gatling
+    MountId: LeftHandGatling
+    LocalPosition: {x: 1.0500003, y: -0.00000009934107, z: -0.0000006208817}
+    LocalEulerAngles: {x: -0.00000030185, y: 90.00004, z: -0.000014187164}
+  - Id: beam
+    MountId: LeftHandBeam
+    LocalPosition: {x: 0.9599999, y: 0.030999878, z: 0.0071995207}
+    LocalEulerAngles: {x: -0.000021129817, y: 90.000015, z: -0.00000784822}
+  - Id: shotgun_cannon
+    MountId: RightHandShotgun
+    LocalPosition: {x: 1.02, y: 0.0255, z: 0}
+    LocalEulerAngles: {x: 0, y: 90, z: 0}
+  - Id: shotgun_cannon
+    MountId: LeftHandShotgun
+    LocalPosition: {x: 1.02, y: 0.0255, z: 0}
+    LocalEulerAngles: {x: 0, y: 90, z: 0}
