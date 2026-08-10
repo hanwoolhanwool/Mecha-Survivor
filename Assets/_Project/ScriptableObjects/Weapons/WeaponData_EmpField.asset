@@ -34,5 +34,5 @@ MonoBehaviour:
   VisualScaleGrowth: 0.2
   HomingUnlockLevel: 0
   ProjectilePrefab: {fileID: 4716345075997868038, guid: b0130ddc1609ba849b34d123a2b98530, type: 3}
-  MuzzleVfxPrefab: {fileID: 4507217097157148152, guid: ff3f33b17263168449981f0ee1205685, type: 3}
-  ImpactVfxPrefab: {fileID: 8395519735903837342, guid: c651e1a7dd96c804f931dfe03ed90b80, type: 3}
+  MuzzleVfxPrefab: {fileID: 0}
+  ImpactVfxPrefab: {fileID: 0}

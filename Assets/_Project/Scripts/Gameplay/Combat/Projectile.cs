@@ -50,6 +50,7 @@ namespace MechaSurvivor.Gameplay
         protected float Damage => _damage;
         protected string SourceId => _sourceId;
         protected Transform HomingTarget => _homingTarget;
+        protected LayerMask HitMask => _hitMask;
         private GameObject _impactVfxPrefab;
         private bool _live;
         private Vector3 _defaultScale;
@@ -96,9 +97,10 @@ namespace MechaSurvivor.Gameplay
             if (stepLength > 0f)
             {
                 Vector3 direction = Velocity / Velocity.magnitude;
-                if (Physics.Raycast(position, direction, out RaycastHit hit, stepLength,
-                        _hitMask, QueryTriggerInteraction.Ignore))
+                if (CastStep(position, direction, stepLength, out RaycastHit hit))
                 {
+                    // 접촉 지점까지 전진시킨 뒤 판정 — 필드·VFX가 실제 충돌 위치에 선다.
+                    transform.position = position + direction * hit.distance;
                     OnImpact(hit);
                     return;
                 }
@@ -112,6 +114,17 @@ namespace MechaSurvivor.Gameplay
             {
                 Expire();
             }
+        }
+
+        /// <summary>
+        /// 이번 프레임 이동 구간의 접촉 판정. 기본은 중심선 레이캐스트 —
+        /// 굵은 탄(EMP 오브 등)은 스윕 굵기를 가진 캐스트로 갈아끼운다.
+        /// </summary>
+        protected virtual bool CastStep(Vector3 origin, Vector3 direction, float distance,
+            out RaycastHit hit)
+        {
+            return Physics.Raycast(origin, direction, out hit, distance,
+                _hitMask, QueryTriggerInteraction.Ignore);
         }
 
         /// <summary>유도 조향. 기본은 타깃을 향해 초당 일정 각도로 선회.</summary>

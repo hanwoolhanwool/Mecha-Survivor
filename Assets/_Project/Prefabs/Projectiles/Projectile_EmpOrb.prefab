@@ -41,7 +41,7 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2582020980978965933}
-  m_Mesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
+  m_Mesh: {fileID: 4300000, guid: aed6ef75dffa496c977e519384899ae9, type: 3}
 --- !u!23 &3323851239531152519
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -67,7 +67,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 676f759ab79c24c4faf622b0070adb7d, type: 2}
+  - {fileID: 2100000, guid: 1c1cff44bac948bc8bcc0b70d80200c2, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -107,6 +107,9 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 25088
   _fieldPrefab: {fileID: 9219724779051350772, guid: a36dd662c2ef8934692171fbc24ca2bd, type: 3}
+  _detonationDistance: 25
+  _burstVfxPrefab: {fileID: 8962661524527363491, guid: 029d99f0a2edd5141b804dfaaa5c0b67, type: 3}
+  _contactRadius: 0.5
   _fieldRadius: 9
   _fieldDuration: 4
   _chainUnlockLevel: 5

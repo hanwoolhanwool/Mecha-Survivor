@@ -33,7 +33,16 @@ namespace MechaSurvivor.Gameplay
 
         [SerializeField] private float _arcWidth = 0.12f;
 
+        [Header("연출")]
+        [Tooltip("테두리 전기 링이 최대 반경으로 전개되는 시간(초) — 기폭 파편 연출이 먼저 읽히도록 천천히 큰다. 판정 반경은 즉시 적용된다.")]
+        [SerializeField] private float _visualGrowDuration = 0.6f;
+
+        [Tooltip("필드 테두리를 도는 전기 링 시각")]
+        [SerializeField] private ElectricRingVfx _ringVfx;
+
         private float _radius;
+        private float _activateTime;
+        private bool _growDone;
         private float _endTime;
         private float _nextTickTime;
         private bool _chainEnabled;
@@ -46,17 +55,37 @@ namespace MechaSurvivor.Gameplay
         private readonly List<Vector3> _affectedPositions = new(64);
         private readonly List<int> _chain = new(8);
 
+        /// <summary>
+        /// 전개 연출의 스케일 배수 (0~1). ease-in 큐빅 — 초반에는 작게 머물러
+        /// 기폭 파편이 먼저 읽히고, 후반에 확 퍼진다. 순수 로직(테스트용).
+        /// </summary>
+        public static float VisualGrowFactor(float elapsed, float growDuration)
+        {
+            if (growDuration <= 0f)
+            {
+                return 1f;
+            }
+
+            float t = Mathf.Clamp01(elapsed / growDuration);
+            return t * t * t;
+        }
+
         public void Activate(float radius, float duration, bool chainEnabled, float chainDamage,
             string sourceId)
         {
             _radius = radius;
+            _activateTime = Time.time;
             _endTime = Time.time + duration;
             _nextTickTime = 0f; // 첫 프레임에 즉시 1틱.
             _chainEnabled = chainEnabled;
             _chainDamage = chainDamage;
             _sourceId = sourceId;
             _active = true;
-            transform.localScale = Vector3.one * (radius * 2f);
+            _growDone = false;
+            if (_ringVfx != null)
+            {
+                _ringVfx.SetRadius(radius * VisualGrowFactor(0f, _visualGrowDuration));
+            }
         }
 
         private void Update()
@@ -71,6 +100,17 @@ namespace MechaSurvivor.Gameplay
                 _active = false;
                 PoolManager.Instance.Despawn(this);
                 return;
+            }
+
+            // 비주얼만 성장 — 판정은 Activate 시점부터 _radius 전체로 돈다.
+            if (!_growDone)
+            {
+                float factor = VisualGrowFactor(Time.time - _activateTime, _visualGrowDuration);
+                if (_ringVfx != null)
+                {
+                    _ringVfx.SetRadius(_radius * factor);
+                }
+                _growDone = factor >= 1f;
             }
 
             if (Time.time < _nextTickTime)
@@ -168,7 +208,6 @@ namespace MechaSurvivor.Gameplay
             _active = false;
             _affected.Clear();
             _affectedPositions.Clear();
-            transform.localScale = Vector3.one;
         }
     }
 }
